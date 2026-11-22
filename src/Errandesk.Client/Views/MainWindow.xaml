@@ -1,0 +1,80 @@
+﻿<Window
+    x:Class="Errandesk.Client.Views.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid
+        x:Name="RootGrid"
+        ActualThemeChanged="OnRootGridActualThemeChanged"
+        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid
+            x:Name="AppTitleBar"
+            Height="48"
+            AutomationProperties.AutomationId="AppTitleBar">
+            <StackPanel
+                Margin="16,0,0,0"
+                VerticalAlignment="Center"
+                Orientation="Horizontal"
+                Spacing="16">
+                <TextBlock
+                    x:Uid="AppTitleTextBlock"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource CaptionTextBlockStyle}" />
+                <StackPanel
+                    x:Name="OfflineIndicator"
+                    VerticalAlignment="Center"
+                    AutomationProperties.AutomationId="OfflineIndicator"
+                    Orientation="Horizontal"
+                    Spacing="6"
+                    Visibility="Collapsed">
+                    <FontIcon
+                        FontSize="12"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Glyph="&#xF384;" />
+                    <TextBlock
+                        x:Uid="OfflineIndicatorTextBlock"
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Style="{StaticResource CaptionTextBlockStyle}" />
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+
+        <Frame
+            x:Name="AppFrame"
+            Grid.Row="1"
+            AutomationProperties.AutomationId="AppFrame" />
+
+        <Grid
+            x:Name="LoadingGrid"
+            Grid.Row="1"
+            Grid.RowSpan="2"
+            AutomationProperties.AutomationId="LoadingGrid"
+            Visibility="Collapsed">
+            <Rectangle Fill="{ThemeResource ThemeColor}" Opacity="0.6" />
+
+            <StackPanel
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Spacing="12">
+                <ProgressRing
+                    Width="48"
+                    Height="48"
+                    HorizontalAlignment="Center"
+                    IsActive="True" />
+                <TextBlock
+                    x:Name="LoadingTextBlock"
+                    HorizontalAlignment="Center"
+                    AutomationProperties.AutomationId="LoadingTextBlock"
+                    FontWeight="SemiBold"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

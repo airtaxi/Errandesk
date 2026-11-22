@@ -1,0 +1,163 @@
+﻿<UserControl
+    x:Class="Errandesk.Client.Views.NoteEditorView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helpers="using:Errandesk.Client.Helpers"
+    xmlns:views="using:Errandesk.Client.Views">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Padding="8,8,8,0" ColumnSpacing="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Button
+                x:Name="NoteBackButton"
+                x:Uid="NoteBackButton"
+                AutomationProperties.AutomationId="NoteBackButton"
+                Command="{x:Bind ViewModel.CloseCommand, Mode=OneWay}"
+                Style="{StaticResource IconButtonStyle}"
+                Visibility="Collapsed">
+                <ToolTipService.ToolTip>
+                    <ToolTip x:Uid="NoteBackToolTip" />
+                </ToolTipService.ToolTip>
+                <FontIcon FontSize="16" Glyph="&#xE72B;" />
+            </Button>
+
+            <TextBlock
+                Grid.Column="1"
+                Margin="8,0"
+                AutomationProperties.AutomationId="NoteSaveStatusTextBlock"
+                AutomationProperties.LiveSetting="Polite"
+                Style="{StaticResource MetadataTextBlockStyle}"
+                Text="{x:Bind ViewModel.SaveStatusText, Mode=OneWay}" />
+
+            <Button
+                Grid.Column="2"
+                AutomationProperties.AutomationId="NotePinButton"
+                AutomationProperties.Name="{x:Bind helpers:XamlFunctions.GetPinButtonText(ViewModel.CurrentNote.IsPinned), Mode=OneWay}"
+                Command="{x:Bind ViewModel.TogglePinCommand, Mode=OneWay}"
+                Style="{StaticResource IconButtonStyle}"
+                ToolTipService.ToolTip="{x:Bind helpers:XamlFunctions.GetPinButtonText(ViewModel.CurrentNote.IsPinned), Mode=OneWay}">
+                <FontIcon FontSize="16" Glyph="{x:Bind helpers:XamlFunctions.GetPinButtonGlyph(ViewModel.CurrentNote.IsPinned), Mode=OneWay}" />
+            </Button>
+
+            <ToggleButton
+                x:Uid="NotePreviewToggleButton"
+                Grid.Column="3"
+                Width="36"
+                Height="36"
+                Padding="0"
+                AutomationProperties.AutomationId="NotePreviewToggleButton"
+                IsChecked="{x:Bind ViewModel.IsPreviewVisible, Mode=TwoWay}">
+                <ToolTipService.ToolTip>
+                    <ToolTip x:Uid="NotePreviewToolTip" />
+                </ToolTipService.ToolTip>
+                <FontIcon FontSize="16" Glyph="&#xE8FF;" />
+            </ToggleButton>
+
+            <Button
+                x:Uid="DeleteNoteButton"
+                Grid.Column="4"
+                AutomationProperties.AutomationId="DeleteNoteButton"
+                Command="{x:Bind ViewModel.DeleteNoteCommand, Mode=OneWay}"
+                Style="{StaticResource IconButtonStyle}">
+                <ToolTipService.ToolTip>
+                    <ToolTip x:Uid="DeleteNoteToolTip" />
+                </ToolTipService.ToolTip>
+                <FontIcon FontSize="16" Glyph="&#xE74D;" />
+            </Button>
+
+            <Button
+                x:Name="NoteCloseButton"
+                x:Uid="NoteCloseButton"
+                Grid.Column="5"
+                AutomationProperties.AutomationId="NoteCloseButton"
+                Command="{x:Bind ViewModel.CloseCommand, Mode=OneWay}"
+                Style="{StaticResource IconButtonStyle}">
+                <ToolTipService.ToolTip>
+                    <ToolTip x:Uid="NoteCloseToolTip" />
+                </ToolTipService.ToolTip>
+                <FontIcon FontSize="16" Glyph="&#xE711;" />
+            </Button>
+        </Grid>
+
+        <StackPanel
+            Grid.Row="1"
+            Padding="16,8,16,0"
+            Spacing="8">
+            <InfoBar
+                AutomationProperties.AutomationId="NoteEditorErrorInfoBar"
+                IsClosable="True"
+                IsOpen="{x:Bind ViewModel.IsErrorVisible, Mode=TwoWay}"
+                Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+                Severity="Error"
+                Visibility="{x:Bind ViewModel.IsErrorVisible, Mode=OneWay}" />
+
+            <TextBox
+                x:Name="NoteTitleTextBox"
+                x:Uid="NoteTitleTextBox"
+                AutomationProperties.AutomationId="NoteTitleTextBox"
+                FontSize="20"
+                FontWeight="SemiBold"
+                KeyDown="OnNoteTitleTextBoxKeyDown"
+                MaxLength="500"
+                Text="{x:Bind ViewModel.Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                TextWrapping="Wrap" />
+
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <FontIcon
+                    FontSize="14"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Glyph="&#xE8EC;" />
+                <TextBox
+                    x:Uid="NoteTagsTextBox"
+                    Grid.Column="1"
+                    AutomationProperties.AutomationId="NoteTagsTextBox"
+                    LostFocus="OnNoteTagsTextBoxLostFocus"
+                    Text="{x:Bind ViewModel.TagsText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </Grid>
+        </StackPanel>
+
+        <Grid Grid.Row="2" Padding="16,12,16,16">
+            <TextBox
+                x:Name="NoteContentTextBox"
+                x:Uid="NoteContentTextBox"
+                VerticalAlignment="Stretch"
+                AcceptsReturn="True"
+                AutomationProperties.AutomationId="NoteContentTextBox"
+                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                Text="{x:Bind ViewModel.Content, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                TextWrapping="Wrap"
+                Visibility="{x:Bind helpers:XamlFunctions.VisibleWhenFalse(ViewModel.IsPreviewVisible), Mode=OneWay}" />
+
+            <ScrollViewer AutomationProperties.AutomationId="NotePreviewScrollViewer" Visibility="{x:Bind ViewModel.IsPreviewVisible, Mode=OneWay}">
+                <Grid Padding="0,0,12,12">
+                    <views:MarkdownView AutomationProperties.AutomationId="NotePreviewMarkdownView" Markdown="{x:Bind ViewModel.PreviewMarkdown, Mode=OneWay}" />
+                    <TextBlock
+                        x:Uid="EmptyNotePreviewTextBlock"
+                        AutomationProperties.AutomationId="EmptyNotePreviewTextBlock"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        TextWrapping="Wrap"
+                        Visibility="{x:Bind ViewModel.IsPreviewEmpty, Mode=OneWay}" />
+                </Grid>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>

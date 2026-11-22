@@ -1,0 +1,1240 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AccessTokenNameTextBox.Header" xml:space="preserve">
+    <value>Token name</value>
+  </data>
+  <data name="AccessTokenNameTextBox.PlaceholderText" xml:space="preserve">
+    <value>For example, Work laptop</value>
+  </data>
+  <data name="AccessTokensDescriptionTextBlock.Text" xml:space="preserve">
+    <value>Personal access tokens let AI apps and scripts read and change your tasks and notes through the MCP endpoint. Keep each token as secret as a password.</value>
+  </data>
+  <data name="AccessTokensEmptyTextBlock.Text" xml:space="preserve">
+    <value>No access tokens yet.</value>
+  </data>
+  <data name="AccessTokensHeaderTextBlock.Text" xml:space="preserve">
+    <value>Access tokens</value>
+  </data>
+  <data name="AccessTokenUnusedFormat" xml:space="preserve">
+    <value>Created {0}, never used</value>
+  </data>
+  <data name="AccessTokenUsedFormat" xml:space="preserve">
+    <value>Created {0}, last used {1}</value>
+  </data>
+  <data name="AccountHeaderTextBlock.Text" xml:space="preserve">
+    <value>Account</value>
+  </data>
+  <data name="AddListMemberButton.Content" xml:space="preserve">
+    <value>Share</value>
+  </data>
+  <data name="AddTaskButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Add task</value>
+  </data>
+  <data name="AddTaskToolTip.Content" xml:space="preserve">
+    <value>Add task</value>
+  </data>
+  <data name="AddToMyDayText" xml:space="preserve">
+    <value>Add to My Day</value>
+  </data>
+  <data name="AllTagsFilterText" xml:space="preserve">
+    <value>All tags</value>
+  </data>
+  <data name="AppearanceHeaderTextBlock.Text" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="ApplicationName" xml:space="preserve">
+    <value>Errandesk</value>
+  </data>
+  <data name="ApprovalApprovedText" xml:space="preserve">
+    <value>Approved</value>
+  </data>
+  <data name="ApprovalDeleteListFormat" xml:space="preserve">
+    <value>Delete the list "{0}" and all of its tasks?</value>
+  </data>
+  <data name="ApprovalDeleteNoteFormat" xml:space="preserve">
+    <value>Delete the note "{0}"?</value>
+  </data>
+  <data name="ApprovalDeleteTaskFormat" xml:space="preserve">
+    <value>Delete the task "{0}"?</value>
+  </data>
+  <data name="ApprovalDeniedText" xml:space="preserve">
+    <value>Denied</value>
+  </data>
+  <data name="ApprovalUnknownItemFormat" xml:space="preserve">
+    <value>Allow this action: {0}?</value>
+  </data>
+  <data name="ApproveButton.Content" xml:space="preserve">
+    <value>Approve</value>
+  </data>
+  <data name="AppTitleTextBlock.Text" xml:space="preserve">
+    <value>Errandesk</value>
+  </data>
+  <data name="AssistantAvailableText" xml:space="preserve">
+    <value>Available</value>
+  </data>
+  <data name="AssistantBusyError" xml:space="preserve">
+    <value>The assistant is still working on another reply in this conversation. Try again in a moment.</value>
+  </data>
+  <data name="AssistantCheckAgainButton.Content" xml:space="preserve">
+    <value>Check again</value>
+  </data>
+  <data name="AssistantCloseButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Close assistant</value>
+  </data>
+  <data name="AssistantCloseToolTip.Content" xml:space="preserve">
+    <value>Close assistant</value>
+  </data>
+  <data name="AssistantConnectionLostError" xml:space="preserve">
+    <value>The connection to the server was lost before the reply finished.</value>
+  </data>
+  <data name="AssistantConversationsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Conversations</value>
+  </data>
+  <data name="AssistantConversationsToolTip.Content" xml:space="preserve">
+    <value>Conversations</value>
+  </data>
+  <data name="AssistantEmptyTextBlock.Text" xml:space="preserve">
+    <value>Ask about your tasks and notes, or ask for help planning your day.</value>
+  </data>
+  <data name="AssistantLabelTextBlock.Text" xml:space="preserve">
+    <value>Assistant</value>
+  </data>
+  <data name="AssistantMessageTextBox.PlaceholderText" xml:space="preserve">
+    <value>Message the assistant</value>
+  </data>
+  <data name="AssistantMessageTextBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="AssistantNavigationItem.Content" xml:space="preserve">
+    <value>Assistant</value>
+  </data>
+  <data name="AssistantNewConversationButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>New conversation</value>
+  </data>
+  <data name="AssistantNewConversationToolTip.Content" xml:space="preserve">
+    <value>New conversation</value>
+  </data>
+  <data name="AssistantReplyFailedFormat" xml:space="preserve">
+    <value>The assistant could not finish the reply. {0}</value>
+  </data>
+  <data name="AssistantReplyProgressRing.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>The assistant is replying</value>
+  </data>
+  <data name="AssistantSendButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="AssistantSendToolTip.Content" xml:space="preserve">
+    <value>Send (Enter)</value>
+  </data>
+  <data name="AssistantStopButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="AssistantStoppedTextBlock.Text" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="AssistantStopToolTip.Content" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="AssistantTitle" xml:space="preserve">
+    <value>Assistant</value>
+  </data>
+  <data name="AssistantToolAddStepText" xml:space="preserve">
+    <value>Add step</value>
+  </data>
+  <data name="AssistantToolAddToMyDayText" xml:space="preserve">
+    <value>Add to My Day</value>
+  </data>
+  <data name="AssistantToolCompleteTaskText" xml:space="preserve">
+    <value>Complete task</value>
+  </data>
+  <data name="AssistantToolCreateNoteText" xml:space="preserve">
+    <value>Create note</value>
+  </data>
+  <data name="AssistantToolCreateTaskListText" xml:space="preserve">
+    <value>Create list</value>
+  </data>
+  <data name="AssistantToolCreateTaskText" xml:space="preserve">
+    <value>Create task</value>
+  </data>
+  <data name="AssistantToolDeleteNoteText" xml:space="preserve">
+    <value>Delete note</value>
+  </data>
+  <data name="AssistantToolDeleteTaskListText" xml:space="preserve">
+    <value>Delete list</value>
+  </data>
+  <data name="AssistantToolDeleteTaskText" xml:space="preserve">
+    <value>Delete task</value>
+  </data>
+  <data name="AssistantToolGetCurrentTimeText" xml:space="preserve">
+    <value>Check the current time</value>
+  </data>
+  <data name="AssistantToolGetMyDayText" xml:space="preserve">
+    <value>Read My Day</value>
+  </data>
+  <data name="AssistantToolGetOverdueTasksText" xml:space="preserve">
+    <value>Find overdue tasks</value>
+  </data>
+  <data name="AssistantToolLinkNoteToTaskText" xml:space="preserve">
+    <value>Link note to task</value>
+  </data>
+  <data name="AssistantToolListTaskListsText" xml:space="preserve">
+    <value>Read lists</value>
+  </data>
+  <data name="AssistantToolReadNoteText" xml:space="preserve">
+    <value>Read note</value>
+  </data>
+  <data name="AssistantToolSearchNotesText" xml:space="preserve">
+    <value>Search notes</value>
+  </data>
+  <data name="AssistantToolSearchTasksText" xml:space="preserve">
+    <value>Search tasks</value>
+  </data>
+  <data name="AssistantToolSetRecurrenceText" xml:space="preserve">
+    <value>Set repeat</value>
+  </data>
+  <data name="AssistantToolSetReminderText" xml:space="preserve">
+    <value>Set reminder</value>
+  </data>
+  <data name="AssistantToolUpdateNoteText" xml:space="preserve">
+    <value>Update note</value>
+  </data>
+  <data name="AssistantToolUpdateTaskText" xml:space="preserve">
+    <value>Update task</value>
+  </data>
+  <data name="AssistantUnavailableText" xml:space="preserve">
+    <value>No AI model is configured on the server</value>
+  </data>
+  <data name="AssistantUnavailableTextBlock.Text" xml:space="preserve">
+    <value>This server has no AI model configured. A server administrator can set one up to turn on the assistant.</value>
+  </data>
+  <data name="AssistantUnavailableTitleTextBlock.Text" xml:space="preserve">
+    <value>The assistant is not available</value>
+  </data>
+  <data name="BackToSignInLinkButton.Content" xml:space="preserve">
+    <value>I already have an account</value>
+  </data>
+  <data name="BodyTextBox.Header" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="BodyTextBox.PlaceholderText" xml:space="preserve">
+    <value>Add a note</value>
+  </data>
+  <data name="ChangeServerButton.Content" xml:space="preserve">
+    <value>Change server</value>
+  </data>
+  <data name="ChangeServerConfirmButtonText" xml:space="preserve">
+    <value>Sign out and change</value>
+  </data>
+  <data name="ChangeServerDialogMessage" xml:space="preserve">
+    <value>You will be signed out of this server.</value>
+  </data>
+  <data name="ChangeServerDialogTitle" xml:space="preserve">
+    <value>Change server?</value>
+  </data>
+  <data name="ChangeServerLinkButton.Content" xml:space="preserve">
+    <value>Change server</value>
+  </data>
+  <data name="ClearDueDateButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Remove due date</value>
+  </data>
+  <data name="ClearDueDateToolTip.Content" xml:space="preserve">
+    <value>Remove due date</value>
+  </data>
+  <data name="ClearRecurrenceButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Never repeat</value>
+  </data>
+  <data name="ClearRecurrenceToolTip.Content" xml:space="preserve">
+    <value>Never repeat</value>
+  </data>
+  <data name="ClearReminderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Remove reminder</value>
+  </data>
+  <data name="ClearReminderToolTip.Content" xml:space="preserve">
+    <value>Remove reminder</value>
+  </data>
+  <data name="CompletedSectionFormat" xml:space="preserve">
+    <value>Completed {0}</value>
+  </data>
+  <data name="ConfirmPasswordBox.Header" xml:space="preserve">
+    <value>Confirm password</value>
+  </data>
+  <data name="ConnectButton.Content" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="ConnectedInfoBar.Message" xml:space="preserve">
+    <value>The server address is saved on this device.</value>
+  </data>
+  <data name="ConnectedInfoBar.Title" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="ConnectingMessage" xml:space="preserve">
+    <value>Connecting to the server</value>
+  </data>
+  <data name="ConnectionErrorInfoBar.Title" xml:space="preserve">
+    <value>Could not connect</value>
+  </data>
+  <data name="ContinueButton.Content" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="ConversationListView.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Conversations</value>
+  </data>
+  <data name="CopyAccessTokenButton.Content" xml:space="preserve">
+    <value>Copy token</value>
+  </data>
+  <data name="CopyImportCodeButton.Content" xml:space="preserve">
+    <value>Copy code</value>
+  </data>
+  <data name="CopyInviteButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Copy code</value>
+  </data>
+  <data name="CopyInviteToolTip.Content" xml:space="preserve">
+    <value>Copy code</value>
+  </data>
+  <data name="CopyMcpEndpointButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Copy MCP endpoint address</value>
+  </data>
+  <data name="CopyMcpEndpointToolTip.Content" xml:space="preserve">
+    <value>Copy MCP endpoint address</value>
+  </data>
+  <data name="CreateAccessTokenButton.Content" xml:space="preserve">
+    <value>Create token</value>
+  </data>
+  <data name="CreateAccountLinkButton.Content" xml:space="preserve">
+    <value>Create an account</value>
+  </data>
+  <data name="CreateButtonText" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="CreatedOnFormat" xml:space="preserve">
+    <value>Created on {0}</value>
+  </data>
+  <data name="CreateInviteButton.Content" xml:space="preserve">
+    <value>Create invite code</value>
+  </data>
+  <data name="CreateLinkedNoteTextBlock.Text" xml:space="preserve">
+    <value>New linked note</value>
+  </data>
+  <data name="CreatingAccountMessage" xml:space="preserve">
+    <value>Creating your account</value>
+  </data>
+  <data name="CustomRecurrenceDialogTitle" xml:space="preserve">
+    <value>Repeat every</value>
+  </data>
+  <data name="CustomRecurrenceMenuItem.Text" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="CustomReminderDialogTitle" xml:space="preserve">
+    <value>Set a reminder</value>
+  </data>
+  <data name="CustomReminderMenuItem.Text" xml:space="preserve">
+    <value>Pick a date and time</value>
+  </data>
+  <data name="DailyRecurrenceMenuItem.Text" xml:space="preserve">
+    <value>Daily</value>
+  </data>
+  <data name="DefaultListName" xml:space="preserve">
+    <value>Tasks</value>
+  </data>
+  <data name="DeleteButtonText" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="DeleteConversationButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Delete conversation</value>
+  </data>
+  <data name="DeleteConversationDialogMessage" xml:space="preserve">
+    <value>"{0}" will be deleted.</value>
+  </data>
+  <data name="DeleteConversationDialogTitle" xml:space="preserve">
+    <value>Delete conversation</value>
+  </data>
+  <data name="DeleteConversationToolTip.Content" xml:space="preserve">
+    <value>Delete conversation</value>
+  </data>
+  <data name="DeleteInviteButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Delete invite</value>
+  </data>
+  <data name="DeleteInviteDialogMessage" xml:space="preserve">
+    <value>Invite code {0} will stop working.</value>
+  </data>
+  <data name="DeleteInviteDialogTitle" xml:space="preserve">
+    <value>Delete invite?</value>
+  </data>
+  <data name="DeleteInviteToolTip.Content" xml:space="preserve">
+    <value>Delete invite</value>
+  </data>
+  <data name="DeleteListDialogMessage" xml:space="preserve">
+    <value>"{0}" and all of its tasks will be deleted.</value>
+  </data>
+  <data name="DeleteListDialogTitle" xml:space="preserve">
+    <value>Delete list?</value>
+  </data>
+  <data name="DeleteListMenuItem.Text" xml:space="preserve">
+    <value>Delete list</value>
+  </data>
+  <data name="DeleteNoteButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Delete note</value>
+  </data>
+  <data name="DeleteNoteDialogMessage" xml:space="preserve">
+    <value>"{0}" will be deleted.</value>
+  </data>
+  <data name="DeleteNoteDialogTitle" xml:space="preserve">
+    <value>Delete note?</value>
+  </data>
+  <data name="DeleteNoteToolTip.Content" xml:space="preserve">
+    <value>Delete note</value>
+  </data>
+  <data name="DeleteStepButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Delete step</value>
+  </data>
+  <data name="DeleteStepToolTip.Content" xml:space="preserve">
+    <value>Delete step</value>
+  </data>
+  <data name="DeleteTaskButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Delete task</value>
+  </data>
+  <data name="DeleteTaskDialogMessage" xml:space="preserve">
+    <value>"{0}" will be deleted.</value>
+  </data>
+  <data name="DeleteTaskDialogTitle" xml:space="preserve">
+    <value>Delete task?</value>
+  </data>
+  <data name="DeleteTaskToolTip.Content" xml:space="preserve">
+    <value>Delete task</value>
+  </data>
+  <data name="DenyButton.Content" xml:space="preserve">
+    <value>Deny</value>
+  </data>
+  <data name="DetailBackButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Back to the list</value>
+  </data>
+  <data name="DetailBackToolTip.Content" xml:space="preserve">
+    <value>Back to the list</value>
+  </data>
+  <data name="DetailCloseButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Close details</value>
+  </data>
+  <data name="DetailCloseToolTip.Content" xml:space="preserve">
+    <value>Close details</value>
+  </data>
+  <data name="DetailCompletionCheckBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="DetailCompletionToolTip.Content" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="DetailTitleTextBox.PlaceholderText" xml:space="preserve">
+    <value>Task title</value>
+  </data>
+  <data name="DialogCancelButtonText" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="DialogCloseButtonText" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="DialogSaveButtonText" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="DismissBriefingButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Dismiss briefing</value>
+  </data>
+  <data name="DismissBriefingToolTip.Content" xml:space="preserve">
+    <value>Dismiss briefing</value>
+  </data>
+  <data name="DisplayNameSavedTextBlock.Text" xml:space="preserve">
+    <value>Display name saved.</value>
+  </data>
+  <data name="DisplayNameTextBox.Header" xml:space="preserve">
+    <value>Display name</value>
+  </data>
+  <data name="DueDatePicker.Header" xml:space="preserve">
+    <value>Due date</value>
+  </data>
+  <data name="DueDatePicker.PlaceholderText" xml:space="preserve">
+    <value>Pick a date</value>
+  </data>
+  <data name="DueTodayText" xml:space="preserve">
+    <value>Today</value>
+  </data>
+  <data name="DueTomorrowText" xml:space="preserve">
+    <value>Tomorrow</value>
+  </data>
+  <data name="DueYesterdayText" xml:space="preserve">
+    <value>Yesterday</value>
+  </data>
+  <data name="EmptyConversationListTextBlock.Text" xml:space="preserve">
+    <value>No conversations yet.</value>
+  </data>
+  <data name="EmptyNotePreviewTextBlock.Text" xml:space="preserve">
+    <value>Nothing to preview yet.</value>
+  </data>
+  <data name="EmptyNotesText" xml:space="preserve">
+    <value>No notes yet.</value>
+  </data>
+  <data name="EmptyTaskListTextBlock.Text" xml:space="preserve">
+    <value>No tasks here yet.</value>
+  </data>
+  <data name="ImportAlreadyRunningError" xml:space="preserve">
+    <value>An import is already running.</value>
+  </data>
+  <data name="ImportantNavigationItem.Content" xml:space="preserve">
+    <value>Important</value>
+  </data>
+  <data name="ImportantTitle" xml:space="preserve">
+    <value>Important</value>
+  </data>
+  <data name="ImportCodeExpiresFormat" xml:space="preserve">
+    <value>The code expires at {0}.</value>
+  </data>
+  <data name="ImportCompletedText" xml:space="preserve">
+    <value>The import finished.</value>
+  </data>
+  <data name="ImportDeclinedText" xml:space="preserve">
+    <value>The Microsoft sign-in was declined, so nothing was imported.</value>
+  </data>
+  <data name="ImportDescriptionTextBlock.Text" xml:space="preserve">
+    <value>Copy your lists, tasks and steps from Microsoft To Do. Tasks imported before are skipped.</value>
+  </data>
+  <data name="ImportExpiredText" xml:space="preserve">
+    <value>The code expired before you signed in. Start the import again.</value>
+  </data>
+  <data name="ImportFailedText" xml:space="preserve">
+    <value>The import stopped before it finished. The items counted below were imported.</value>
+  </data>
+  <data name="ImportHeaderTextBlock.Text" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="ImportInProgressText" xml:space="preserve">
+    <value>Importing your data.</value>
+  </data>
+  <data name="ImportListsLabelTextBlock.Text" xml:space="preserve">
+    <value>Lists created</value>
+  </data>
+  <data name="ImportSignInInstructionsTextBlock.Text" xml:space="preserve">
+    <value>Open the Microsoft sign-in page and enter this code. The import starts as soon as you have signed in.</value>
+  </data>
+  <data name="ImportSkippedLabelTextBlock.Text" xml:space="preserve">
+    <value>Tasks already imported</value>
+  </data>
+  <data name="ImportStepsLabelTextBlock.Text" xml:space="preserve">
+    <value>Steps imported</value>
+  </data>
+  <data name="ImportTasksLabelTextBlock.Text" xml:space="preserve">
+    <value>Tasks imported</value>
+  </data>
+  <data name="ImportUnavailableError" xml:space="preserve">
+    <value>Microsoft sign-in could not be reached. Try again later.</value>
+  </data>
+  <data name="InsecureConnectionInfoBar.Message" xml:space="preserve">
+    <value>This address does not use HTTPS, so data is sent unencrypted. Use it only on a network you trust.</value>
+  </data>
+  <data name="InsecureConnectionInfoBar.Title" xml:space="preserve">
+    <value>Unencrypted connection</value>
+  </data>
+  <data name="InviteCodeTextBox.Header" xml:space="preserve">
+    <value>Invite code</value>
+  </data>
+  <data name="InviteCodeTextBox.PlaceholderText" xml:space="preserve">
+    <value>Not needed for the first account</value>
+  </data>
+  <data name="InviteExpiredText" xml:space="preserve">
+    <value>Expired</value>
+  </data>
+  <data name="InviteExpiresFormat" xml:space="preserve">
+    <value>Expires on {0}</value>
+  </data>
+  <data name="InvitesDescriptionTextBlock.Text" xml:space="preserve">
+    <value>Each code lets one person create an account and expires after 7 days.</value>
+  </data>
+  <data name="InvitesEmptyTextBlock.Text" xml:space="preserve">
+    <value>No invite codes yet.</value>
+  </data>
+  <data name="InvitesHeaderTextBlock.Text" xml:space="preserve">
+    <value>Invites</value>
+  </data>
+  <data name="InviteUsedFormat" xml:space="preserve">
+    <value>Used on {0}</value>
+  </data>
+  <data name="ItemNotFoundError" xml:space="preserve">
+    <value>This item no longer exists. Refresh the view.</value>
+  </data>
+  <data name="LanguageComboBox.Header" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="LanguageEnglishComboBoxItem.Content" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="LanguageKoreanComboBoxItem.Content" xml:space="preserve">
+    <value>한국어</value>
+  </data>
+  <data name="LanguageSystemComboBoxItem.Content" xml:space="preserve">
+    <value>Use system setting</value>
+  </data>
+  <data name="LastSyncedFormat" xml:space="preserve">
+    <value>Last synced {0}</value>
+  </data>
+  <data name="LaterTodayReminderFormat" xml:space="preserve">
+    <value>Later today, {0}</value>
+  </data>
+  <data name="LeaveListButtonText" xml:space="preserve">
+    <value>Leave list</value>
+  </data>
+  <data name="LeaveListDialogMessageFormat" xml:space="preserve">
+    <value>{0} and its tasks will be removed from your devices. The owner can share it with you again later.</value>
+  </data>
+  <data name="LeaveListDialogTitle" xml:space="preserve">
+    <value>Leave this list?</value>
+  </data>
+  <data name="LinkedNoteCountFormat" xml:space="preserve">
+    <value>{0} notes</value>
+  </data>
+  <data name="LinkedNoteCountSingularFormat" xml:space="preserve">
+    <value>{0} note</value>
+  </data>
+  <data name="LinkedNotesHeaderTextBlock.Text" xml:space="preserve">
+    <value>Linked notes</value>
+  </data>
+  <data name="LinkNoteAutoSuggestBox.PlaceholderText" xml:space="preserve">
+    <value>Link an existing note</value>
+  </data>
+  <data name="LinkNoteAutoSuggestBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Link an existing note</value>
+  </data>
+  <data name="ListActionsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>List options</value>
+  </data>
+  <data name="ListActionsToolTip.Content" xml:space="preserve">
+    <value>List options</value>
+  </data>
+  <data name="ListCurrentUserRoleText" xml:space="preserve">
+    <value>You</value>
+  </data>
+  <data name="ListMembersButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Members</value>
+  </data>
+  <data name="ListMembersDialogTitleFormat" xml:space="preserve">
+    <value>Members of {0}</value>
+  </data>
+  <data name="ListMembersToolTip.Content" xml:space="preserve">
+    <value>Members</value>
+  </data>
+  <data name="ListNamePlaceholder" xml:space="preserve">
+    <value>List name</value>
+  </data>
+  <data name="ListNotSharedTextBlock.Text" xml:space="preserve">
+    <value>Only you can see this list.</value>
+  </data>
+  <data name="ListOwnerRoleText" xml:space="preserve">
+    <value>Owner</value>
+  </data>
+  <data name="ListPeopleHeaderTextBlock.Text" xml:space="preserve">
+    <value>People</value>
+  </data>
+  <data name="LongDatePattern" xml:space="preserve">
+    <value>MMMM d, yyyy</value>
+  </data>
+  <data name="MarkImportantText" xml:space="preserve">
+    <value>Mark as important</value>
+  </data>
+  <data name="McpEndpointLabelTextBlock.Text" xml:space="preserve">
+    <value>MCP endpoint</value>
+  </data>
+  <data name="MemberUserNameTextBox.Header" xml:space="preserve">
+    <value>User name</value>
+  </data>
+  <data name="MemberUserNameTextBox.PlaceholderText" xml:space="preserve">
+    <value>The exact user name</value>
+  </data>
+  <data name="MonthlyRecurrenceMenuItem.Text" xml:space="preserve">
+    <value>Monthly</value>
+  </data>
+  <data name="MorningBriefingDescriptionTextBlock.Text" xml:space="preserve">
+    <value>Every morning at the time you choose, the assistant summarizes your overdue tasks, tasks due today, My Day and recently changed notes. The briefing appears at the top of My Day and in the assistant.</value>
+  </data>
+  <data name="MorningBriefingHeaderTextBlock.Text" xml:space="preserve">
+    <value>Morning briefing</value>
+  </data>
+  <data name="MorningBriefingPanelTitleTextBlock.Text" xml:space="preserve">
+    <value>Morning briefing</value>
+  </data>
+  <data name="MorningBriefingTimePicker.Header" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="MorningBriefingTimeZoneFormat" xml:space="preserve">
+    <value>The time is in the time zone {0}.</value>
+  </data>
+  <data name="MorningBriefingTitle" xml:space="preserve">
+    <value>Morning briefing</value>
+  </data>
+  <data name="MorningBriefingToggleSwitch.Header" xml:space="preserve">
+    <value>Write a morning briefing</value>
+  </data>
+  <data name="MyDayDatePattern" xml:space="preserve">
+    <value>dddd, MMMM d</value>
+  </data>
+  <data name="MyDayMetadataTextBlock.Text" xml:space="preserve">
+    <value>My Day</value>
+  </data>
+  <data name="MyDayNavigationItem.Content" xml:space="preserve">
+    <value>My Day</value>
+  </data>
+  <data name="MyDayTitle" xml:space="preserve">
+    <value>My Day</value>
+  </data>
+  <data name="NewAccessTokenInfoBar.Message" xml:space="preserve">
+    <value>This is the only time the token is shown.</value>
+  </data>
+  <data name="NewAccessTokenInfoBar.Title" xml:space="preserve">
+    <value>Copy your new token</value>
+  </data>
+  <data name="NewConversationTitle" xml:space="preserve">
+    <value>New conversation</value>
+  </data>
+  <data name="NewDisplayNameTextBox.Header" xml:space="preserve">
+    <value>Display name (optional)</value>
+  </data>
+  <data name="NewListDialogTitle" xml:space="preserve">
+    <value>New list</value>
+  </data>
+  <data name="NewListNavigationItem.Content" xml:space="preserve">
+    <value>New list</value>
+  </data>
+  <data name="NewNoteButtonTextBlock.Text" xml:space="preserve">
+    <value>New note</value>
+  </data>
+  <data name="NewPasswordBox.Header" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="NewPasswordBox.PlaceholderText" xml:space="preserve">
+    <value>At least 8 characters</value>
+  </data>
+  <data name="NewStepTextBox.PlaceholderText" xml:space="preserve">
+    <value>Add a step</value>
+  </data>
+  <data name="NewTaskTextBox.PlaceholderText" xml:space="preserve">
+    <value>Add a task</value>
+  </data>
+  <data name="NewUserNameTextBox.Header" xml:space="preserve">
+    <value>User name</value>
+  </data>
+  <data name="NewUserNameTextBox.PlaceholderText" xml:space="preserve">
+    <value>3 to 32 letters, digits, dots, hyphens or underscores</value>
+  </data>
+  <data name="NextWeekReminderFormat" xml:space="preserve">
+    <value>Next week, {0}</value>
+  </data>
+  <data name="NoMatchingNotesText" xml:space="preserve">
+    <value>No notes match this search.</value>
+  </data>
+  <data name="NoNoteSelectedTextBlock.Text" xml:space="preserve">
+    <value>Select a note to read or edit it.</value>
+  </data>
+  <data name="NoteBackButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Back to notes</value>
+  </data>
+  <data name="NoteBackToolTip.Content" xml:space="preserve">
+    <value>Back to notes</value>
+  </data>
+  <data name="NoteCloseButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Close note</value>
+  </data>
+  <data name="NoteCloseToolTip.Content" xml:space="preserve">
+    <value>Close note</value>
+  </data>
+  <data name="NoteContentTextBox.PlaceholderText" xml:space="preserve">
+    <value>Write in Markdown</value>
+  </data>
+  <data name="NoteContentTextBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Note content</value>
+  </data>
+  <data name="NoteNotSavedText" xml:space="preserve">
+    <value>Not saved</value>
+  </data>
+  <data name="NotePreviewToggleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="NotePreviewToolTip.Content" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="NoteSavedText" xml:space="preserve">
+    <value>Saved</value>
+  </data>
+  <data name="NoteSavingText" xml:space="preserve">
+    <value>Saving…</value>
+  </data>
+  <data name="NoteSearchBox.PlaceholderText" xml:space="preserve">
+    <value>Search notes</value>
+  </data>
+  <data name="NoteSearchBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Search notes</value>
+  </data>
+  <data name="NotesNavigationItem.Content" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="NotesTitleTextBlock.Text" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="NoteTagsTextBox.PlaceholderText" xml:space="preserve">
+    <value>Tags, separated by spaces</value>
+  </data>
+  <data name="NoteTagsTextBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Tags</value>
+  </data>
+  <data name="NoteTitleTextBox.PlaceholderText" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="NoteTitleTextBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Note title</value>
+  </data>
+  <data name="OfflineIndicatorTextBlock.Text" xml:space="preserve">
+    <value>Offline</value>
+  </data>
+  <data name="OpenBriefingInAssistantButton.Content" xml:space="preserve">
+    <value>Continue in assistant</value>
+  </data>
+  <data name="OpenReminderTaskButton.Content" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="PasswordBox.Header" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="PasswordMismatchError" xml:space="preserve">
+    <value>The passwords do not match.</value>
+  </data>
+  <data name="PasswordTooShortError" xml:space="preserve">
+    <value>The password must have at least 8 characters.</value>
+  </data>
+  <data name="PinnedNoteIcon.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Pinned</value>
+  </data>
+  <data name="PinNoteText" xml:space="preserve">
+    <value>Pin note</value>
+  </data>
+  <data name="PlannedNavigationItem.Content" xml:space="preserve">
+    <value>Planned</value>
+  </data>
+  <data name="PlannedTitle" xml:space="preserve">
+    <value>Planned</value>
+  </data>
+  <data name="RecurrenceDailyText" xml:space="preserve">
+    <value>Daily</value>
+  </data>
+  <data name="RecurrenceDaysComboBoxItem.Content" xml:space="preserve">
+    <value>Days</value>
+  </data>
+  <data name="RecurrenceDaysTextBlock.Text" xml:space="preserve">
+    <value>On these days</value>
+  </data>
+  <data name="RecurrenceEveryDaysFormat" xml:space="preserve">
+    <value>Every {0} days</value>
+  </data>
+  <data name="RecurrenceEveryMonthsFormat" xml:space="preserve">
+    <value>Every {0} months</value>
+  </data>
+  <data name="RecurrenceEveryWeeksFormat" xml:space="preserve">
+    <value>Every {0} weeks</value>
+  </data>
+  <data name="RecurrenceEveryWeeksOnFormat" xml:space="preserve">
+    <value>Every {0} weeks on {1}</value>
+  </data>
+  <data name="RecurrenceEveryYearsFormat" xml:space="preserve">
+    <value>Every {0} years</value>
+  </data>
+  <data name="RecurrenceFrequencyComboBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Unit</value>
+  </data>
+  <data name="RecurrenceIntervalNumberBox.Header" xml:space="preserve">
+    <value>Interval</value>
+  </data>
+  <data name="RecurrenceMonthlyText" xml:space="preserve">
+    <value>Monthly</value>
+  </data>
+  <data name="RecurrenceMonthsComboBoxItem.Content" xml:space="preserve">
+    <value>Months</value>
+  </data>
+  <data name="RecurrenceWeekdaysText" xml:space="preserve">
+    <value>Weekdays</value>
+  </data>
+  <data name="RecurrenceWeeklyOnFormat" xml:space="preserve">
+    <value>Weekly on {0}</value>
+  </data>
+  <data name="RecurrenceWeeklyText" xml:space="preserve">
+    <value>Weekly</value>
+  </data>
+  <data name="RecurrenceWeeksComboBoxItem.Content" xml:space="preserve">
+    <value>Weeks</value>
+  </data>
+  <data name="RecurrenceYearlyText" xml:space="preserve">
+    <value>Yearly</value>
+  </data>
+  <data name="RecurrenceYearsComboBoxItem.Content" xml:space="preserve">
+    <value>Years</value>
+  </data>
+  <data name="RegistrationClosedError" xml:space="preserve">
+    <value>This server does not accept new accounts.</value>
+  </data>
+  <data name="RegistrationClosedInfoBar.Message" xml:space="preserve">
+    <value>This server does not accept new accounts.</value>
+  </data>
+  <data name="RegistrationClosedInfoBar.Title" xml:space="preserve">
+    <value>Registration closed</value>
+  </data>
+  <data name="RegistrationClosedText" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="RegistrationFirstAccountText" xml:space="preserve">
+    <value>Open for the first account only</value>
+  </data>
+  <data name="RegistrationInviteText" xml:space="preserve">
+    <value>Invite code required</value>
+  </data>
+  <data name="RegistrationLabelTextBlock.Text" xml:space="preserve">
+    <value>Registration</value>
+  </data>
+  <data name="RegistrationOpenText" xml:space="preserve">
+    <value>Open to everyone</value>
+  </data>
+  <data name="RemindAtFormat" xml:space="preserve">
+    <value>Remind me at {0}</value>
+  </data>
+  <data name="ReminderChannelName" xml:space="preserve">
+    <value>Reminders</value>
+  </data>
+  <data name="ReminderDatePicker.Header" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="ReminderDatePicker.PlaceholderText" xml:space="preserve">
+    <value>Pick a date</value>
+  </data>
+  <data name="ReminderDateTimeFormat" xml:space="preserve">
+    <value>{0}, {1}</value>
+  </data>
+  <data name="ReminderNotificationText" xml:space="preserve">
+    <value>It's time for this task.</value>
+  </data>
+  <data name="ReminderTimePicker.Header" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="RemindMeText" xml:space="preserve">
+    <value>Remind me</value>
+  </data>
+  <data name="RemoveFromMyDayText" xml:space="preserve">
+    <value>Remove from My Day</value>
+  </data>
+  <data name="RemoveImportanceText" xml:space="preserve">
+    <value>Remove importance</value>
+  </data>
+  <data name="RemoveListMemberButtonNameFormat" xml:space="preserve">
+    <value>Remove {0}</value>
+  </data>
+  <data name="RenameButtonText" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="RenameListDialogTitle" xml:space="preserve">
+    <value>Rename list</value>
+  </data>
+  <data name="RenameListMenuItem.Text" xml:space="preserve">
+    <value>Rename list</value>
+  </data>
+  <data name="RepeatText" xml:space="preserve">
+    <value>Repeat</value>
+  </data>
+  <data name="RequestFailedError" xml:space="preserve">
+    <value>The server responded with status {0}.</value>
+  </data>
+  <data name="RestartNoticeInfoBar.Message" xml:space="preserve">
+    <value>Restart Errandesk to apply the new language.</value>
+  </data>
+  <data name="RetryButton.Content" xml:space="preserve">
+    <value>Try again</value>
+  </data>
+  <data name="RetrySignInButton.Content" xml:space="preserve">
+    <value>Try again</value>
+  </data>
+  <data name="RevokeAccessTokenButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Revoke token</value>
+  </data>
+  <data name="RevokeAccessTokenConfirmButtonText" xml:space="preserve">
+    <value>Revoke</value>
+  </data>
+  <data name="RevokeAccessTokenDialogMessage" xml:space="preserve">
+    <value>Apps that use the token {0} will stop working.</value>
+  </data>
+  <data name="RevokeAccessTokenDialogTitle" xml:space="preserve">
+    <value>Revoke this token?</value>
+  </data>
+  <data name="RevokeAccessTokenToolTip.Content" xml:space="preserve">
+    <value>Revoke token</value>
+  </data>
+  <data name="SaveDisplayNameButton.Content" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="ServerAddressInvalidError" xml:space="preserve">
+    <value>Enter a valid address, such as https://errandesk.example.com.</value>
+  </data>
+  <data name="ServerAddressTextBox.Header" xml:space="preserve">
+    <value>Server address</value>
+  </data>
+  <data name="ServerAddressTextBox.PlaceholderText" xml:space="preserve">
+    <value>https://errandesk.example.com</value>
+  </data>
+  <data name="ServerConnectionTitleTextBlock.Text" xml:space="preserve">
+    <value>Connect to a server</value>
+  </data>
+  <data name="ServerLabelTextBlock.Text" xml:space="preserve">
+    <value>Server</value>
+  </data>
+  <data name="ServerNotErrandeskError" xml:space="preserve">
+    <value>This address did not return Errandesk server information.</value>
+  </data>
+  <data name="ServerStatusError" xml:space="preserve">
+    <value>The server responded with status {0}. Check that the address points to an Errandesk server.</value>
+  </data>
+  <data name="ServerTimeoutError" xml:space="preserve">
+    <value>The server did not respond in time.</value>
+  </data>
+  <data name="ServerUnavailableError" xml:space="preserve">
+    <value>The server cannot reach its database right now. Try again later.</value>
+  </data>
+  <data name="ServerUnreachableError" xml:space="preserve">
+    <value>The server could not be reached. Check the address and your network connection.</value>
+  </data>
+  <data name="ServerVersionLabelTextBlock.Text" xml:space="preserve">
+    <value>Server version</value>
+  </data>
+  <data name="SessionEndedMessage" xml:space="preserve">
+    <value>Your session has ended. Sign in again.</value>
+  </data>
+  <data name="SettingsTitleTextBlock.Text" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="SharedByFormat" xml:space="preserve">
+    <value>Shared by {0}</value>
+  </data>
+  <data name="SharedListItemStatus" xml:space="preserve">
+    <value>Shared</value>
+  </data>
+  <data name="SharedWithManyFormat" xml:space="preserve">
+    <value>Shared with {0} people</value>
+  </data>
+  <data name="SharedWithOneFormat" xml:space="preserve">
+    <value>Shared with {0}</value>
+  </data>
+  <data name="ShareListButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Share list</value>
+  </data>
+  <data name="ShareListDialogTitleFormat" xml:space="preserve">
+    <value>Share {0}</value>
+  </data>
+  <data name="ShareListMemberDescriptionFormat" xml:space="preserve">
+    <value>{0} shared this list with you. You can see and change its tasks. Only the owner can rename, delete or share it.</value>
+  </data>
+  <data name="ShareListOwnerDescription" xml:space="preserve">
+    <value>People you add can see and change the tasks in this list. Your notes stay private. Enter the user name they sign in with.</value>
+  </data>
+  <data name="ShareListToolTip.Content" xml:space="preserve">
+    <value>Share list</value>
+  </data>
+  <data name="ShareUserNotFoundErrorFormat" xml:space="preserve">
+    <value>No user is named {0}. Check the spelling of the user name.</value>
+  </data>
+  <data name="ShareWithSelfError" xml:space="preserve">
+    <value>You already own this list.</value>
+  </data>
+  <data name="ShortDatePattern" xml:space="preserve">
+    <value>ddd, MMM d</value>
+  </data>
+  <data name="ShortDateWithYearPattern" xml:space="preserve">
+    <value>ddd, MMM d, yyyy</value>
+  </data>
+  <data name="SignInButton.Content" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="SignInFailedError" xml:space="preserve">
+    <value>The user name or password is incorrect.</value>
+  </data>
+  <data name="SigningInMessage" xml:space="preserve">
+    <value>Signing in</value>
+  </data>
+  <data name="SigningOutMessage" xml:space="preserve">
+    <value>Signing out</value>
+  </data>
+  <data name="SignInMissingFieldsError" xml:space="preserve">
+    <value>Enter your user name and password.</value>
+  </data>
+  <data name="SignInTitleTextBlock.Text" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="SignOutButton.Content" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="SignUpButton.Content" xml:space="preserve">
+    <value>Create account</value>
+  </data>
+  <data name="SignUpTitleTextBlock.Text" xml:space="preserve">
+    <value>Create an account</value>
+  </data>
+  <data name="StartMicrosoftTodoImportButton.Content" xml:space="preserve">
+    <value>Import from Microsoft To Do</value>
+  </data>
+  <data name="StepsHeaderTextBlock.Text" xml:space="preserve">
+    <value>Steps</value>
+  </data>
+  <data name="StepsProgressFormat" xml:space="preserve">
+    <value>{0} of {1}</value>
+  </data>
+  <data name="SyncHeaderTextBlock.Text" xml:space="preserve">
+    <value>Sync</value>
+  </data>
+  <data name="SyncInProgressText" xml:space="preserve">
+    <value>Syncing…</value>
+  </data>
+  <data name="SyncNowButton.Content" xml:space="preserve">
+    <value>Sync now</value>
+  </data>
+  <data name="SyncOfflineText" xml:space="preserve">
+    <value>Offline. Changes are saved on this device and sync when the server can be reached.</value>
+  </data>
+  <data name="SyncPendingFormat" xml:space="preserve">
+    <value>{0} changes waiting to sync</value>
+  </data>
+  <data name="SyncPendingSingularFormat" xml:space="preserve">
+    <value>{0} change waiting to sync</value>
+  </data>
+  <data name="SyncUpToDateText" xml:space="preserve">
+    <value>All changes are synced</value>
+  </data>
+  <data name="TagFilterComboBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Filter by tag</value>
+  </data>
+  <data name="TagFilterOptionFormat" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="TasksNavigationItem.Content" xml:space="preserve">
+    <value>Tasks</value>
+  </data>
+  <data name="ThemeComboBox.Header" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="ThemeDarkComboBoxItem.Content" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="ThemeLightComboBoxItem.Content" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="ThemeSystemComboBoxItem.Content" xml:space="preserve">
+    <value>Use system setting</value>
+  </data>
+  <data name="TomorrowReminderFormat" xml:space="preserve">
+    <value>Tomorrow, {0}</value>
+  </data>
+  <data name="ToolUndoButton.Content" xml:space="preserve">
+    <value>Undo</value>
+  </data>
+  <data name="ToolUndoneTextBlock.Text" xml:space="preserve">
+    <value>Undone</value>
+  </data>
+  <data name="TooManyRequestsError" xml:space="preserve">
+    <value>Too many attempts. Wait a minute and try again.</value>
+  </data>
+  <data name="UndoConflictError" xml:space="preserve">
+    <value>This change can't be undone because the item changed after it or the change was already undone.</value>
+  </data>
+  <data name="UnlinkNoteButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Unlink note</value>
+  </data>
+  <data name="UnlinkNoteToolTip.Content" xml:space="preserve">
+    <value>Unlink note</value>
+  </data>
+  <data name="UnpinNoteText" xml:space="preserve">
+    <value>Unpin note</value>
+  </data>
+  <data name="UnsyncedChangesConfirmButtonText" xml:space="preserve">
+    <value>Sign out anyway</value>
+  </data>
+  <data name="UnsyncedChangesDialogMessage" xml:space="preserve">
+    <value>{0} changes on this device have not reached the server yet. Signing out deletes them from this device.</value>
+  </data>
+  <data name="UnsyncedChangesDialogTitle" xml:space="preserve">
+    <value>Delete unsynced changes?</value>
+  </data>
+  <data name="UntitledNoteText" xml:space="preserve">
+    <value>Untitled note</value>
+  </data>
+  <data name="UserNameLabelTextBlock.Text" xml:space="preserve">
+    <value>User name</value>
+  </data>
+  <data name="UserNameTakenError" xml:space="preserve">
+    <value>This user name is already taken.</value>
+  </data>
+  <data name="UserNameTextBox.Header" xml:space="preserve">
+    <value>User name</value>
+  </data>
+  <data name="WeekdaysRecurrenceMenuItem.Text" xml:space="preserve">
+    <value>Weekdays</value>
+  </data>
+  <data name="WeeklyRecurrenceMenuItem.Text" xml:space="preserve">
+    <value>Weekly</value>
+  </data>
+  <data name="YearlyRecurrenceMenuItem.Text" xml:space="preserve">
+    <value>Yearly</value>
+  </data>
+</root>

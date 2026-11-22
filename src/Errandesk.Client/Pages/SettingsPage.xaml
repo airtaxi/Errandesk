@@ -1,0 +1,519 @@
+﻿<Page
+    x:Class="Errandesk.Client.Pages.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:Errandesk.Client.Models">
+
+    <ScrollViewer>
+        <Grid Padding="24,16,24,32">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MaxWidth="640" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Spacing="32">
+                <TextBlock
+                    x:Uid="SettingsTitleTextBlock"
+                    AutomationProperties.HeadingLevel="Level1"
+                    Style="{StaticResource TitleTextBlockStyle}" />
+
+                <InfoBar
+                    AutomationProperties.AutomationId="SettingsErrorInfoBar"
+                    IsClosable="True"
+                    IsOpen="{x:Bind ViewModel.IsErrorVisible, Mode=TwoWay}"
+                    Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+                    Severity="Error"
+                    Visibility="{x:Bind ViewModel.IsErrorVisible, Mode=OneWay}" />
+
+                <StackPanel Spacing="12">
+                    <TextBlock
+                        x:Uid="AccountHeaderTextBlock"
+                        AutomationProperties.HeadingLevel="Level2"
+                        Style="{StaticResource SubtitleTextBlockStyle}" />
+
+                    <Grid ColumnSpacing="24" RowSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock x:Uid="UserNameLabelTextBlock" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock
+                            Grid.Column="1"
+                            AutomationProperties.AutomationId="SettingsUserNameTextBlock"
+                            IsTextSelectionEnabled="True"
+                            Text="{x:Bind ViewModel.UserNameText, Mode=OneWay}"
+                            TextWrapping="Wrap" />
+
+                        <TextBlock
+                            x:Uid="ServerLabelTextBlock"
+                            Grid.Row="1"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            AutomationProperties.AutomationId="SettingsServerTextBlock"
+                            IsTextSelectionEnabled="True"
+                            Text="{x:Bind ViewModel.ServerAddressText, Mode=OneWay}"
+                            TextWrapping="Wrap" />
+                    </Grid>
+
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox
+                            x:Uid="DisplayNameTextBox"
+                            AutomationProperties.AutomationId="DisplayNameTextBox"
+                            MaxLength="100"
+                            Text="{x:Bind ViewModel.DisplayName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button
+                            x:Uid="SaveDisplayNameButton"
+                            Grid.Column="1"
+                            VerticalAlignment="Bottom"
+                            AutomationProperties.AutomationId="SaveDisplayNameButton"
+                            Command="{x:Bind ViewModel.SaveDisplayNameCommand}" />
+                    </Grid>
+
+                    <TextBlock
+                        x:Uid="DisplayNameSavedTextBlock"
+                        AutomationProperties.AutomationId="DisplayNameSavedTextBlock"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Visibility="{x:Bind ViewModel.IsDisplayNameSavedVisible, Mode=OneWay}" />
+
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button
+                            x:Uid="SignOutButton"
+                            AutomationProperties.AutomationId="SignOutButton"
+                            Command="{x:Bind ViewModel.SignOutCommand}" />
+                        <Button
+                            x:Uid="ChangeServerButton"
+                            AutomationProperties.AutomationId="ChangeServerButton"
+                            Command="{x:Bind ViewModel.ChangeServerCommand}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Spacing="12">
+                    <TextBlock
+                        x:Uid="SyncHeaderTextBlock"
+                        AutomationProperties.HeadingLevel="Level2"
+                        Style="{StaticResource SubtitleTextBlockStyle}" />
+
+                    <StackPanel Spacing="4">
+                        <TextBlock
+                            AutomationProperties.AutomationId="SyncStatusTextBlock"
+                            AutomationProperties.LiveSetting="Polite"
+                            Text="{x:Bind ViewModel.SyncStatusText, Mode=OneWay}"
+                            TextWrapping="Wrap" />
+                        <TextBlock
+                            AutomationProperties.AutomationId="LastSyncedTextBlock"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind ViewModel.LastSyncedText, Mode=OneWay}"
+                            TextWrapping="Wrap"
+                            Visibility="{x:Bind ViewModel.IsLastSyncedVisible, Mode=OneWay}" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button
+                            x:Uid="SyncNowButton"
+                            AutomationProperties.AutomationId="SyncNowButton"
+                            Command="{x:Bind ViewModel.SyncNowCommand}" />
+                        <ProgressRing
+                            Width="20"
+                            Height="20"
+                            AutomationProperties.AutomationId="SyncProgressRing"
+                            IsActive="{x:Bind ViewModel.IsSyncing, Mode=OneWay}"
+                            Visibility="{x:Bind ViewModel.IsSyncing, Mode=OneWay}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Spacing="12">
+                    <TextBlock
+                        x:Uid="AppearanceHeaderTextBlock"
+                        AutomationProperties.HeadingLevel="Level2"
+                        Style="{StaticResource SubtitleTextBlockStyle}" />
+
+                    <ComboBox
+                        x:Uid="LanguageComboBox"
+                        MinWidth="240"
+                        AutomationProperties.AutomationId="LanguageComboBox"
+                        SelectedIndex="{x:Bind ViewModel.LanguageIndex, Mode=TwoWay}">
+                        <ComboBoxItem x:Uid="LanguageSystemComboBoxItem" />
+                        <ComboBoxItem x:Uid="LanguageEnglishComboBoxItem" />
+                        <ComboBoxItem x:Uid="LanguageKoreanComboBoxItem" />
+                    </ComboBox>
+
+                    <InfoBar
+                        x:Uid="RestartNoticeInfoBar"
+                        AutomationProperties.AutomationId="RestartNoticeInfoBar"
+                        IsClosable="False"
+                        IsOpen="{x:Bind ViewModel.IsRestartNoticeVisible, Mode=OneWay}"
+                        Severity="Informational"
+                        Visibility="{x:Bind ViewModel.IsRestartNoticeVisible, Mode=OneWay}" />
+
+                    <ComboBox
+                        x:Uid="ThemeComboBox"
+                        MinWidth="240"
+                        AutomationProperties.AutomationId="ThemeComboBox"
+                        SelectedIndex="{x:Bind ViewModel.ThemeIndex, Mode=TwoWay}">
+                        <ComboBoxItem x:Uid="ThemeSystemComboBoxItem" />
+                        <ComboBoxItem x:Uid="ThemeLightComboBoxItem" />
+                        <ComboBoxItem x:Uid="ThemeDarkComboBoxItem" />
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel
+                    AutomationProperties.AutomationId="MorningBriefingSection"
+                    Spacing="12"
+                    Visibility="{x:Bind ViewModel.IsAiAvailable, Mode=OneWay}">
+                    <TextBlock
+                        x:Uid="MorningBriefingHeaderTextBlock"
+                        AutomationProperties.HeadingLevel="Level2"
+                        Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <TextBlock
+                        x:Uid="MorningBriefingDescriptionTextBlock"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        TextWrapping="Wrap" />
+
+                    <ToggleSwitch
+                        x:Uid="MorningBriefingToggleSwitch"
+                        AutomationProperties.AutomationId="MorningBriefingToggleSwitch"
+                        IsOn="{x:Bind ViewModel.IsMorningBriefingEnabled, Mode=TwoWay}" />
+
+                    <StackPanel Spacing="4">
+                        <TimePicker
+                            x:Uid="MorningBriefingTimePicker"
+                            AutomationProperties.AutomationId="MorningBriefingTimePicker"
+                            IsEnabled="{x:Bind ViewModel.IsMorningBriefingEnabled, Mode=OneWay}"
+                            MinuteIncrement="5"
+                            Time="{x:Bind ViewModel.MorningBriefingTime, Mode=TwoWay}" />
+                        <TextBlock
+                            AutomationProperties.AutomationId="MorningBriefingTimeZoneTextBlock"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind ViewModel.MorningBriefingTimeZoneText, Mode=OneWay}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel
+                    AutomationProperties.AutomationId="ImportSection"
+                    Spacing="12"
+                    Visibility="{x:Bind ViewModel.IsImportAvailable, Mode=OneWay}">
+                    <TextBlock
+                        x:Uid="ImportHeaderTextBlock"
+                        AutomationProperties.HeadingLevel="Level2"
+                        Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <TextBlock
+                        x:Uid="ImportDescriptionTextBlock"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        TextWrapping="Wrap" />
+
+                    <Button
+                        x:Name="StartMicrosoftTodoImportButton"
+                        x:Uid="StartMicrosoftTodoImportButton"
+                        AutomationProperties.AutomationId="StartMicrosoftTodoImportButton"
+                        Command="{x:Bind ViewModel.StartImportCommand}"
+                        IsEnabled="{x:Bind ViewModel.IsImportStartEnabled, Mode=OneWay}" />
+
+                    <StackPanel
+                        AutomationProperties.AutomationId="ImportSignInPanel"
+                        Spacing="8"
+                        Visibility="{x:Bind ViewModel.IsImportCodeVisible, Mode=OneWay}">
+                        <TextBlock x:Uid="ImportSignInInstructionsTextBlock" TextWrapping="Wrap" />
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                AutomationProperties.AutomationId="ImportUserCodeTextBlock"
+                                IsTextSelectionEnabled="True"
+                                Style="{StaticResource SubtitleTextBlockStyle}"
+                                Text="{x:Bind ViewModel.ImportUserCode, Mode=OneWay}" />
+                            <Button
+                                x:Name="CopyImportCodeButton"
+                                x:Uid="CopyImportCodeButton"
+                                VerticalAlignment="Center"
+                                AutomationProperties.AutomationId="CopyImportCodeButton"
+                                Click="OnCopyImportCodeButtonClicked" />
+                        </StackPanel>
+                        <HyperlinkButton
+                            Padding="0"
+                            AutomationProperties.AutomationId="ImportSignInHyperlinkButton"
+                            Content="{x:Bind ViewModel.ImportVerificationText, Mode=OneWay}"
+                            NavigateUri="{x:Bind ViewModel.ImportVerificationUri, Mode=OneWay}" />
+                        <TextBlock
+                            AutomationProperties.AutomationId="ImportCodeExpiresTextBlock"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind ViewModel.ImportExpiresText, Mode=OneWay}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.IsImportStatusVisible, Mode=OneWay}">
+                        <TextBlock
+                            AutomationProperties.AutomationId="ImportStatusTextBlock"
+                            AutomationProperties.LiveSetting="Polite"
+                            Text="{x:Bind ViewModel.ImportStatusText, Mode=OneWay}"
+                            TextWrapping="Wrap" />
+                        <ProgressBar
+                            MaxWidth="320"
+                            HorizontalAlignment="Left"
+                            AutomationProperties.AutomationId="ImportProgressBar"
+                            IsIndeterminate="True"
+                            Visibility="{x:Bind ViewModel.IsImportInProgress, Mode=OneWay}" />
+                    </StackPanel>
+
+                    <Grid
+                        AutomationProperties.AutomationId="ImportCountsGrid"
+                        ColumnSpacing="24"
+                        RowSpacing="8"
+                        Visibility="{x:Bind ViewModel.IsImportCountsVisible, Mode=OneWay}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock x:Uid="ImportListsLabelTextBlock" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock
+                            Grid.Column="1"
+                            AutomationProperties.AutomationId="ImportListsCountTextBlock"
+                            Text="{x:Bind ViewModel.ImportListsCountText, Mode=OneWay}" />
+
+                        <TextBlock
+                            x:Uid="ImportTasksLabelTextBlock"
+                            Grid.Row="1"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            AutomationProperties.AutomationId="ImportTasksCountTextBlock"
+                            Text="{x:Bind ViewModel.ImportTasksCountText, Mode=OneWay}" />
+
+                        <TextBlock
+                            x:Uid="ImportStepsLabelTextBlock"
+                            Grid.Row="2"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            AutomationProperties.AutomationId="ImportStepsCountTextBlock"
+                            Text="{x:Bind ViewModel.ImportStepsCountText, Mode=OneWay}" />
+
+                        <TextBlock
+                            x:Uid="ImportSkippedLabelTextBlock"
+                            Grid.Row="3"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            AutomationProperties.AutomationId="ImportSkippedCountTextBlock"
+                            Text="{x:Bind ViewModel.ImportSkippedCountText, Mode=OneWay}" />
+                    </Grid>
+                </StackPanel>
+
+                <StackPanel AutomationProperties.AutomationId="AccessTokensSection" Spacing="12">
+                    <TextBlock
+                        x:Uid="AccessTokensHeaderTextBlock"
+                        AutomationProperties.HeadingLevel="Level2"
+                        Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <TextBlock
+                        x:Uid="AccessTokensDescriptionTextBlock"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        TextWrapping="Wrap" />
+
+                    <StackPanel Spacing="4">
+                        <TextBlock x:Uid="McpEndpointLabelTextBlock" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                AutomationProperties.AutomationId="McpEndpointTextBlock"
+                                IsTextSelectionEnabled="True"
+                                Text="{x:Bind ViewModel.McpEndpointText, Mode=OneWay}"
+                                TextWrapping="Wrap" />
+                            <Button
+                                x:Uid="CopyMcpEndpointButton"
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                AutomationProperties.AutomationId="CopyMcpEndpointButton"
+                                Click="OnCopyMcpEndpointButtonClicked"
+                                Style="{StaticResource IconButtonStyle}">
+                                <ToolTipService.ToolTip>
+                                    <ToolTip x:Uid="CopyMcpEndpointToolTip" />
+                                </ToolTipService.ToolTip>
+                                <FontIcon FontSize="16" Glyph="&#xE8C8;" />
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBox
+                            x:Name="AccessTokenNameTextBox"
+                            x:Uid="AccessTokenNameTextBox"
+                            MinWidth="240"
+                            AutomationProperties.AutomationId="AccessTokenNameTextBox"
+                            KeyDown="OnAccessTokenNameTextBoxKeyDown"
+                            MaxLength="100"
+                            Text="{x:Bind ViewModel.AccessTokenName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button
+                            x:Uid="CreateAccessTokenButton"
+                            VerticalAlignment="Bottom"
+                            AutomationProperties.AutomationId="CreateAccessTokenButton"
+                            Command="{x:Bind ViewModel.CreateAccessTokenCommand}"
+                            IsEnabled="{x:Bind ViewModel.IsCreateAccessTokenEnabled, Mode=OneWay}" />
+                    </StackPanel>
+
+                    <InfoBar
+                        x:Uid="NewAccessTokenInfoBar"
+                        AutomationProperties.AutomationId="NewAccessTokenInfoBar"
+                        Closed="OnNewAccessTokenInfoBarClosed"
+                        IsClosable="True"
+                        IsOpen="{x:Bind ViewModel.IsNewAccessTokenVisible, Mode=OneWay}"
+                        Severity="Informational">
+                        <InfoBar.Content>
+                            <StackPanel Padding="0,0,0,12" Spacing="8">
+                                <TextBlock
+                                    AutomationProperties.AutomationId="NewAccessTokenTextBlock"
+                                    IsTextSelectionEnabled="True"
+                                    Style="{StaticResource BodyStrongTextBlockStyle}"
+                                    Text="{x:Bind ViewModel.NewAccessToken, Mode=OneWay}"
+                                    TextWrapping="Wrap" />
+                                <Button
+                                    x:Name="CopyAccessTokenButton"
+                                    x:Uid="CopyAccessTokenButton"
+                                    AutomationProperties.AutomationId="CopyAccessTokenButton"
+                                    Click="OnCopyAccessTokenButtonClicked" />
+                            </StackPanel>
+                        </InfoBar.Content>
+                    </InfoBar>
+
+                    <TextBlock
+                        x:Uid="AccessTokensEmptyTextBlock"
+                        AutomationProperties.AutomationId="AccessTokensEmptyTextBlock"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Visibility="{x:Bind ViewModel.IsAccessTokensEmptyTextVisible, Mode=OneWay}" />
+
+                    <ItemsControl AutomationProperties.AutomationId="AccessTokensItemsControl" ItemsSource="{x:Bind ViewModel.AccessTokens}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:PersonalAccessTokenModel">
+                                <Grid Padding="0,6" ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel VerticalAlignment="Center" Spacing="2">
+                                        <TextBlock
+                                            AutomationProperties.AutomationId="AccessTokenNameTextBlock"
+                                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                                            Text="{x:Bind Name}"
+                                            TextTrimming="CharacterEllipsis" />
+                                        <TextBlock
+                                            AutomationProperties.AutomationId="AccessTokenPrefixTextBlock"
+                                            Style="{StaticResource MetadataTextBlockStyle}"
+                                            Text="{x:Bind DisplayPrefixText}" />
+                                        <TextBlock
+                                            AutomationProperties.AutomationId="AccessTokenUsageTextBlock"
+                                            Style="{StaticResource MetadataTextBlockStyle}"
+                                            Text="{x:Bind UsageText}" />
+                                    </StackPanel>
+                                    <Button
+                                        x:Uid="RevokeAccessTokenButton"
+                                        Grid.Column="1"
+                                        AutomationProperties.AutomationId="RevokeAccessTokenButton"
+                                        Click="OnRevokeAccessTokenButtonClicked"
+                                        Style="{StaticResource IconButtonStyle}">
+                                        <ToolTipService.ToolTip>
+                                            <ToolTip x:Uid="RevokeAccessTokenToolTip" />
+                                        </ToolTipService.ToolTip>
+                                        <FontIcon FontSize="16" Glyph="&#xE74D;" />
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsAdministrator, Mode=OneWay}">
+                    <TextBlock
+                        x:Uid="InvitesHeaderTextBlock"
+                        AutomationProperties.HeadingLevel="Level2"
+                        Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <TextBlock
+                        x:Uid="InvitesDescriptionTextBlock"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        TextWrapping="Wrap" />
+
+                    <Button
+                        x:Uid="CreateInviteButton"
+                        AutomationProperties.AutomationId="CreateInviteButton"
+                        Command="{x:Bind ViewModel.CreateInviteCommand}" />
+
+                    <TextBlock
+                        x:Uid="InvitesEmptyTextBlock"
+                        AutomationProperties.AutomationId="InvitesEmptyTextBlock"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Visibility="{x:Bind ViewModel.IsInvitesEmptyTextVisible, Mode=OneWay}" />
+
+                    <ItemsControl AutomationProperties.AutomationId="InvitesItemsControl" ItemsSource="{x:Bind ViewModel.Invites}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:InviteModel">
+                                <Grid Padding="0,6" ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel VerticalAlignment="Center" Spacing="2">
+                                        <TextBlock
+                                            AutomationProperties.AutomationId="InviteCodeTextBlock"
+                                            IsTextSelectionEnabled="True"
+                                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                                            Text="{x:Bind Code}" />
+                                        <TextBlock Style="{StaticResource MetadataTextBlockStyle}" Text="{x:Bind StatusText}" />
+                                    </StackPanel>
+                                    <Button
+                                        x:Uid="CopyInviteButton"
+                                        Grid.Column="1"
+                                        AutomationProperties.AutomationId="CopyInviteButton"
+                                        Click="OnCopyInviteButtonClicked"
+                                        IsEnabled="{x:Bind IsUsable}"
+                                        Style="{StaticResource IconButtonStyle}">
+                                        <ToolTipService.ToolTip>
+                                            <ToolTip x:Uid="CopyInviteToolTip" />
+                                        </ToolTipService.ToolTip>
+                                        <FontIcon FontSize="16" Glyph="&#xE8C8;" />
+                                    </Button>
+                                    <Button
+                                        x:Uid="DeleteInviteButton"
+                                        Grid.Column="2"
+                                        AutomationProperties.AutomationId="DeleteInviteButton"
+                                        Click="OnDeleteInviteButtonClicked"
+                                        Style="{StaticResource IconButtonStyle}">
+                                        <ToolTipService.ToolTip>
+                                            <ToolTip x:Uid="DeleteInviteToolTip" />
+                                        </ToolTipService.ToolTip>
+                                        <FontIcon FontSize="16" Glyph="&#xE74D;" />
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</Page>

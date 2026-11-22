@@ -1,0 +1,121 @@
+﻿<UserControl
+    x:Class="Errandesk.Client.Views.ShareListView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:Errandesk.Client.Models"
+    Loaded="OnShareListViewLoaded">
+
+    <StackPanel
+        MinWidth="320"
+        AutomationProperties.AutomationId="ShareListView"
+        Spacing="12">
+        <TextBlock
+            AutomationProperties.AutomationId="ShareListDescriptionTextBlock"
+            Text="{x:Bind ViewModel.DescriptionText, Mode=OneWay}"
+            TextWrapping="Wrap" />
+
+        <Grid ColumnSpacing="8" Visibility="{x:Bind ViewModel.IsOwner, Mode=OneWay}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox
+                x:Name="MemberUserNameTextBox"
+                x:Uid="MemberUserNameTextBox"
+                AutomationProperties.AutomationId="MemberUserNameTextBox"
+                IsSpellCheckEnabled="False"
+                KeyDown="OnMemberUserNameTextBoxKeyDown"
+                MaxLength="32"
+                Text="{x:Bind ViewModel.NewMemberUserName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <Button
+                x:Uid="AddListMemberButton"
+                Grid.Column="1"
+                VerticalAlignment="Bottom"
+                AutomationProperties.AutomationId="AddListMemberButton"
+                Command="{x:Bind ViewModel.AddMemberCommand}"
+                Style="{StaticResource AccentButtonStyle}" />
+        </Grid>
+
+        <InfoBar
+            AutomationProperties.AutomationId="ShareListErrorInfoBar"
+            IsClosable="False"
+            IsOpen="{x:Bind ViewModel.IsErrorVisible, Mode=OneWay}"
+            Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+            Severity="Error"
+            Visibility="{x:Bind ViewModel.IsErrorVisible, Mode=OneWay}" />
+
+        <StackPanel Spacing="4">
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock
+                    x:Uid="ListPeopleHeaderTextBlock"
+                    AutomationProperties.HeadingLevel="Level2"
+                    Style="{StaticResource BodyStrongTextBlockStyle}" />
+                <ProgressRing
+                    Grid.Column="1"
+                    Width="16"
+                    Height="16"
+                    AutomationProperties.AutomationId="ShareListProgressRing"
+                    IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+            </Grid>
+
+            <ItemsControl AutomationProperties.AutomationId="ListMembersItemsControl" ItemsSource="{x:Bind ViewModel.Members}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:ListMemberModel">
+                        <Grid
+                            MinHeight="44"
+                            Padding="0,4"
+                            ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel VerticalAlignment="Center" Spacing="2">
+                                <TextBlock
+                                    AutomationProperties.AutomationId="ListMemberDisplayNameTextBlock"
+                                    Text="{x:Bind DisplayName}"
+                                    TextTrimming="CharacterEllipsis" />
+                                <TextBlock
+                                    AutomationProperties.AutomationId="ListMemberUserNameTextBlock"
+                                    Style="{StaticResource MetadataTextBlockStyle}"
+                                    Text="{x:Bind UserName}"
+                                    TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                AutomationProperties.AutomationId="ListMemberRoleTextBlock"
+                                Style="{StaticResource MetadataTextBlockStyle}"
+                                Text="{x:Bind RoleText}"
+                                Visibility="{x:Bind HasRole}" />
+                            <Button
+                                Grid.Column="2"
+                                AutomationProperties.AutomationId="RemoveListMemberButton"
+                                AutomationProperties.Name="{x:Bind RemoveButtonName}"
+                                Click="OnRemoveListMemberButtonClicked"
+                                Style="{StaticResource IconButtonStyle}"
+                                ToolTipService.ToolTip="{x:Bind RemoveButtonName}"
+                                Visibility="{x:Bind CanRemove}">
+                                <FontIcon FontSize="16" Glyph="&#xE711;" />
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock
+                x:Uid="ListNotSharedTextBlock"
+                AutomationProperties.AutomationId="ListNotSharedTextBlock"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                TextWrapping="Wrap"
+                Visibility="{x:Bind ViewModel.IsEmptyTextVisible, Mode=OneWay}" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,33 @@
+* text=auto
+
+# Shell scripts must keep LF line endings to run inside containers
+*.sh text eol=lf
+
+# Images and icons
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.bmp binary
+*.webp binary
+*.ico binary
+*.icns binary
+
+# Fonts
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+
+# Certificates and signing material
+*.pfx binary
+*.p12 binary
+*.cer binary
+*.crt binary
+*.der binary
+*.keystore binary
+*.jks binary
+
+# Archives
+*.zip binary
+*.7z binary

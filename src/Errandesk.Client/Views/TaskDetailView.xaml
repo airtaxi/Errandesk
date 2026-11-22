@@ -1,0 +1,435 @@
+﻿<UserControl
+    x:Class="Errandesk.Client.Views.TaskDetailView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helpers="using:Errandesk.Client.Helpers"
+    xmlns:models="using:Errandesk.Client.Models">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Padding="8,8,8,0" ColumnSpacing="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Button
+                x:Name="DetailBackButton"
+                x:Uid="DetailBackButton"
+                AutomationProperties.AutomationId="DetailBackButton"
+                Command="{x:Bind ViewModel.CloseCommand, Mode=OneWay}"
+                Style="{StaticResource IconButtonStyle}"
+                Visibility="Collapsed">
+                <ToolTipService.ToolTip>
+                    <ToolTip x:Uid="DetailBackToolTip" />
+                </ToolTipService.ToolTip>
+                <FontIcon FontSize="16" Glyph="&#xE72B;" />
+            </Button>
+
+            <Button
+                x:Name="DetailCloseButton"
+                x:Uid="DetailCloseButton"
+                Grid.Column="2"
+                AutomationProperties.AutomationId="DetailCloseButton"
+                Command="{x:Bind ViewModel.CloseCommand, Mode=OneWay}"
+                Style="{StaticResource IconButtonStyle}">
+                <ToolTipService.ToolTip>
+                    <ToolTip x:Uid="DetailCloseToolTip" />
+                </ToolTipService.ToolTip>
+                <FontIcon FontSize="16" Glyph="&#xE711;" />
+            </Button>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Padding="16,8,16,24" Spacing="20">
+                <InfoBar
+                    AutomationProperties.AutomationId="TaskDetailErrorInfoBar"
+                    IsClosable="True"
+                    IsOpen="{x:Bind ViewModel.IsErrorVisible, Mode=TwoWay}"
+                    Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+                    Severity="Error"
+                    Visibility="{x:Bind ViewModel.IsErrorVisible, Mode=OneWay}" />
+
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <CheckBox
+                        x:Uid="DetailCompletionCheckBox"
+                        MinWidth="0"
+                        VerticalAlignment="Center"
+                        AutomationProperties.AutomationId="DetailCompletionCheckBox"
+                        Click="OnDetailCompletionCheckBoxClicked"
+                        IsChecked="{x:Bind ViewModel.CurrentTask.IsCompleted, Mode=OneWay}">
+                        <ToolTipService.ToolTip>
+                            <ToolTip x:Uid="DetailCompletionToolTip" />
+                        </ToolTipService.ToolTip>
+                    </CheckBox>
+
+                    <TextBox
+                        x:Name="TitleTextBox"
+                        x:Uid="DetailTitleTextBox"
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        AutomationProperties.AutomationId="DetailTitleTextBox"
+                        FontSize="20"
+                        FontWeight="SemiBold"
+                        KeyDown="OnTitleTextBoxKeyDown"
+                        LostFocus="OnTitleTextBoxLostFocus"
+                        MaxLength="500"
+                        Text="{x:Bind ViewModel.CurrentTask.Title, Mode=OneWay}"
+                        TextWrapping="Wrap" />
+
+                    <Button
+                        Grid.Column="2"
+                        AutomationProperties.AutomationId="DetailImportanceButton"
+                        AutomationProperties.Name="{x:Bind helpers:XamlFunctions.GetImportanceButtonText(ViewModel.CurrentTask.IsImportant), Mode=OneWay}"
+                        Command="{x:Bind ViewModel.ToggleImportanceCommand, Mode=OneWay}"
+                        Style="{StaticResource IconButtonStyle}"
+                        ToolTipService.ToolTip="{x:Bind helpers:XamlFunctions.GetImportanceButtonText(ViewModel.CurrentTask.IsImportant), Mode=OneWay}">
+                        <Grid>
+                            <FontIcon
+                                FontSize="16"
+                                Glyph="&#xE734;"
+                                Visibility="{x:Bind helpers:XamlFunctions.VisibleWhenFalse(ViewModel.CurrentTask.IsImportant), Mode=OneWay}" />
+                            <FontIcon
+                                FontSize="16"
+                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                Glyph="&#xE735;"
+                                Visibility="{x:Bind ViewModel.CurrentTask.IsImportant, Mode=OneWay}" />
+                        </Grid>
+                    </Button>
+                </Grid>
+
+                <StackPanel Spacing="4">
+                    <TextBlock x:Uid="StepsHeaderTextBlock" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <ItemsControl AutomationProperties.AutomationId="StepsItemsControl" ItemsSource="{x:Bind ViewModel.CurrentTask.Steps, Mode=OneWay}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:TaskStepModel">
+                                <Grid Padding="0,2" ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <CheckBox
+                                        MinWidth="0"
+                                        VerticalAlignment="Center"
+                                        AutomationProperties.AutomationId="StepCompletionCheckBox"
+                                        AutomationProperties.Name="{x:Bind Title, Mode=OneWay}"
+                                        Click="OnStepCompletionCheckBoxClicked"
+                                        IsChecked="{x:Bind IsCompleted, Mode=OneWay}" />
+                                    <TextBox
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        AutomationProperties.AutomationId="StepTitleTextBox"
+                                        AutomationProperties.Name="{x:Bind Title, Mode=OneWay}"
+                                        KeyDown="OnStepTitleTextBoxKeyDown"
+                                        LostFocus="OnStepTitleTextBoxLostFocus"
+                                        MaxLength="500"
+                                        Opacity="{x:Bind helpers:XamlFunctions.GetCompletedOpacity(IsCompleted), Mode=OneWay}"
+                                        Text="{x:Bind Title, Mode=OneWay}" />
+                                    <Button
+                                        x:Uid="DeleteStepButton"
+                                        Grid.Column="2"
+                                        AutomationProperties.AutomationId="DeleteStepButton"
+                                        Click="OnDeleteStepButtonClicked"
+                                        Style="{StaticResource IconButtonStyle}">
+                                        <ToolTipService.ToolTip>
+                                            <ToolTip x:Uid="DeleteStepToolTip" />
+                                        </ToolTipService.ToolTip>
+                                        <FontIcon FontSize="14" Glyph="&#xE711;" />
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBox
+                        x:Uid="NewStepTextBox"
+                        AutomationProperties.AutomationId="NewStepTextBox"
+                        KeyDown="OnNewStepTextBoxKeyDown"
+                        MaxLength="500"
+                        Text="{x:Bind ViewModel.NewStepTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+
+                <Button
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    AutomationProperties.AutomationId="MyDayButton"
+                    Command="{x:Bind ViewModel.ToggleMyDayCommand, Mode=OneWay}">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon FontSize="16" Glyph="&#xE706;" />
+                        <TextBlock Text="{x:Bind helpers:XamlFunctions.GetMyDayButtonText(ViewModel.CurrentTask.IsInMyDay), Mode=OneWay}" />
+                    </StackPanel>
+                </Button>
+
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <CalendarDatePicker
+                        x:Uid="DueDatePicker"
+                        HorizontalAlignment="Stretch"
+                        AutomationProperties.AutomationId="DueDatePicker"
+                        Date="{x:Bind ViewModel.DueDateValue, Mode=OneWay}"
+                        DateChanged="OnDueDatePickerDateChanged" />
+                    <Button
+                        x:Uid="ClearDueDateButton"
+                        Grid.Column="1"
+                        VerticalAlignment="Bottom"
+                        AutomationProperties.AutomationId="ClearDueDateButton"
+                        Command="{x:Bind ViewModel.ClearDueDateCommand, Mode=OneWay}"
+                        Style="{StaticResource IconButtonStyle}"
+                        Visibility="{x:Bind ViewModel.CurrentTask.HasDueDate, Mode=OneWay}">
+                        <ToolTipService.ToolTip>
+                            <ToolTip x:Uid="ClearDueDateToolTip" />
+                        </ToolTipService.ToolTip>
+                        <FontIcon FontSize="14" Glyph="&#xE711;" />
+                    </Button>
+                </Grid>
+
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Left"
+                        AutomationProperties.AutomationId="ReminderButton"
+                        AutomationProperties.Name="{x:Bind helpers:XamlFunctions.GetReminderButtonText(ViewModel.CurrentTask.ReminderText), Mode=OneWay}">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon FontSize="16" Glyph="&#xEA8F;" />
+                            <TextBlock Text="{x:Bind helpers:XamlFunctions.GetReminderButtonText(ViewModel.CurrentTask.ReminderText), Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <Button.Flyout>
+                            <MenuFlyout Opening="OnReminderMenuFlyoutOpening" Placement="BottomEdgeAlignedLeft">
+                                <MenuFlyoutItem
+                                    AutomationProperties.AutomationId="LaterTodayReminderMenuItem"
+                                    Command="{x:Bind ViewModel.SetLaterTodayReminderCommand, Mode=OneWay}"
+                                    Text="{x:Bind ViewModel.LaterTodayReminderText, Mode=OneWay}"
+                                    Visibility="{x:Bind ViewModel.IsLaterTodayReminderAvailable, Mode=OneWay}" />
+                                <MenuFlyoutItem
+                                    AutomationProperties.AutomationId="TomorrowReminderMenuItem"
+                                    Command="{x:Bind ViewModel.SetTomorrowReminderCommand, Mode=OneWay}"
+                                    Text="{x:Bind ViewModel.TomorrowReminderText, Mode=OneWay}" />
+                                <MenuFlyoutItem
+                                    AutomationProperties.AutomationId="NextWeekReminderMenuItem"
+                                    Command="{x:Bind ViewModel.SetNextWeekReminderCommand, Mode=OneWay}"
+                                    Text="{x:Bind ViewModel.NextWeekReminderText, Mode=OneWay}" />
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem
+                                    x:Uid="CustomReminderMenuItem"
+                                    AutomationProperties.AutomationId="CustomReminderMenuItem"
+                                    Click="OnCustomReminderMenuItemClicked" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
+                    <Button
+                        x:Uid="ClearReminderButton"
+                        Grid.Column="1"
+                        AutomationProperties.AutomationId="ClearReminderButton"
+                        Command="{x:Bind ViewModel.ClearReminderCommand, Mode=OneWay}"
+                        Style="{StaticResource IconButtonStyle}"
+                        Visibility="{x:Bind ViewModel.CurrentTask.HasReminder, Mode=OneWay}">
+                        <ToolTipService.ToolTip>
+                            <ToolTip x:Uid="ClearReminderToolTip" />
+                        </ToolTipService.ToolTip>
+                        <FontIcon FontSize="14" Glyph="&#xE711;" />
+                    </Button>
+                </Grid>
+
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Left"
+                        AutomationProperties.AutomationId="RecurrenceButton"
+                        AutomationProperties.Name="{x:Bind helpers:XamlFunctions.GetRecurrenceButtonText(ViewModel.CurrentTask.RecurrenceText), Mode=OneWay}">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon FontSize="16" Glyph="&#xE8EE;" />
+                            <TextBlock Text="{x:Bind helpers:XamlFunctions.GetRecurrenceButtonText(ViewModel.CurrentTask.RecurrenceText), Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <Button.Flyout>
+                            <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                                <MenuFlyoutItem
+                                    x:Uid="DailyRecurrenceMenuItem"
+                                    AutomationProperties.AutomationId="DailyRecurrenceMenuItem"
+                                    Command="{x:Bind ViewModel.SetDailyRecurrenceCommand, Mode=OneWay}" />
+                                <MenuFlyoutItem
+                                    x:Uid="WeekdaysRecurrenceMenuItem"
+                                    AutomationProperties.AutomationId="WeekdaysRecurrenceMenuItem"
+                                    Command="{x:Bind ViewModel.SetWeekdaysRecurrenceCommand, Mode=OneWay}" />
+                                <MenuFlyoutItem
+                                    x:Uid="WeeklyRecurrenceMenuItem"
+                                    AutomationProperties.AutomationId="WeeklyRecurrenceMenuItem"
+                                    Command="{x:Bind ViewModel.SetWeeklyRecurrenceCommand, Mode=OneWay}" />
+                                <MenuFlyoutItem
+                                    x:Uid="MonthlyRecurrenceMenuItem"
+                                    AutomationProperties.AutomationId="MonthlyRecurrenceMenuItem"
+                                    Command="{x:Bind ViewModel.SetMonthlyRecurrenceCommand, Mode=OneWay}" />
+                                <MenuFlyoutItem
+                                    x:Uid="YearlyRecurrenceMenuItem"
+                                    AutomationProperties.AutomationId="YearlyRecurrenceMenuItem"
+                                    Command="{x:Bind ViewModel.SetYearlyRecurrenceCommand, Mode=OneWay}" />
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem
+                                    x:Uid="CustomRecurrenceMenuItem"
+                                    AutomationProperties.AutomationId="CustomRecurrenceMenuItem"
+                                    Click="OnCustomRecurrenceMenuItemClicked" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
+                    <Button
+                        x:Uid="ClearRecurrenceButton"
+                        Grid.Column="1"
+                        AutomationProperties.AutomationId="ClearRecurrenceButton"
+                        Command="{x:Bind ViewModel.ClearRecurrenceCommand, Mode=OneWay}"
+                        Style="{StaticResource IconButtonStyle}"
+                        Visibility="{x:Bind ViewModel.CurrentTask.HasRecurrence, Mode=OneWay}">
+                        <ToolTipService.ToolTip>
+                            <ToolTip x:Uid="ClearRecurrenceToolTip" />
+                        </ToolTipService.ToolTip>
+                        <FontIcon FontSize="14" Glyph="&#xE711;" />
+                    </Button>
+                </Grid>
+
+                <TextBox
+                    x:Name="BodyTextBox"
+                    x:Uid="BodyTextBox"
+                    MinHeight="120"
+                    AcceptsReturn="True"
+                    AutomationProperties.AutomationId="BodyTextBox"
+                    LostFocus="OnBodyTextBoxLostFocus"
+                    Text="{x:Bind ViewModel.CurrentTask.Body, Mode=OneWay}"
+                    TextWrapping="Wrap" />
+
+                <StackPanel Spacing="4">
+                    <TextBlock x:Uid="LinkedNotesHeaderTextBlock" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <ItemsControl AutomationProperties.AutomationId="LinkedNotesItemsControl" ItemsSource="{x:Bind ViewModel.CurrentTask.LinkedNotes, Mode=OneWay}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:LinkedNoteModel">
+                                <Grid ColumnSpacing="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Button
+                                        Padding="8,6"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Left"
+                                        AutomationProperties.AutomationId="OpenLinkedNoteButton"
+                                        AutomationProperties.Name="{x:Bind DisplayTitle}"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Click="OnOpenLinkedNoteButtonClicked">
+                                        <StackPanel Orientation="Horizontal" Spacing="12">
+                                            <FontIcon
+                                                FontSize="16"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                Glyph="&#xE70B;" />
+                                            <TextBlock Text="{x:Bind DisplayTitle}" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button
+                                        x:Uid="UnlinkNoteButton"
+                                        Grid.Column="1"
+                                        AutomationProperties.AutomationId="UnlinkNoteButton"
+                                        Click="OnUnlinkNoteButtonClicked"
+                                        Style="{StaticResource IconButtonStyle}">
+                                        <ToolTipService.ToolTip>
+                                            <ToolTip x:Uid="UnlinkNoteToolTip" />
+                                        </ToolTipService.ToolTip>
+                                        <FontIcon FontSize="14" Glyph="&#xE711;" />
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <AutoSuggestBox
+                        x:Name="LinkNoteAutoSuggestBox"
+                        x:Uid="LinkNoteAutoSuggestBox"
+                        AutomationProperties.AutomationId="LinkNoteAutoSuggestBox"
+                        GotFocus="OnLinkNoteAutoSuggestBoxGotFocus"
+                        ItemsSource="{x:Bind ViewModel.NoteSuggestions, Mode=OneWay}"
+                        QuerySubmitted="OnLinkNoteAutoSuggestBoxQuerySubmitted"
+                        TextChanged="OnLinkNoteAutoSuggestBoxTextChanged">
+                        <AutoSuggestBox.QueryIcon>
+                            <FontIcon FontSize="14" Glyph="&#xE71B;" />
+                        </AutoSuggestBox.QueryIcon>
+                        <AutoSuggestBox.ItemTemplate>
+                            <DataTemplate x:DataType="models:NoteItemModel">
+                                <StackPanel Padding="0,4" Spacing="2">
+                                    <TextBlock Text="{x:Bind DisplayTitle}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock
+                                        Style="{StaticResource MetadataTextBlockStyle}"
+                                        Text="{x:Bind Excerpt}"
+                                        Visibility="{x:Bind HasExcerpt}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </AutoSuggestBox.ItemTemplate>
+                    </AutoSuggestBox>
+
+                    <Button
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Left"
+                        AutomationProperties.AutomationId="CreateLinkedNoteButton"
+                        Command="{x:Bind ViewModel.CreateLinkedNoteCommand, Mode=OneWay}">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon FontSize="16" Glyph="&#xE710;" />
+                            <TextBlock x:Uid="CreateLinkedNoteTextBlock" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid
+            Grid.Row="2"
+            Padding="16,8"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="0,1,0,0"
+            ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock
+                VerticalAlignment="Center"
+                AutomationProperties.AutomationId="TaskCreatedTextBlock"
+                Style="{StaticResource MetadataTextBlockStyle}"
+                Text="{x:Bind ViewModel.CreatedText, Mode=OneWay}" />
+            <Button
+                x:Uid="DeleteTaskButton"
+                Grid.Column="1"
+                AutomationProperties.AutomationId="DeleteTaskButton"
+                Command="{x:Bind ViewModel.DeleteTaskCommand, Mode=OneWay}"
+                Style="{StaticResource IconButtonStyle}">
+                <ToolTipService.ToolTip>
+                    <ToolTip x:Uid="DeleteTaskToolTip" />
+                </ToolTipService.ToolTip>
+                <FontIcon FontSize="16" Glyph="&#xE74D;" />
+            </Button>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,25 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="global.json" />
+  </Folder>
+  <Folder Name="/deploy/">
+    <File Path="deploy/.env.example" />
+    <File Path="deploy/compose.yaml" />
+    <File Path="deploy/Dockerfile" />
+    <File Path="deploy/Dockerfile.dockerignore" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Errandesk.Client/Errandesk.Client.csproj">
+      <Deploy />
+    </Project>
+    <Project Path="src/Errandesk.Client.Sync/Errandesk.Client.Sync.csproj" />
+    <Project Path="src/Errandesk.Contracts/Errandesk.Contracts.csproj" />
+    <Project Path="src/Errandesk.Server/Errandesk.Server.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Errandesk.Client.Sync.Tests/Errandesk.Client.Sync.Tests.csproj" />
+    <Project Path="tests/Errandesk.Server.Tests/Errandesk.Server.Tests.csproj" />
+  </Folder>
+</Solution>

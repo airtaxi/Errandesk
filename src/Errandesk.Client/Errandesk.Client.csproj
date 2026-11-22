@@ -1,0 +1,113 @@
+<Project Sdk="Uno.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net11.0-android;net11.0-windows10.0.26100.0;net11.0-desktop</TargetFrameworks>
+    <!--
+      iOS builds on macOS. On Windows the iOS target compiles the managed code only (no app bundle without a Mac),
+      which still checks iOS-specific code. Other hosts have no iOS workload. Pass -p:ErrandeskIncludeIosTarget=true or false to override.
+    -->
+    <ErrandeskIncludeIosTarget Condition="'$(ErrandeskIncludeIosTarget)' == '' and ($([MSBuild]::IsOSPlatform('OSX')) or $([MSBuild]::IsOSPlatform('Windows')))">true</ErrandeskIncludeIosTarget>
+    <TargetFrameworks Condition="'$(ErrandeskIncludeIosTarget)' == 'true'">$(TargetFrameworks);net11.0-ios</TargetFrameworks>
+
+    <OutputType>Exe</OutputType>
+    <UnoSingleProject>true</UnoSingleProject>
+    <RootNamespace>Errandesk.Client</RootNamespace>
+
+    <ApplicationTitle>Errandesk</ApplicationTitle>
+    <ApplicationId>com.airtaxi.errandesk</ApplicationId>
+    <ApplicationId Condition="'$(ERRANDESK_CLIENT_APPLICATION_ID)' != ''">$(ERRANDESK_CLIENT_APPLICATION_ID)</ApplicationId>
+    <ApplicationDisplayVersion>$(Version)</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationPublisher>Howon Lee</ApplicationPublisher>
+    <Description>Tasks, notes and an assistant on your own Errandesk server.</Description>
+
+    <!--
+      NETSDK1201: specifying a runtime identifier does not create a self-contained app.
+      PRI257: the default language (en) is not one of the included resource qualifiers.
+    -->
+    <NoWarn>$(NoWarn);NETSDK1201;PRI257</NoWarn>
+
+    <UnoSplashScreenBackgroundColor>#202020</UnoSplashScreenBackgroundColor>
+
+    <UnoFeatures>
+      Mvvm;
+      Skia;
+    </UnoFeatures>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Errandesk.Contracts\Errandesk.Contracts.csproj" />
+    <ProjectReference Include="..\Errandesk.Client.Sync\Errandesk.Client.Sync.csproj" />
+  </ItemGroup>
+
+  <!-- The app version the device reports to the server. -->
+  <ItemGroup>
+    <AssemblyMetadata Include="ErrandeskAppVersion" Value="$(ApplicationDisplayVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'ios'">
+    <CustomEntitlements Include="aps-environment" Type="String" Value="development" Condition="'$(Configuration)' != 'Release'" />
+    <CustomEntitlements Include="aps-environment" Type="String" Value="production" Condition="'$(Configuration)' == 'Release'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Markdig" Version="1.6.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="11.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="11.0.0" />
+  </ItemGroup>
+
+  <!--
+    Builder-specific values come from ERRANDESK_CLIENT_* environment variables, which MSBuild exposes as properties.
+    Every one of them is optional; without them the build uses debug or local development signing.
+  -->
+  <PropertyGroup>
+    <ErrandeskTargetPlatform>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</ErrandeskTargetPlatform>
+  </PropertyGroup>
+
+  <!-- Keeps the adaptive icon foreground inside the 66dp safe zone of the 108dp canvas. -->
+  <PropertyGroup Condition="'$(ErrandeskTargetPlatform)' == 'android'">
+    <UnoIconForegroundScale>0.80</UnoIconForegroundScale>
+  </PropertyGroup>
+
+  <!--
+    Android push: a google-services.json from ERRANDESK_CLIENT_GOOGLE_SERVICES_JSON or Platforms/Android/google-services.json
+    adds Firebase Cloud Messaging and defines ERRANDESK_FIREBASE_MESSAGING. Without one, reminders use local alarms.
+  -->
+  <PropertyGroup Condition="'$(ErrandeskTargetPlatform)' == 'android'">
+    <ErrandeskGoogleServicesJson Condition="'$(ERRANDESK_CLIENT_GOOGLE_SERVICES_JSON)' != ''">$(ERRANDESK_CLIENT_GOOGLE_SERVICES_JSON)</ErrandeskGoogleServicesJson>
+    <ErrandeskGoogleServicesJson Condition="'$(ErrandeskGoogleServicesJson)' == '' and Exists('$(MSBuildProjectDirectory)/Platforms/Android/google-services.json')">$(MSBuildProjectDirectory)/Platforms/Android/google-services.json</ErrandeskGoogleServicesJson>
+    <ErrandeskUsesFirebaseMessaging Condition="'$(ErrandeskGoogleServicesJson)' != '' and Exists('$(ErrandeskGoogleServicesJson)')">true</ErrandeskUsesFirebaseMessaging>
+    <DefineConstants Condition="'$(ErrandeskUsesFirebaseMessaging)' == 'true'">$(DefineConstants);ERRANDESK_FIREBASE_MESSAGING</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(ErrandeskUsesFirebaseMessaging)' == 'true'">
+    <GoogleServicesJson Include="$(ErrandeskGoogleServicesJson)" />
+    <PackageReference Include="Xamarin.Firebase.Messaging" Version="126.0.1" />
+  </ItemGroup>
+
+  <Target Name="ErrandeskWarnMissingGoogleServicesJson" BeforeTargets="Build" Condition="'$(ErrandeskTargetPlatform)' == 'android' and '$(ERRANDESK_CLIENT_GOOGLE_SERVICES_JSON)' != '' and '$(ErrandeskUsesFirebaseMessaging)' != 'true'">
+    <Warning Text="ERRANDESK_CLIENT_GOOGLE_SERVICES_JSON names a file that does not exist, so Android push is left out of this build." />
+  </Target>
+
+  <!-- Android release signing; the password file serves as both key and keystore password. -->
+  <PropertyGroup Condition="'$(ErrandeskTargetPlatform)' == 'android' and '$(ERRANDESK_CLIENT_ANDROID_KEYSTORE)' != '' and '$(ERRANDESK_CLIENT_ANDROID_KEY_ALIAS)' != '' and '$(ERRANDESK_CLIENT_ANDROID_KEY_PASSWORD_FILE)' != ''">
+    <AndroidKeyStore>true</AndroidKeyStore>
+    <AndroidSigningKeyStore>$(ERRANDESK_CLIENT_ANDROID_KEYSTORE)</AndroidSigningKeyStore>
+    <AndroidSigningKeyAlias>$(ERRANDESK_CLIENT_ANDROID_KEY_ALIAS)</AndroidSigningKeyAlias>
+    <AndroidSigningKeyPass>file:$(ERRANDESK_CLIENT_ANDROID_KEY_PASSWORD_FILE)</AndroidSigningKeyPass>
+    <AndroidSigningStorePass>file:$(ERRANDESK_CLIENT_ANDROID_KEY_PASSWORD_FILE)</AndroidSigningStorePass>
+  </PropertyGroup>
+
+  <!-- iOS device signing. -->
+  <PropertyGroup Condition="'$(ErrandeskTargetPlatform)' == 'ios'">
+    <CodesignKey Condition="'$(ERRANDESK_CLIENT_IOS_CODESIGN_KEY)' != ''">$(ERRANDESK_CLIENT_IOS_CODESIGN_KEY)</CodesignKey>
+    <CodesignProvision Condition="'$(ERRANDESK_CLIENT_IOS_PROVISIONING_PROFILE)' != ''">$(ERRANDESK_CLIENT_IOS_PROVISIONING_PROFILE)</CodesignProvision>
+  </PropertyGroup>
+
+  <!-- MSIX signing with a .pfx certificate that has no password. -->
+  <PropertyGroup Condition="'$(ErrandeskTargetPlatform)' == 'windows' and '$(ERRANDESK_CLIENT_WINDOWS_CERTIFICATE)' != ''">
+    <AppxPackageSigningEnabled>true</AppxPackageSigningEnabled>
+    <PackageCertificateKeyFile>$(ERRANDESK_CLIENT_WINDOWS_CERTIFICATE)</PackageCertificateKeyFile>
+  </PropertyGroup>
+
+</Project>

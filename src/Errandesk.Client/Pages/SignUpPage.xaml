@@ -1,0 +1,85 @@
+﻿<Page
+    x:Class="Errandesk.Client.Pages.SignUpPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <ScrollViewer>
+        <Grid Padding="24" VerticalAlignment="Center">
+            <StackPanel MaxWidth="400" Spacing="16">
+                <StackPanel Spacing="4">
+                    <TextBlock
+                        x:Uid="SignUpTitleTextBlock"
+                        AutomationProperties.HeadingLevel="Level1"
+                        Style="{StaticResource TitleTextBlockStyle}"
+                        TextWrapping="Wrap" />
+                    <TextBlock
+                        AutomationProperties.AutomationId="SignUpServerAddressTextBlock"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.ServerAddressText, Mode=OneWay}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <InfoBar
+                    x:Uid="RegistrationClosedInfoBar"
+                    AutomationProperties.AutomationId="RegistrationClosedInfoBar"
+                    IsClosable="False"
+                    IsOpen="{x:Bind ViewModel.IsRegistrationClosed, Mode=OneWay}"
+                    Severity="Warning"
+                    Visibility="{x:Bind ViewModel.IsRegistrationClosed, Mode=OneWay}" />
+
+                <InfoBar
+                    AutomationProperties.AutomationId="SignUpErrorInfoBar"
+                    IsClosable="False"
+                    IsOpen="{x:Bind ViewModel.IsErrorVisible, Mode=OneWay}"
+                    Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+                    Severity="Error"
+                    Visibility="{x:Bind ViewModel.IsErrorVisible, Mode=OneWay}" />
+
+                <TextBox
+                    x:Uid="NewUserNameTextBox"
+                    AutomationProperties.AutomationId="NewUserNameTextBox"
+                    IsSpellCheckEnabled="False"
+                    IsTextPredictionEnabled="False"
+                    MaxLength="32"
+                    Text="{x:Bind ViewModel.UserName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBox
+                    x:Uid="NewDisplayNameTextBox"
+                    AutomationProperties.AutomationId="NewDisplayNameTextBox"
+                    MaxLength="100"
+                    Text="{x:Bind ViewModel.DisplayName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <PasswordBox
+                    x:Uid="NewPasswordBox"
+                    AutomationProperties.AutomationId="NewPasswordBox"
+                    Password="{x:Bind ViewModel.Password, Mode=TwoWay}" />
+
+                <PasswordBox
+                    x:Uid="ConfirmPasswordBox"
+                    AutomationProperties.AutomationId="ConfirmPasswordBox"
+                    Password="{x:Bind ViewModel.ConfirmPassword, Mode=TwoWay}" />
+
+                <TextBox
+                    x:Uid="InviteCodeTextBox"
+                    AutomationProperties.AutomationId="InviteCodeTextBox"
+                    IsSpellCheckEnabled="False"
+                    IsTextPredictionEnabled="False"
+                    Text="{x:Bind ViewModel.InviteCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Visibility="{x:Bind ViewModel.IsInviteCodeVisible, Mode=OneWay}" />
+
+                <Button
+                    x:Uid="SignUpButton"
+                    HorizontalAlignment="Stretch"
+                    AutomationProperties.AutomationId="SignUpButton"
+                    Command="{x:Bind ViewModel.SignUpCommand}"
+                    Style="{StaticResource AccentButtonStyle}" />
+
+                <HyperlinkButton
+                    x:Uid="BackToSignInLinkButton"
+                    AutomationProperties.AutomationId="BackToSignInLinkButton"
+                    Command="{x:Bind ViewModel.ShowSignInCommand}" />
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</Page>

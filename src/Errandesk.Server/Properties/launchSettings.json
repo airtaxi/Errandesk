@@ -1,0 +1,18 @@
+﻿{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5080",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ERRANDESK_MONGODB_CONNECTION_STRING": "mongodb://localhost:27017",
+        "ERRANDESK_MONGODB_DATABASE": "errandesk-development",
+        "ERRANDESK_JWT_SIGNING_KEY": "development-only-signing-key-never-use-in-production",
+        "ERRANDESK_HTTP_PORT": "5080"
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+﻿<UserControl
+    x:Class="Errandesk.Client.Views.CustomReminderView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <StackPanel MinWidth="280" Spacing="12">
+        <CalendarDatePicker
+            x:Name="ReminderDatePicker"
+            x:Uid="ReminderDatePicker"
+            HorizontalAlignment="Stretch"
+            AutomationProperties.AutomationId="ReminderDatePicker" />
+        <TimePicker
+            x:Name="ReminderTimePicker"
+            x:Uid="ReminderTimePicker"
+            HorizontalAlignment="Stretch"
+            AutomationProperties.AutomationId="ReminderTimePicker"
+            MinuteIncrement="5" />
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,44 @@
+﻿<UserControl
+    x:Class="Errandesk.Client.Views.CustomRecurrenceView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <StackPanel MinWidth="280" Spacing="12">
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <NumberBox
+                x:Name="RecurrenceIntervalNumberBox"
+                x:Uid="RecurrenceIntervalNumberBox"
+                AutomationProperties.AutomationId="RecurrenceIntervalNumberBox"
+                Maximum="999"
+                Minimum="1"
+                SmallChange="1"
+                SpinButtonPlacementMode="Compact" />
+            <ComboBox
+                x:Name="RecurrenceFrequencyComboBox"
+                x:Uid="RecurrenceFrequencyComboBox"
+                Grid.Column="1"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Bottom"
+                AutomationProperties.AutomationId="RecurrenceFrequencyComboBox"
+                SelectionChanged="OnRecurrenceFrequencyComboBoxSelectionChanged">
+                <ComboBoxItem x:Uid="RecurrenceDaysComboBoxItem" />
+                <ComboBoxItem x:Uid="RecurrenceWeeksComboBoxItem" />
+                <ComboBoxItem x:Uid="RecurrenceMonthsComboBoxItem" />
+                <ComboBoxItem x:Uid="RecurrenceYearsComboBoxItem" />
+            </ComboBox>
+        </Grid>
+
+        <StackPanel x:Name="RecurrenceDaysPanel" Spacing="4">
+            <TextBlock x:Uid="RecurrenceDaysTextBlock" />
+            <StackPanel
+                x:Name="RecurrenceDayButtonsPanel"
+                Orientation="Horizontal"
+                Spacing="4" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>
