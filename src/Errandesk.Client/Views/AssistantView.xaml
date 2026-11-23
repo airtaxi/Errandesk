@@ -348,6 +348,7 @@
                 x:Name="MessagesScrollViewer"
                 AutomationProperties.AutomationId="AssistantMessagesScrollViewer"
                 HorizontalScrollMode="Disabled"
+                SizeChanged="OnMessagesScrollViewerSizeChanged"
                 ViewChanged="OnMessagesScrollViewerViewChanged">
                 <ItemsControl
                     x:Name="MessagesItemsControl"

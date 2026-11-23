@@ -1,12 +1,19 @@
 ﻿<Window
     x:Class="Errandesk.Client.Views.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:utu="using:Uno.Toolkit.UI">
 
+    <!--
+        Keeps the content out of the status bar, navigation bar and display cutouts while the background fills the whole window.
+        While the on-screen keyboard is open, the bottom margin ends the content at the top of the keyboard.
+    -->
     <Grid
         x:Name="RootGrid"
+        utu:SafeArea.Insets="VisibleBounds"
         ActualThemeChanged="OnRootGridActualThemeChanged"
-        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+        SizeChanged="OnRootGridSizeChanged">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />

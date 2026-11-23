@@ -132,6 +132,17 @@ public sealed partial class AssistantView : UserControl
     }
 
     /// <summary>
+    /// Keeps the newest message in view when the viewport gets shorter, such as when the on-screen keyboard opens, unless the user scrolled up to read earlier messages.
+    /// </summary>
+    private void OnMessagesScrollViewerSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (_isScrolledToBottom)
+        {
+            ScrollToBottom();
+        }
+    }
+
+    /// <summary>
     /// Keeps the newest message in view while a reply grows, unless the user scrolled up to read earlier messages.
     /// </summary>
     private void OnMessagesItemsControlSizeChanged(object sender, SizeChangedEventArgs e)
