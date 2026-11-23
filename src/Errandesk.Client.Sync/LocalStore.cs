@@ -154,6 +154,27 @@ public sealed class LocalStore : IDisposable
 
     public IReadOnlyList<Guid> GetTaskIdsInList(Guid listId) => QueryIds("SELECT id FROM tasks WHERE list_id = $listId", ("$listId", ToText(listId)));
 
+    /// <summary>
+    /// The number of open tasks in each list that has any.
+    /// </summary>
+    public IReadOnlyDictionary<Guid, int> CountOpenTasksByList()
+    {
+        lock (_gate)
+        {
+            using var command = CreateCommand("SELECT list_id, COUNT(*) FROM tasks WHERE is_completed = 0 GROUP BY list_id");
+            using var reader = command.ExecuteReader();
+            Dictionary<Guid, int> counts = [];
+            while (reader.Read()) counts[Guid.Parse(reader.GetString(0))] = reader.GetInt32(1);
+            return counts;
+        }
+    }
+
+    public int CountOpenTasksInMyDay(DateOnly today) => CountOpenTasks("my_day_date = $today", ("$today", ToText(today)));
+
+    public int CountOpenImportantTasks() => CountOpenTasks("is_important = 1");
+
+    public int CountOpenPlannedTasks() => CountOpenTasks("due_date IS NOT NULL");
+
     public void UpsertTask(TaskItemResponse task)
     {
         var storedTask = task with { LinkedNotes = [] };
@@ -353,6 +374,15 @@ public sealed class LocalStore : IDisposable
     }
 
     private IReadOnlyList<TaskItemResponse> QueryTasks(string condition, params (string Name, object? Value)[] parameters) => QueryPayloads($"SELECT payload FROM tasks WHERE {condition}", JsonContext.TaskItemResponse, parameters);
+
+    private int CountOpenTasks(string condition, params (string Name, object? Value)[] parameters)
+    {
+        lock (_gate)
+        {
+            using var command = CreateCommand($"SELECT COUNT(*) FROM tasks WHERE is_completed = 0 AND {condition}", parameters);
+            return Convert.ToInt32(command.ExecuteScalar(), CultureInfo.InvariantCulture);
+        }
+    }
 
     private List<T> QueryPayloads<T>(string commandText, JsonTypeInfo<T> typeInfo, params (string Name, object? Value)[] parameters)
     {

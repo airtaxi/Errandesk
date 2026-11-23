@@ -77,6 +77,11 @@ public sealed class LocalDataService(LocalStore store, TimeProvider timeProvider
     public TaskItemResponse? GetTask(Guid taskId) => store.GetTask(taskId) is { } task ? Complete([task], Today)[0] : null;
 
     /// <summary>
+    /// The number of open tasks in My Day, Important, Planned and each list.
+    /// </summary>
+    public OpenTaskCounts GetOpenTaskCounts() => new(store.CountOpenTasksInMyDay(Today), store.CountOpenImportantTasks(), store.CountOpenPlannedTasks(), store.CountOpenTasksByList());
+
+    /// <summary>
     /// Open tasks that have a reminder, which the reminder schedulers show.
     /// </summary>
     public IReadOnlyList<TaskItemResponse> GetOpenTasksWithReminders() => store.GetOpenTasksWithReminders();

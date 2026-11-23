@@ -4,6 +4,7 @@ using Errandesk.Client.Managers;
 using Errandesk.Client.Models;
 using Errandesk.Client.Services;
 using Errandesk.Client.Sync;
+using Errandesk.Contracts;
 
 namespace Errandesk.Client.ViewModels;
 
@@ -23,6 +24,12 @@ public sealed partial class ShellViewModel(TaskListsManager taskListsManager, Se
 
     [ObservableProperty]
     public partial string UserDisplayName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The number of open tasks shown next to each smart list and list.
+    /// </summary>
+    [ObservableProperty]
+    public partial OpenTaskCounts OpenTaskCounts { get; set; } = OpenTaskCounts.Empty;
 
     [ObservableProperty]
     public partial bool IsErrorVisible { get; set; }
@@ -70,8 +77,11 @@ public sealed partial class ShellViewModel(TaskListsManager taskListsManager, Se
         UserDisplayName = _sessionManager.CurrentUser?.DisplayName ?? string.Empty;
         _sessionManager.CurrentUserChanged -= OnSessionManagerCurrentUserChanged;
         _sessionManager.CurrentUserChanged += OnSessionManagerCurrentUserChanged;
+        _syncManager.DataChanged -= OnSyncManagerDataChanged;
+        _syncManager.DataChanged += OnSyncManagerDataChanged;
         IsErrorVisible = false;
         _taskListsManager.Load();
+        RefreshOpenTaskCounts();
         if (_syncManager.HasSynchronized) return true;
 
         var outcome = await _syncManager.SyncNowAsync();
@@ -85,7 +95,16 @@ public sealed partial class ShellViewModel(TaskListsManager taskListsManager, Se
         return false;
     }
 
-    public void Unload() => _sessionManager.CurrentUserChanged -= OnSessionManagerCurrentUserChanged;
+    public void Unload()
+    {
+        _sessionManager.CurrentUserChanged -= OnSessionManagerCurrentUserChanged;
+        _syncManager.DataChanged -= OnSyncManagerDataChanged;
+    }
+
+    /// <summary>
+    /// Counts the open tasks again, such as after the date changed and My Day holds other tasks.
+    /// </summary>
+    public void RefreshOpenTaskCounts() => OpenTaskCounts = _syncManager.Data.GetOpenTaskCounts();
 
     /// <summary>
     /// Asks for a name and creates a list.
@@ -109,6 +128,11 @@ public sealed partial class ShellViewModel(TaskListsManager taskListsManager, Se
     private async Task RetryAsync() => await LoadAsync();
 
     private void OnSessionManagerCurrentUserChanged(object? _, EventArgs __) => UserDisplayName = _sessionManager.CurrentUser?.DisplayName ?? string.Empty;
+
+    /// <remarks>
+    /// <see cref="TaskListsManager"/> follows the same event from an earlier subscription, so new lists are already shown when the counts change.
+    /// </remarks>
+    private void OnSyncManagerDataChanged(object? _, ChangesResponse __) => RefreshOpenTaskCounts();
 
     private void ShowError(Exception exception)
     {

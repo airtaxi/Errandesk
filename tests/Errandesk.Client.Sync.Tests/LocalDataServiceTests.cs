@@ -31,6 +31,27 @@ public sealed class LocalDataServiceTests : IDisposable
     }
 
     [Fact]
+    public void OpenTaskCounts_LeaveOutCompletedTasks()
+    {
+        var otherList = _local.Data.CreateList("Groceries");
+        _local.Data.CreateTask(new CreateTaskRequest("Milk", ListId: otherList.Id));
+        _local.Data.CreateTask(new CreateTaskRequest("Call the bank", DueDate: new DateOnly(2031, 3, 20), IsImportant: true, IsInMyDay: true));
+        var completed = _local.Data.CreateTask(new CreateTaskRequest("Pay rent", DueDate: new DateOnly(2031, 3, 12), IsImportant: true, IsInMyDay: true));
+        _local.Data.UpdateTask(completed.Id, new UpdateTaskRequest { IsCompleted = true });
+
+        var counts = _local.Data.GetOpenTaskCounts();
+        Assert.Equal(1, counts.MyDay);
+        Assert.Equal(1, counts.Important);
+        Assert.Equal(1, counts.Planned);
+        Assert.Equal(1, counts.GetListCount(s_defaultListId));
+        Assert.Equal(1, counts.GetListCount(otherList.Id));
+
+        _local.TimeProvider.Advance(TimeSpan.FromDays(1));
+
+        Assert.Equal(0, _local.Data.GetOpenTaskCounts().MyDay);
+    }
+
+    [Fact]
     public void MyDay_ContainsOnlyTasksAddedToday()
     {
         var task = _local.Data.CreateTask(new CreateTaskRequest("Call the bank", IsInMyDay: true));

@@ -44,6 +44,7 @@ public sealed partial class ShellPage : Page
     {
         if (ShellNavigationView.SettingsItem is NavigationViewItem settingsItem) AutomationProperties.SetAutomationId(settingsItem, "SettingsNavigationItem");
         ViewModel.Lists.CollectionChanged += OnListsCollectionChanged;
+        ViewModel.PropertyChanged += OnViewModelPropertyChanged;
         _noteNavigationManager.NoteOpenRequested += OnNoteNavigationManagerNoteOpenRequested;
         _taskNavigationManager.TaskOpenRequested += OnTaskNavigationManagerTaskOpenRequested;
         _reminderManager.InAppReminderRaised += OnReminderManagerInAppReminderRaised;
@@ -62,6 +63,7 @@ public sealed partial class ShellPage : Page
         _syncManager.Stop();
         AssistantView.ViewModel.StopCommand.Execute(null);
         ViewModel.Lists.CollectionChanged -= OnListsCollectionChanged;
+        ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
         _noteNavigationManager.NoteOpenRequested -= OnNoteNavigationManagerNoteOpenRequested;
         foreach (var list in ViewModel.Lists) list.PropertyChanged -= OnListPropertyChanged;
         ViewModel.Unload();
@@ -128,13 +130,56 @@ public sealed partial class ShellPage : Page
     /// <summary>
     /// Moves the content below the pane toggle button, which floats over the content in minimal mode.
     /// </summary>
-    private void OnShellNavigationViewDisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args) => ContentGrid.Margin = args.DisplayMode == NavigationViewDisplayMode.Minimal ? new Thickness(0, MinimalModeContentTopOffset, 0, 0) : new Thickness(0);
+    private void OnShellNavigationViewDisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args)
+    {
+        ContentGrid.Margin = args.DisplayMode == NavigationViewDisplayMode.Minimal ? new Thickness(0, MinimalModeContentTopOffset, 0, 0) : new Thickness(0);
+        ApplyOpenTaskCounts(sender.IsPaneOpen);
+    }
+
+    private void OnShellNavigationViewPaneOpening(NavigationView sender, object args) => ApplyOpenTaskCounts(true);
+
+    private void OnShellNavigationViewPaneClosing(NavigationView sender, NavigationViewPaneClosingEventArgs args) => ApplyOpenTaskCounts(false);
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ShellViewModel.OpenTaskCounts))
+        {
+            ApplyOpenTaskCounts(ShellNavigationView.IsPaneOpen);
+        }
+    }
+
+    /// <summary>
+    /// Shows the number of open tasks next to each smart list and list while the pane shows item names.
+    /// </summary>
+    /// <param name="isPaneOpen">Whether the pane shows item names; with only icons the counts are hidden.</param>
+    private void ApplyOpenTaskCounts(bool isPaneOpen)
+    {
+        var counts = ViewModel.OpenTaskCounts;
+        ApplyOpenTaskCount(MyDayNavigationItem, counts.MyDay, isPaneOpen);
+        ApplyOpenTaskCount(ImportantNavigationItem, counts.Important, isPaneOpen);
+        ApplyOpenTaskCount(PlannedNavigationItem, counts.Planned, isPaneOpen);
+        ApplyOpenTaskCount(TasksNavigationItem, ViewModel.DefaultList is { } defaultList ? counts.GetListCount(defaultList.Id) : 0, isPaneOpen);
+        foreach (var (listId, navigationItem) in _listNavigationItems) ApplyOpenTaskCount(navigationItem, counts.GetListCount(listId), isPaneOpen);
+    }
+
+    private void ApplyOpenTaskCount(NavigationViewItem navigationItem, int openTaskCount, bool isPaneOpen)
+    {
+        if (openTaskCount <= 0 || !isPaneOpen)
+        {
+            navigationItem.InfoBadge = null;
+            return;
+        }
+
+        if (navigationItem.InfoBadge is not { } infoBadge) navigationItem.InfoBadge = infoBadge = new InfoBadge { Style = (Style)Resources["OpenTaskCountInfoBadgeStyle"] };
+        infoBadge.Value = openTaskCount;
+    }
 
     private async void OnShellRetryButtonClicked(object sender, RoutedEventArgs e) => await LoadAsync();
 
     private async void OnShellNavigationViewSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         if (_isAssistantOpen && !IsAssistantDocked()) await SetAssistantOpenAsync(false);
+        if (_areListsLoaded) ViewModel.RefreshOpenTaskCounts();
         if (args.IsSettingsSelected) ContentFrame.Navigate(typeof(SettingsPage));
         else if (ReferenceEquals(args.SelectedItem, NotesNavigationItem)) NavigateToNotes();
         else if (args.SelectedItem is NavigationViewItem { Tag: TaskViewDescriptor view })
@@ -258,6 +303,7 @@ public sealed partial class ShellPage : Page
         }
 
         ListsSeparator.Visibility = _listNavigationItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        ApplyOpenTaskCounts(ShellNavigationView.IsPaneOpen);
         if (selectedView?.ListId is { } selectedListId && ViewModel.DefaultList?.Id != selectedListId) ShellNavigationView.SelectedItem = _listNavigationItems.TryGetValue(selectedListId, out var selectedItem) ? selectedItem : MyDayNavigationItem;
     }
 }
