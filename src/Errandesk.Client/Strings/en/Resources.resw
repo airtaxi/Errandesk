@@ -463,6 +463,12 @@
   <data name="DeleteTaskDialogTitle" xml:space="preserve">
     <value>Delete task?</value>
   </data>
+  <data name="DeleteTasksDialogMessageFormat" xml:space="preserve">
+    <value>{0} tasks will be deleted.</value>
+  </data>
+  <data name="DeleteTasksDialogTitle" xml:space="preserve">
+    <value>Delete tasks?</value>
+  </data>
   <data name="DeleteTaskToolTip.Content" xml:space="preserve">
     <value>Delete task</value>
   </data>
@@ -697,8 +703,14 @@
   <data name="LongDatePattern" xml:space="preserve">
     <value>MMMM d, yyyy</value>
   </data>
+  <data name="MarkCompletedText" xml:space="preserve">
+    <value>Mark as completed</value>
+  </data>
   <data name="MarkImportantText" xml:space="preserve">
     <value>Mark as important</value>
+  </data>
+  <data name="MarkNotCompletedText" xml:space="preserve">
+    <value>Mark as not completed</value>
   </data>
   <data name="McpEndpointLabelTextBlock.Text" xml:space="preserve">
     <value>MCP endpoint</value>
@@ -867,6 +879,9 @@
   </data>
   <data name="PasswordTooShortError" xml:space="preserve">
     <value>The password must have at least 8 characters.</value>
+  </data>
+  <data name="PickDueDateDialogTitle" xml:space="preserve">
+    <value>Pick a due date</value>
   </data>
   <data name="PinnedNoteIcon.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Pinned</value>
@@ -1173,6 +1188,24 @@
   </data>
   <data name="TagFilterOptionFormat" xml:space="preserve">
     <value>{0} ({1})</value>
+  </data>
+  <data name="TaskMenuDeleteText" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="TaskMenuDueTodayText" xml:space="preserve">
+    <value>Due today</value>
+  </data>
+  <data name="TaskMenuDueTomorrowText" xml:space="preserve">
+    <value>Due tomorrow</value>
+  </data>
+  <data name="TaskMenuMoveToText" xml:space="preserve">
+    <value>Move to</value>
+  </data>
+  <data name="TaskMenuPickDateText" xml:space="preserve">
+    <value>Pick a date</value>
+  </data>
+  <data name="TaskMenuRemoveDueDateText" xml:space="preserve">
+    <value>Remove due date</value>
   </data>
   <data name="TasksNavigationItem.Content" xml:space="preserve">
     <value>Tasks</value>

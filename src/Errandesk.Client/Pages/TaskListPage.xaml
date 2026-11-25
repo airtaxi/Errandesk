@@ -295,12 +295,24 @@
                 Grid.Row="3"
                 Padding="0,0,0,24"
                 AutomationProperties.AutomationId="TasksListView"
+                ContextRequested="OnTasksListViewContextRequested"
                 IsItemClickEnabled="True"
                 ItemClick="OnTasksListViewItemClicked"
                 ItemTemplateSelector="{StaticResource TaskRowTemplateSelector}"
                 ItemsSource="{x:Bind ViewModel.Rows, Mode=OneWay}"
                 SelectionChanged="OnTasksListViewSelectionChanged"
-                SelectionMode="Single">
+                SelectionMode="Extended">
+                <ListView.KeyboardAccelerators>
+                    <KeyboardAccelerator
+                        Key="T"
+                        Invoked="OnMyDayKeyboardAcceleratorInvoked"
+                        Modifiers="Control" />
+                    <KeyboardAccelerator
+                        Key="D"
+                        Invoked="OnCompletionKeyboardAcceleratorInvoked"
+                        Modifiers="Control" />
+                    <KeyboardAccelerator Key="Delete" Invoked="OnDeleteKeyboardAcceleratorInvoked" />
+                </ListView.KeyboardAccelerators>
                 <ListView.Header>
                     <StackPanel Spacing="4">
                         <Border

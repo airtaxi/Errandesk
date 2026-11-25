@@ -305,9 +305,59 @@ public sealed partial class TaskListViewModel : ObservableObject
         UpdateEmptyState();
     }
 
-    public void ToggleCompletion(TaskItemModel task) => UpdateTask(task, new UpdateTaskRequest { IsCompleted = !task.IsCompleted });
+    public void ToggleCompletion(TaskItemModel task) => UpdateTasks((TaskItemModel[])[task], new UpdateTaskRequest { IsCompleted = !task.IsCompleted });
 
-    public void ToggleImportance(TaskItemModel task) => UpdateTask(task, new UpdateTaskRequest { IsImportant = !task.IsImportant });
+    public void ToggleImportance(TaskItemModel task) => UpdateTasks((TaskItemModel[])[task], new UpdateTaskRequest { IsImportant = !task.IsImportant });
+
+    /// <summary>
+    /// The lists tasks can be moved to, in the order of the navigation pane.
+    /// </summary>
+    public List<TaskListModel> GetMoveTargetLists() =>
+    [.. _taskListsManager.Lists];
+
+    /// <summary>
+    /// Adds the tasks to My Day or removes them. Tasks removed from My Day leave the My Day view.
+    /// </summary>
+    public void SetInMyDay(IReadOnlyList<TaskItemModel> tasks, bool isInMyDay) => UpdateTasks(tasks, new UpdateTaskRequest { IsInMyDay = isInMyDay }, removesTasksOutsideView: !isInMyDay);
+
+    public void SetImportant(IReadOnlyList<TaskItemModel> tasks, bool isImportant) => UpdateTasks(tasks, new UpdateTaskRequest { IsImportant = isImportant });
+
+    public void SetCompleted(IReadOnlyList<TaskItemModel> tasks, bool isCompleted) => UpdateTasks(tasks, new UpdateTaskRequest { IsCompleted = isCompleted });
+
+    /// <summary>
+    /// Sets the due date of the tasks, or removes it when <paramref name="dueDate"/> is <see langword="null"/>.
+    /// </summary>
+    public void SetDueDate(IReadOnlyList<TaskItemModel> tasks, DateOnly? dueDate) => UpdateTasks(tasks, new UpdateTaskRequest { DueDate = dueDate });
+
+    /// <summary>
+    /// Moves the tasks to another list. Tasks that no longer belong to the view leave it.
+    /// </summary>
+    public void MoveToList(IReadOnlyList<TaskItemModel> tasks, Guid listId) => UpdateTasks(tasks.Where(task => task.ListId != listId).ToList(), new UpdateTaskRequest { ListId = listId }, removesTasksOutsideView: true);
+
+    /// <summary>
+    /// Asks for confirmation, then deletes the tasks.
+    /// </summary>
+    public async Task DeleteTasksAsync(IReadOnlyList<TaskItemModel> tasks)
+    {
+        if (tasks.Count == 0) return;
+
+        var title = LocalizedStrings.Get(tasks.Count == 1 ? "DeleteTaskDialogTitle" : "DeleteTasksDialogTitle");
+        var message = tasks.Count == 1 ? string.Format(CultureInfo.CurrentCulture, LocalizedStrings.Get("DeleteTaskDialogMessage"), tasks[0].Title) : string.Format(CultureInfo.CurrentCulture, LocalizedStrings.Get("DeleteTasksDialogMessageFormat"), tasks.Count);
+        if (!await _dialogService.ConfirmAsync(title, message, LocalizedStrings.Get("DeleteButtonText"))) return;
+
+        IsErrorVisible = false;
+        foreach (var task in tasks)
+        {
+            try
+            {
+                _syncManager.Data.DeleteTask(task.Id);
+                RemoveTask(task);
+            }
+            catch (Exception exception) when (ApiErrorMessages.IsRequestFailure(exception)) { ShowError(exception); }
+        }
+
+        UpdateEmptyState();
+    }
 
     [RelayCommand]
     private void AddTask()
@@ -386,18 +436,25 @@ public sealed partial class TaskListViewModel : ObservableObject
     [RelayCommand]
     private void Refresh() => Load(View);
 
-    private void UpdateTask(TaskItemModel task, UpdateTaskRequest request)
+    /// <summary>
+    /// Applies the same change to each task. With <paramref name="removesTasksOutsideView"/>, tasks that no longer belong to the view leave it right away.
+    /// </summary>
+    private void UpdateTasks(IReadOnlyList<TaskItemModel> tasks, UpdateTaskRequest request, bool removesTasksOutsideView = false)
     {
         IsErrorVisible = false;
-        _locallyChangedTaskIds.Add(task.Id);
-        try
+        foreach (var task in tasks)
         {
-            if (task.Apply(_syncManager.Data.UpdateTask(task.Id, request)))
+            _locallyChangedTaskIds.Add(task.Id);
+            try
             {
-                PlaceTask(task);
+                var response = _syncManager.Data.UpdateTask(task.Id, request);
+                if (task.Apply(response)) PlaceTask(task);
+                if (removesTasksOutsideView && !BelongsToView(response)) RemoveTask(task);
             }
+            catch (Exception exception) when (ApiErrorMessages.IsRequestFailure(exception)) { ShowError(exception); }
         }
-        catch (Exception exception) when (ApiErrorMessages.IsRequestFailure(exception)) { ShowError(exception); }
+
+        UpdateEmptyState();
     }
 
     private TaskItemModel CreateTaskModel(TaskItemResponse response) => new(response, View.Kind)

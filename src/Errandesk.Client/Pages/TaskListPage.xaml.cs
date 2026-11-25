@@ -6,7 +6,10 @@ using Errandesk.Client.Services;
 using Errandesk.Client.ViewModels;
 using Errandesk.Client.Views;
 using Errandesk.Contracts;
+using Microsoft.UI.Xaml.Automation;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Windows.System;
 
@@ -19,9 +22,25 @@ public sealed partial class TaskListPage : Page
 {
     private const double WideLayoutMinimumWidth = 640;
     private const double DetailPaneWidth = 360;
+    private const string MyDayGlyph = "";
+    private const string ImportantGlyph = "";
+    private const string CompletedGlyph = "";
+    private const string DueTodayGlyph = "";
+    private const string DueTomorrowGlyph = "";
+    private const string PickDateGlyph = "";
+    private const string RemoveDueDateGlyph = "";
+    private const string MoveGlyph = "";
+    private const string DeleteGlyph = "";
+    private const string DefaultListGlyph = "";
+    private const string ListGlyph = "";
+    private const string SharedListGlyph = "";
+    private const string MyDayAcceleratorText = "Ctrl+T";
+    private const string CompletionAcceleratorText = "Ctrl+D";
+    private const string DeleteAcceleratorText = "Delete";
 
     private readonly SyncManager _syncManager = App.GetService<SyncManager>();
     private readonly MorningBriefingManager _briefingManager = App.GetService<MorningBriefingManager>();
+    private bool _isSelectionChanging;
 
     public TaskListPage() => InitializeComponent();
 
@@ -76,6 +95,7 @@ public sealed partial class TaskListPage : Page
     /// </summary>
     private void SyncListSelection()
     {
+        if (_isSelectionChanging) return;
         if (ViewModel.SelectedTask is not { } selectedTask || !ViewModel.Rows.Contains(selectedTask))
         {
             TasksListView.SelectedItem = null;
@@ -92,17 +112,206 @@ public sealed partial class TaskListPage : Page
     /// </summary>
     private void RestoreListSelection() => TasksListView.SelectedItem = ViewModel.SelectedTask is { } selectedTask && ViewModel.Rows.Contains(selectedTask) ? selectedTask : null;
 
+    /// <summary>
+    /// Opens the only selected task in the detail pane and closes the pane while several tasks are selected. The completed section header cannot be selected.
+    /// </summary>
     private void OnTasksListViewSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (TasksListView.SelectedItem is CompletedSectionModel)
+        if (_isSelectionChanging) return;
+
+        if (TasksListView.SelectedItems.Contains(ViewModel.CompletedSection))
         {
-            RestoreListSelection();
+            _isSelectionChanging = true;
+            try { TasksListView.SelectedItems.Remove(ViewModel.CompletedSection); }
+            finally { _isSelectionChanging = false; }
+
+            if (TasksListView.SelectedItems.Count == 0) RestoreListSelection();
             return;
         }
 
-        if (TasksListView.SelectedItem is not TaskItemModel task || ReferenceEquals(ViewModel.SelectedTask, task)) return;
+        UpdateSelectedTaskFromList();
+    }
+
+    /// <summary>
+    /// Shows the selected task in the detail pane when exactly one task is selected, and no task when several are. An empty selection leaves the pane as it is.
+    /// </summary>
+    private void UpdateSelectedTaskFromList()
+    {
+        var selectedTasks = GetSelectedTasks();
+        if (selectedTasks.Count == 0) return;
+
+        var task = selectedTasks.Count == 1 ? selectedTasks[0] : null;
+        if (ReferenceEquals(ViewModel.SelectedTask, task)) return;
+
         TaskDetailView.CommitPendingEdits();
-        ViewModel.SelectedTask = task;
+        _isSelectionChanging = true;
+        try { ViewModel.SelectedTask = task; }
+        finally { _isSelectionChanging = false; }
+    }
+
+    private List<TaskItemModel> GetSelectedTasks() =>
+    [.. TasksListView.SelectedItems.OfType<TaskItemModel>()];
+
+    /// <summary>
+    /// Opens the task menu for the right-clicked task. A task outside the selection becomes the selection on wide layouts; on narrow layouts, where selecting opens the detail pane over the list, the menu acts on that task alone.
+    /// </summary>
+    private void OnTasksListViewContextRequested(UIElement sender, ContextRequestedEventArgs args)
+    {
+        if ((args.OriginalSource as FrameworkElement)?.DataContext is not TaskItemModel task) return;
+        args.Handled = true;
+
+        List<TaskItemModel> tasks;
+        if (TasksListView.SelectedItems.Contains(task)) tasks = GetSelectedTasks();
+        else
+        {
+            if (IsWideLayout()) TasksListView.SelectedItem = task;
+            tasks = [task];
+        }
+
+        var menuFlyout = CreateTaskMenuFlyout(tasks);
+        if (args.TryGetPosition(TasksListView, out var position)) menuFlyout.ShowAt(TasksListView, new FlyoutShowOptions { Position = position });
+        else menuFlyout.ShowAt(TasksListView.ContainerFromItem(task) as FrameworkElement ?? TasksListView);
+    }
+
+    private MenuFlyout CreateTaskMenuFlyout(IReadOnlyList<TaskItemModel> tasks)
+    {
+        var isEveryTaskInMyDay = tasks.All(task => task.IsInMyDay);
+        var isEveryTaskImportant = tasks.All(task => task.IsImportant);
+        var isEveryTaskCompleted = tasks.All(task => task.IsCompleted);
+
+        var menuFlyout = new MenuFlyout();
+        menuFlyout.Items.Add(CreateMenuItem(isEveryTaskInMyDay ? "RemoveFromMyDayText" : "AddToMyDayText", MyDayGlyph, "TaskMyDayMenuItem", MyDayAcceleratorText, () => RunTaskAction(() => ViewModel.SetInMyDay(tasks, !isEveryTaskInMyDay))));
+        menuFlyout.Items.Add(CreateMenuItem(isEveryTaskImportant ? "RemoveImportanceText" : "MarkImportantText", ImportantGlyph, "TaskImportanceMenuItem", null, () => RunTaskAction(() => ViewModel.SetImportant(tasks, !isEveryTaskImportant))));
+        menuFlyout.Items.Add(CreateMenuItem(isEveryTaskCompleted ? "MarkNotCompletedText" : "MarkCompletedText", CompletedGlyph, "TaskCompletionMenuItem", CompletionAcceleratorText, () => RunTaskAction(() => ViewModel.SetCompleted(tasks, !isEveryTaskCompleted))));
+        menuFlyout.Items.Add(new MenuFlyoutSeparator());
+        menuFlyout.Items.Add(CreateMenuItem("TaskMenuDueTodayText", DueTodayGlyph, "TaskDueTodayMenuItem", null, () => RunTaskAction(() => ViewModel.SetDueDate(tasks, DateDisplayHelper.Today))));
+        menuFlyout.Items.Add(CreateMenuItem("TaskMenuDueTomorrowText", DueTomorrowGlyph, "TaskDueTomorrowMenuItem", null, () => RunTaskAction(() => ViewModel.SetDueDate(tasks, DateDisplayHelper.Today.AddDays(1)))));
+        menuFlyout.Items.Add(CreateMenuItem("TaskMenuPickDateText", PickDateGlyph, "TaskPickDateMenuItem", null, () => _ = PickDueDateAsync(tasks)));
+        if (tasks.Any(task => task.DueDate is not null)) menuFlyout.Items.Add(CreateMenuItem("TaskMenuRemoveDueDateText", RemoveDueDateGlyph, "TaskRemoveDueDateMenuItem", null, () => RunTaskAction(() => ViewModel.SetDueDate(tasks, null))));
+        menuFlyout.Items.Add(new MenuFlyoutSeparator());
+        menuFlyout.Items.Add(CreateMoveMenuItem(tasks));
+        menuFlyout.Items.Add(new MenuFlyoutSeparator());
+        menuFlyout.Items.Add(CreateMenuItem("TaskMenuDeleteText", DeleteGlyph, "TaskDeleteMenuItem", DeleteAcceleratorText, () => _ = RunTaskActionAsync(() => ViewModel.DeleteTasksAsync(tasks))));
+        return menuFlyout;
+    }
+
+    private MenuFlyoutSubItem CreateMoveMenuItem(IReadOnlyList<TaskItemModel> tasks)
+    {
+        var moveMenuItem = new MenuFlyoutSubItem { Text = LocalizedStrings.Get("TaskMenuMoveToText"), Icon = new FontIcon { Glyph = MoveGlyph } };
+        AutomationProperties.SetAutomationId(moveMenuItem, "TaskMoveMenuItem");
+        foreach (var list in ViewModel.GetMoveTargetLists())
+        {
+            var listId = list.Id;
+            var listMenuItem = new MenuFlyoutItem { Text = list.DisplayName, Icon = new FontIcon { Glyph = list.IsDefault ? DefaultListGlyph : list.IsShared ? SharedListGlyph : ListGlyph }, IsEnabled = tasks.Any(task => task.ListId != listId) };
+            listMenuItem.Click += (_, __) => RunTaskAction(() => ViewModel.MoveToList(tasks, listId));
+            moveMenuItem.Items.Add(listMenuItem);
+        }
+        return moveMenuItem;
+    }
+
+    private static MenuFlyoutItem CreateMenuItem(string resourceName, string glyph, string automationId, string? acceleratorText, Action onClick)
+    {
+        var menuItem = new MenuFlyoutItem { Text = LocalizedStrings.Get(resourceName), Icon = new FontIcon { Glyph = glyph } };
+        if (acceleratorText is not null) menuItem.KeyboardAcceleratorTextOverride = acceleratorText;
+        AutomationProperties.SetAutomationId(menuItem, automationId);
+        menuItem.Click += (_, __) => onClick();
+        return menuItem;
+    }
+
+    private async Task PickDueDateAsync(IReadOnlyList<TaskItemModel> tasks)
+    {
+        var calendarView = new CalendarView { SelectionMode = CalendarViewSelectionMode.Single };
+        AutomationProperties.SetAutomationId(calendarView, "DueDateCalendarView");
+        if (!await App.GetService<DialogService>().ShowContentAsync(LocalizedStrings.Get("PickDueDateDialogTitle"), calendarView, LocalizedStrings.Get("DialogSaveButtonText"))) return;
+        if (calendarView.SelectedDates.Count == 0) return;
+
+        var dueDate = DateOnly.FromDateTime(calendarView.SelectedDates[0].DateTime);
+        RunTaskAction(() => ViewModel.SetDueDate(tasks, dueDate));
+    }
+
+    /// <summary>
+    /// Runs a change of several tasks without letting rows that move or leave during the change open the detail pane, then selects the tasks that are still shown.
+    /// </summary>
+    private void RunTaskAction(Action action)
+    {
+        TaskDetailView.CommitPendingEdits();
+        var selectedTasks = GetSelectedTasks();
+        _isSelectionChanging = true;
+        try
+        {
+            action();
+            RestoreSelectedTasks(selectedTasks);
+        }
+        finally { _isSelectionChanging = false; }
+
+        UpdateSelectedTaskFromList();
+    }
+
+    private async Task RunTaskActionAsync(Func<Task> action)
+    {
+        TaskDetailView.CommitPendingEdits();
+        var selectedTasks = GetSelectedTasks();
+        _isSelectionChanging = true;
+        try
+        {
+            await action();
+            RestoreSelectedTasks(selectedTasks);
+        }
+        finally { _isSelectionChanging = false; }
+
+        UpdateSelectedTaskFromList();
+    }
+
+    private void RestoreSelectedTasks(List<TaskItemModel> tasks)
+    {
+        TasksListView.SelectedItems.Clear();
+        foreach (var task in tasks.Where(ViewModel.Rows.Contains)) TasksListView.SelectedItems.Add(task);
+    }
+
+    private void OnMyDayKeyboardAcceleratorInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (!TryGetKeyboardTargetTasks(args, out var tasks)) return;
+        var isInMyDay = !tasks.All(task => task.IsInMyDay);
+        RunTaskAction(() => ViewModel.SetInMyDay(tasks, isInMyDay));
+    }
+
+    private void OnCompletionKeyboardAcceleratorInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (!TryGetKeyboardTargetTasks(args, out var tasks)) return;
+        var isCompleted = !tasks.All(task => task.IsCompleted);
+        RunTaskAction(() => ViewModel.SetCompleted(tasks, isCompleted));
+    }
+
+    private void OnDeleteKeyboardAcceleratorInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (TryGetKeyboardTargetTasks(args, out var tasks))
+        {
+            _ = RunTaskActionAsync(() => ViewModel.DeleteTasksAsync(tasks));
+        }
+    }
+
+    /// <summary>
+    /// The selected tasks for a task shortcut, which applies only while the focus is in the task list so that typing elsewhere keeps its keys.
+    /// </summary>
+    private bool TryGetKeyboardTargetTasks(KeyboardAcceleratorInvokedEventArgs args, out List<TaskItemModel> tasks)
+    {
+        tasks = IsFocusWithinTasksList() ? GetSelectedTasks() : [];
+        if (tasks.Count == 0) return false;
+
+        args.Handled = true;
+        return true;
+    }
+
+    private bool IsFocusWithinTasksList()
+    {
+        for (var element = XamlRoot is { } xamlRoot ? FocusManager.GetFocusedElement(xamlRoot) as DependencyObject : null; element is not null; element = VisualTreeHelper.GetParent(element))
+        {
+            if (ReferenceEquals(element, TasksListView))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void OnTasksListViewItemClicked(object sender, ItemClickEventArgs e)
