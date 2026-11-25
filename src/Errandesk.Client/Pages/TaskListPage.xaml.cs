@@ -105,7 +105,13 @@ public sealed partial class TaskListPage : Page
         ViewModel.SelectedTask = task;
     }
 
-    private void OnCompletedSectionButtonClicked(object sender, RoutedEventArgs e) => ViewModel.ToggleCompletedSectionCommand.Execute(null);
+    private void OnTasksListViewItemClicked(object sender, ItemClickEventArgs e)
+    {
+        if (e.ClickedItem is CompletedSectionModel)
+        {
+            ViewModel.ToggleCompletedSectionCommand.Execute(null);
+        }
+    }
 
     private void OnTaskCompletionCheckBoxClicked(object sender, RoutedEventArgs e)
     {

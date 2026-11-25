@@ -122,19 +122,21 @@
         </DataTemplate>
 
         <DataTemplate x:Key="CompletedSectionRowTemplate" x:DataType="models:CompletedSectionModel">
-            <Button
-                Padding="8,6"
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                AutomationProperties.AutomationId="CompletedSectionButton"
-                Background="Transparent"
-                BorderThickness="0"
-                Click="OnCompletedSectionButtonClicked">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <FontIcon FontSize="12" Glyph="{x:Bind helpers:XamlFunctions.GetCompletedSectionGlyph(IsExpanded), Mode=OneWay}" />
-                    <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind HeaderText, Mode=OneWay}" />
-                </StackPanel>
-            </Button>
+            <StackPanel
+                MinHeight="40"
+                AutomationProperties.AutomationId="CompletedSectionHeader"
+                AutomationProperties.Name="{x:Bind HeaderText, Mode=OneWay}"
+                Orientation="Horizontal"
+                Spacing="8">
+                <FontIcon
+                    VerticalAlignment="Center"
+                    FontSize="12"
+                    Glyph="{x:Bind helpers:XamlFunctions.GetCompletedSectionGlyph(IsExpanded), Mode=OneWay}" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Style="{StaticResource BodyStrongTextBlockStyle}"
+                    Text="{x:Bind HeaderText, Mode=OneWay}" />
+            </StackPanel>
         </DataTemplate>
 
         <helpers:TaskRowTemplateSelector
@@ -293,6 +295,8 @@
                 Grid.Row="3"
                 Padding="0,0,0,24"
                 AutomationProperties.AutomationId="TasksListView"
+                IsItemClickEnabled="True"
+                ItemClick="OnTasksListViewItemClicked"
                 ItemTemplateSelector="{StaticResource TaskRowTemplateSelector}"
                 ItemsSource="{x:Bind ViewModel.Rows, Mode=OneWay}"
                 SelectionChanged="OnTasksListViewSelectionChanged"
