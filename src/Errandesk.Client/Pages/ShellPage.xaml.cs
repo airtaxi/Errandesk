@@ -3,15 +3,17 @@ using System.ComponentModel;
 using Errandesk.Client.Helpers;
 using Errandesk.Client.Managers;
 using Errandesk.Client.Models;
+using Errandesk.Client.Services;
 using Errandesk.Client.ViewModels;
 using Microsoft.UI.Xaml.Automation;
+using Microsoft.UI.Xaml.Navigation;
 
 namespace Errandesk.Client.Pages;
 
 /// <summary>
 /// The signed-in layout: the navigation pane with smart lists, the user's lists and settings, and the content frame.
 /// </summary>
-public sealed partial class ShellPage : Page
+public sealed partial class ShellPage : Page, IBackNavigationHandler
 {
     private const double MinimalModeContentTopOffset = 48;
     private const double AssistantPaneWidth = 400;
@@ -25,6 +27,7 @@ public sealed partial class ShellPage : Page
     private readonly ReminderManager _reminderManager = App.GetService<ReminderManager>();
     private readonly TaskNavigationManager _taskNavigationManager = App.GetService<TaskNavigationManager>();
     private readonly AssistantNavigationManager _assistantNavigationManager = App.GetService<AssistantNavigationManager>();
+    private readonly BackNavigationManager _backNavigationManager = App.GetService<BackNavigationManager>();
     private Guid? _pendingNoteId;
     private Guid? _pendingSelectedTaskId;
     private bool _isAssistantOpen;
@@ -39,6 +42,28 @@ public sealed partial class ShellPage : Page
     }
 
     public ShellViewModel ViewModel { get; } = App.GetService<ShellViewModel>();
+
+    public bool CanGoBack => IsPaneOverContent() || IsAssistantReplacingContent() || ContentFrame.Content is IBackNavigationHandler { CanGoBack: true };
+
+    /// <summary>
+    /// Closes the navigation pane where it covers the content, then the assistant where it replaces the page, and otherwise goes back on the shown page.
+    /// </summary>
+    public void GoBack()
+    {
+        if (IsPaneOverContent()) ShellNavigationView.IsPaneOpen = false;
+        else if (IsAssistantReplacingContent()) _ = SetAssistantOpenAsync(false);
+        else if (ContentFrame.Content is IBackNavigationHandler { CanGoBack: true } handler) handler.GoBack();
+    }
+
+    private bool IsPaneOverContent() => ShellNavigationView.IsPaneOpen && ShellNavigationView.DisplayMode != NavigationViewDisplayMode.Expanded;
+
+    private bool IsAssistantReplacingContent() => _isAssistantOpen && !IsAssistantDocked();
+
+    private void OnContentFrameNavigated(object sender, NavigationEventArgs e) => _backNavigationManager.Update();
+
+    private void OnShellNavigationViewPaneOpened(NavigationView sender, object args) => _backNavigationManager.Update();
+
+    private void OnShellNavigationViewPaneClosed(NavigationView sender, object args) => _backNavigationManager.Update();
 
     private async void OnPageLoaded(object sender, RoutedEventArgs e)
     {
@@ -107,7 +132,7 @@ public sealed partial class ShellPage : Page
     /// </summary>
     private async Task OpenTaskAsync(TaskNavigationRequest request)
     {
-        if (_isAssistantOpen && !IsAssistantDocked()) await SetAssistantOpenAsync(false);
+        if (IsAssistantReplacingContent()) await SetAssistantOpenAsync(false);
 
         var listId = ViewModel.ResolveTaskListId(request);
         NavigationViewItem? navigationItem = listId is not { } resolvedListId ? null : ViewModel.DefaultList?.Id == resolvedListId ? TasksNavigationItem : _listNavigationItems.GetValueOrDefault(resolvedListId);
@@ -134,6 +159,7 @@ public sealed partial class ShellPage : Page
     {
         ContentGrid.Margin = args.DisplayMode == NavigationViewDisplayMode.Minimal ? new Thickness(0, MinimalModeContentTopOffset, 0, 0) : new Thickness(0);
         ApplyOpenTaskCounts(sender.IsPaneOpen);
+        _backNavigationManager.Update();
     }
 
     private void OnShellNavigationViewPaneOpening(NavigationView sender, object args) => ApplyOpenTaskCounts(true);
@@ -178,7 +204,7 @@ public sealed partial class ShellPage : Page
 
     private async void OnShellNavigationViewSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        if (_isAssistantOpen && !IsAssistantDocked()) await SetAssistantOpenAsync(false);
+        if (IsAssistantReplacingContent()) await SetAssistantOpenAsync(false);
         if (_areListsLoaded) ViewModel.RefreshOpenTaskCounts();
         if (args.IsSettingsSelected) ContentFrame.Navigate(typeof(SettingsPage));
         else if (ReferenceEquals(args.SelectedItem, NotesNavigationItem)) NavigateToNotes();
@@ -215,7 +241,7 @@ public sealed partial class ShellPage : Page
             return;
         }
 
-        if (_isAssistantOpen && !IsAssistantDocked()) await SetAssistantOpenAsync(false);
+        if (IsAssistantReplacingContent()) await SetAssistantOpenAsync(false);
         if (!ReferenceEquals(args.InvokedItemContainer, NewListNavigationItem)) return;
         if (await ViewModel.CreateListAsync() is { } list && _listNavigationItems.TryGetValue(list.Id, out var navigationItem)) ShellNavigationView.SelectedItem = navigationItem;
     }
@@ -257,6 +283,7 @@ public sealed partial class ShellPage : Page
         AssistantColumn.Width = !_isAssistantOpen ? new GridLength(0) : isDocked ? new GridLength(AssistantPaneWidth) : new GridLength(1, GridUnitType.Star);
         MainContentColumn.Width = _isAssistantOpen && !isDocked ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
         ContentFrame.Visibility = _isAssistantOpen && !isDocked ? Visibility.Collapsed : Visibility.Visible;
+        _backNavigationManager.Update();
     }
 
     private void OnListsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => RebuildListNavigationItems();

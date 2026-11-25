@@ -16,9 +16,10 @@ using Windows.System;
 namespace Errandesk.Client.Pages;
 
 /// <summary>
-/// The tasks of a smart list or task list. On wide windows the selected task opens in a pane on the right; on narrow windows it replaces the list.
+/// The tasks of a smart list or task list. On wide windows the selected task opens in a pane on the right; on narrow windows it replaces the list
+/// and going back closes it.
 /// </summary>
-public sealed partial class TaskListPage : Page
+public sealed partial class TaskListPage : Page, IBackNavigationHandler
 {
     private const double WideLayoutMinimumWidth = 640;
     private const double DetailPaneWidth = 360;
@@ -40,11 +41,23 @@ public sealed partial class TaskListPage : Page
 
     private readonly SyncManager _syncManager = App.GetService<SyncManager>();
     private readonly MorningBriefingManager _briefingManager = App.GetService<MorningBriefingManager>();
+    private readonly BackNavigationManager _backNavigationManager = App.GetService<BackNavigationManager>();
     private bool _isSelectionChanging;
 
     public TaskListPage() => InitializeComponent();
 
     public TaskListViewModel ViewModel { get; } = App.GetService<TaskListViewModel>();
+
+    public bool CanGoBack => ViewModel.SelectedTask is not null && !IsWideLayout();
+
+    /// <summary>
+    /// Saves the title and note still being edited, then closes the details and shows the list again.
+    /// </summary>
+    public void GoBack()
+    {
+        TaskDetailView.CommitPendingEdits();
+        ViewModel.Detail.CloseCommand.Execute(null);
+    }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
@@ -385,5 +398,6 @@ public sealed partial class TaskListPage : Page
         DetailPanel.BorderThickness = isWideLayout ? new Thickness(1, 0, 0, 0) : new Thickness(0);
         DetailColumn.Width = !isDetailOpen ? new GridLength(0) : isWideLayout ? new GridLength(DetailPaneWidth) : new GridLength(1, GridUnitType.Star);
         TaskDetailView.IsBackButtonVisible = !isWideLayout;
+        _backNavigationManager.Update();
     }
 }

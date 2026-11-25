@@ -2,6 +2,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using Errandesk.Client.Managers;
 using Errandesk.Client.Models;
+using Errandesk.Client.Services;
 using Errandesk.Client.ViewModels;
 using Errandesk.Contracts;
 using Microsoft.UI.Xaml.Input;
@@ -10,18 +11,24 @@ using Microsoft.UI.Xaml.Navigation;
 namespace Errandesk.Client.Pages;
 
 /// <summary>
-/// The notes list and the editor of the selected note. On wide windows the editor is a pane on the right; on narrow windows it replaces the list.
+/// The notes list and the editor of the selected note. On wide windows the editor is a pane on the right; on narrow windows it replaces the list
+/// and going back closes it.
 /// </summary>
-public sealed partial class NotesPage : Page
+public sealed partial class NotesPage : Page, IBackNavigationHandler
 {
     private const double WideLayoutMinimumWidth = 640;
     private const double ListPaneWidth = 360;
 
     private readonly SyncManager _syncManager = App.GetService<SyncManager>();
+    private readonly BackNavigationManager _backNavigationManager = App.GetService<BackNavigationManager>();
 
     public NotesPage() => InitializeComponent();
 
     public NotesViewModel ViewModel { get; } = App.GetService<NotesViewModel>();
+
+    public bool CanGoBack => ViewModel.SelectedNote is not null && !IsWideLayout();
+
+    public void GoBack() => ViewModel.Editor.CloseCommand.Execute(null);
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
@@ -115,5 +122,6 @@ public sealed partial class NotesPage : Page
         NoteEditorView.Visibility = isNoteOpen ? Visibility.Visible : Visibility.Collapsed;
         NoNoteSelectedTextBlock.Visibility = isNoteOpen ? Visibility.Collapsed : Visibility.Visible;
         NoteEditorView.IsBackButtonVisible = !isWideLayout;
+        _backNavigationManager.Update();
     }
 }

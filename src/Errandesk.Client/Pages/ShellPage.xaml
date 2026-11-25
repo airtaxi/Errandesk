@@ -23,7 +23,9 @@
         IsBackButtonVisible="Collapsed"
         IsSettingsVisible="True"
         ItemInvoked="OnShellNavigationViewItemInvoked"
+        PaneClosed="OnShellNavigationViewPaneClosed"
         PaneClosing="OnShellNavigationViewPaneClosing"
+        PaneOpened="OnShellNavigationViewPaneOpened"
         PaneOpening="OnShellNavigationViewPaneOpening"
         PaneTitle="{x:Bind ViewModel.UserDisplayName, Mode=OneWay}"
         SelectionChanged="OnShellNavigationViewSelectionChanged">
@@ -143,7 +145,8 @@
             <Frame
                 x:Name="ContentFrame"
                 Grid.Row="1"
-                AutomationProperties.AutomationId="ContentFrame" />
+                AutomationProperties.AutomationId="ContentFrame"
+                Navigated="OnContentFrameNavigated" />
 
             <Border
                 x:Name="AssistantPanel"

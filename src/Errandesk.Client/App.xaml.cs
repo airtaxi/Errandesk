@@ -57,7 +57,7 @@ public partial class App : Application
             appearanceService.ApplySavedLanguage();
 
             var navigationService = GetService<NavigationService>();
-            _mainWindow = new MainWindow(navigationService, GetService<SyncManager>());
+            _mainWindow = new MainWindow(navigationService, GetService<BackNavigationManager>(), GetService<SyncManager>());
 #if DEBUG
             _mainWindow.UseStudio();
 #endif
@@ -103,6 +103,7 @@ public partial class App : Application
         services.AddSingleton<ApplicationSettingsService>();
         services.AddSingleton<AppearanceService>();
         services.AddSingleton<NavigationService>();
+        services.AddSingleton<BackNavigationManager>();
         services.AddSingleton<LoadingOverlayService>();
         services.AddSingleton<DialogService>();
         services.AddSingleton<RefreshTokenStore>();

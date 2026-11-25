@@ -23,13 +23,14 @@ public sealed partial class MainWindow : Window
     private readonly SyncManager _syncManager;
     private UIElement? _pendingBringIntoViewElement;
 
-    public MainWindow(NavigationService navigationService, SyncManager syncManager)
+    public MainWindow(NavigationService navigationService, BackNavigationManager backNavigationManager, SyncManager syncManager)
     {
         InitializeComponent();
         s_instance = this;
         _syncManager = syncManager;
         Title = LocalizedStrings.Get("ApplicationName");
         navigationService.Initialize(AppFrame);
+        backNavigationManager.Initialize(AppFrame);
         ConfigureTitleBar();
         ConfigureInputPane();
         _syncManager.StatusChanged += OnSyncManagerStatusChanged;
