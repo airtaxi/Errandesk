@@ -14,6 +14,7 @@ public static class AgentToolNames
     public const string UpdateTask = "update_task";
     public const string CompleteTask = "complete_task";
     public const string AddStep = "add_step";
+    public const string CompleteStep = "complete_step";
     public const string AddToMyDay = "add_to_my_day";
     public const string SearchNotes = "search_notes";
     public const string ReadNote = "read_note";

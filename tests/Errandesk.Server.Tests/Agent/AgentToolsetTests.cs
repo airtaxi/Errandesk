@@ -23,7 +23,7 @@ public sealed class AgentToolsetTests(MongoDbContainerFixture mongoDb)
 
         var tools = CreateToolset(server, alice.Id).CreateTools();
 
-        string[] expectedNames = [AgentToolNames.ListTaskLists, AgentToolNames.CreateTaskList, AgentToolNames.SearchTasks, AgentToolNames.GetMyDay, AgentToolNames.GetOverdueTasks, AgentToolNames.CreateTask, AgentToolNames.UpdateTask, AgentToolNames.CompleteTask, AgentToolNames.AddStep, AgentToolNames.AddToMyDay, AgentToolNames.SearchNotes, AgentToolNames.ReadNote, AgentToolNames.CreateNote, AgentToolNames.UpdateNote, AgentToolNames.LinkNoteToTask, AgentToolNames.GetCurrentTime, AgentToolNames.SetReminder, AgentToolNames.SetRecurrence, AgentToolNames.DeleteTask, AgentToolNames.DeleteTaskList, AgentToolNames.DeleteNote];
+        string[] expectedNames = [AgentToolNames.ListTaskLists, AgentToolNames.CreateTaskList, AgentToolNames.SearchTasks, AgentToolNames.GetMyDay, AgentToolNames.GetOverdueTasks, AgentToolNames.CreateTask, AgentToolNames.UpdateTask, AgentToolNames.CompleteTask, AgentToolNames.AddStep, AgentToolNames.CompleteStep, AgentToolNames.AddToMyDay, AgentToolNames.SearchNotes, AgentToolNames.ReadNote, AgentToolNames.CreateNote, AgentToolNames.UpdateNote, AgentToolNames.LinkNoteToTask, AgentToolNames.GetCurrentTime, AgentToolNames.SetReminder, AgentToolNames.SetRecurrence, AgentToolNames.DeleteTask, AgentToolNames.DeleteTaskList, AgentToolNames.DeleteNote];
         Assert.Equal(expectedNames.Order(), tools.Select(tool => tool.Name).Order());
         Assert.Equal([AgentToolNames.DeleteNote, AgentToolNames.DeleteTask, AgentToolNames.DeleteTaskList], tools.OfType<ApprovalRequiredAIFunction>().Select(tool => tool.Name).Order());
         var createTask = Assert.IsAssignableFrom<AIFunction>(Assert.Single(tools, tool => tool.Name == AgentToolNames.CreateTask));
@@ -89,14 +89,18 @@ public sealed class AgentToolsetTests(MongoDbContainerFixture mongoDb)
         Assert.Equal(errands.Id, updated.ListId);
 
         var withStep = Assert.IsType<TaskItemResponse>(await toolset.AddStepAsync(created.Id, "Find card number", cancellationToken));
-        Assert.Equal("Find card number", Assert.Single(withStep.Steps).Title);
+        var step = Assert.Single(withStep.Steps);
+        Assert.Equal("Find card number", step.Title);
+        var withCompletedStep = Assert.IsType<TaskItemResponse>(await toolset.CompleteStepAsync(created.Id, step.Id, cancellationToken: cancellationToken));
+        Assert.True(Assert.Single(withCompletedStep.Steps).IsCompleted);
+        Assert.False(withCompletedStep.IsCompleted);
         Assert.True(Assert.IsType<TaskItemResponse>(await toolset.AddToMyDayAsync(created.Id, cancellationToken: cancellationToken)).IsInMyDay);
         var completed = Assert.IsType<TaskItemResponse>(await toolset.CompleteTaskAsync(created.Id, cancellationToken: cancellationToken));
         Assert.True(completed.IsCompleted);
         Assert.NotNull(completed.CompletedAt);
         JsonAssert.Equal(completed, await alice.Client.GetAsync<TaskItemResponse>($"{TasksPath}/{created.Id}"));
 
-        Assert.Equal(4, context.ToolCalls.Count);
+        Assert.Equal(5, context.ToolCalls.Count);
         Assert.All(context.ToolCalls, toolCall => Assert.NotNull(toolCall.AgentActionId));
         var updateAction = await server.FindRawAsync(server.Database.AgentActions, context.ToolCalls[0].AgentActionId!.Value);
         Assert.Equal(context.ConversationId, updateAction.ConversationId);

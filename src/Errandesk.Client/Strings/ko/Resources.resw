@@ -202,6 +202,9 @@
   <data name="AssistantToolAddToMyDayText" xml:space="preserve">
     <value>오늘 할 일에 추가</value>
   </data>
+  <data name="AssistantToolCompleteStepText" xml:space="preserve">
+    <value>단계 완료</value>
+  </data>
   <data name="AssistantToolCompleteTaskText" xml:space="preserve">
     <value>작업 완료</value>
   </data>

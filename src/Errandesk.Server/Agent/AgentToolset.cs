@@ -46,6 +46,7 @@ public sealed class AgentToolset(TaskListService taskListService, TaskService ta
             Create(UpdateTaskAsync, AgentToolNames.UpdateTask, "Changes a task. Only the given values change."),
             Create(CompleteTaskAsync, AgentToolNames.CompleteTask, "Marks a task as completed, or as not completed."),
             Create(AddStepAsync, AgentToolNames.AddStep, "Adds a step at the end of a task's steps."),
+            Create(CompleteStepAsync, AgentToolNames.CompleteStep, "Marks a step of a task as completed, or as not completed. The step IDs are in the steps of the task data."),
             Create(AddToMyDayAsync, AgentToolNames.AddToMyDay, "Adds a task to today's My Day, or removes it."),
             Create(SearchNotesAsync, AgentToolNames.SearchNotes, $"Finds notes by words in the title, content or tags, by tag, or by linked task. Returns summaries of at most {MaximumSearchResultCount} notes; use read_note for the full content."),
             Create(ReadNoteAsync, AgentToolNames.ReadNote, "Returns a note with its full Markdown content."),
@@ -123,6 +124,8 @@ public sealed class AgentToolset(TaskListService taskListService, TaskService ta
     });
 
     public Task<object> AddStepAsync([Description("ID of the task.")] Guid taskId, [Description("Title of the step.")] string title, CancellationToken cancellationToken = default) => RunAsync(AgentToolNames.AddStep, () => ChangeAsync(AgentToolNames.AddStep, EntityTypes.Task, taskId, () => taskService.AddStepAsync(UserId, taskId, new CreateTaskStepRequest(title), cancellationToken), task => task.Id, cancellationToken));
+
+    public Task<object> CompleteStepAsync([Description("ID of the task.")] Guid taskId, [Description("ID of the step.")] Guid stepId, [Description("False marks the step as not completed.")] bool completed = true, CancellationToken cancellationToken = default) => RunAsync(AgentToolNames.CompleteStep, () => ChangeAsync(AgentToolNames.CompleteStep, EntityTypes.Task, taskId, () => taskService.UpdateStepAsync(UserId, taskId, stepId, new UpdateTaskStepRequest { IsCompleted = completed }, cancellationToken), task => task.Id, cancellationToken));
 
     public Task<object> AddToMyDayAsync([Description("ID of the task.")] Guid taskId, [Description("False removes the task from My Day.")] bool inMyDay = true, CancellationToken cancellationToken = default) => RunAsync(AgentToolNames.AddToMyDay, () => ChangeAsync(AgentToolNames.AddToMyDay, EntityTypes.Task, taskId, () => taskService.UpdateAsync(UserId, taskId, new UpdateTaskRequest { IsInMyDay = inMyDay }, cancellationToken), task => task.Id, cancellationToken));
 

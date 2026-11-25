@@ -18,7 +18,7 @@ public sealed class McpEndpointTests(MongoDbContainerFixture mongoDb)
     private static readonly string[] s_toolNames =
     [
         AgentToolNames.ListTaskLists, AgentToolNames.CreateTaskList, AgentToolNames.SearchTasks, AgentToolNames.GetMyDay, AgentToolNames.GetOverdueTasks, AgentToolNames.CreateTask, AgentToolNames.UpdateTask,
-        AgentToolNames.CompleteTask, AgentToolNames.AddStep, AgentToolNames.AddToMyDay, AgentToolNames.SearchNotes, AgentToolNames.ReadNote, AgentToolNames.CreateNote, AgentToolNames.UpdateNote,
+        AgentToolNames.CompleteTask, AgentToolNames.AddStep, AgentToolNames.CompleteStep, AgentToolNames.AddToMyDay, AgentToolNames.SearchNotes, AgentToolNames.ReadNote, AgentToolNames.CreateNote, AgentToolNames.UpdateNote,
         AgentToolNames.LinkNoteToTask, AgentToolNames.GetCurrentTime, AgentToolNames.SetReminder, AgentToolNames.SetRecurrence, AgentToolNames.DeleteTask, AgentToolNames.DeleteTaskList, AgentToolNames.DeleteNote,
     ];
 

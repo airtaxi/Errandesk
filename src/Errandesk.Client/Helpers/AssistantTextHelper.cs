@@ -19,6 +19,7 @@ public static class AssistantTextHelper
         ["update_task"] = "AssistantToolUpdateTaskText",
         ["complete_task"] = "AssistantToolCompleteTaskText",
         ["add_step"] = "AssistantToolAddStepText",
+        ["complete_step"] = "AssistantToolCompleteStepText",
         ["add_to_my_day"] = "AssistantToolAddToMyDayText",
         ["search_notes"] = "AssistantToolSearchNotesText",
         ["read_note"] = "AssistantToolReadNoteText",

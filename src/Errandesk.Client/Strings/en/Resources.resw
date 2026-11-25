@@ -202,6 +202,9 @@
   <data name="AssistantToolAddToMyDayText" xml:space="preserve">
     <value>Add to My Day</value>
   </data>
+  <data name="AssistantToolCompleteStepText" xml:space="preserve">
+    <value>Complete step</value>
+  </data>
   <data name="AssistantToolCompleteTaskText" xml:space="preserve">
     <value>Complete task</value>
   </data>
