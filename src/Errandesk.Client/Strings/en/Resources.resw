@@ -226,6 +226,9 @@
   <data name="AssistantToolDeleteTaskText" xml:space="preserve">
     <value>Delete task</value>
   </data>
+  <data name="AssistantToolEditNoteContentText" xml:space="preserve">
+    <value>Edit note content</value>
+  </data>
   <data name="AssistantToolGetCurrentTimeText" xml:space="preserve">
     <value>Check the current time</value>
   </data>

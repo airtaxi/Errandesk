@@ -20,6 +20,7 @@ public static class AgentToolNames
     public const string ReadNote = "read_note";
     public const string CreateNote = "create_note";
     public const string UpdateNote = "update_note";
+    public const string EditNoteContent = "edit_note_content";
     public const string LinkNoteToTask = "link_note_to_task";
     public const string GetCurrentTime = "get_current_time";
     public const string SetReminder = "set_reminder";

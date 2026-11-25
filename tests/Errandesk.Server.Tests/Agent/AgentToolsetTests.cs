@@ -23,7 +23,7 @@ public sealed class AgentToolsetTests(MongoDbContainerFixture mongoDb)
 
         var tools = CreateToolset(server, alice.Id).CreateTools();
 
-        string[] expectedNames = [AgentToolNames.ListTaskLists, AgentToolNames.CreateTaskList, AgentToolNames.SearchTasks, AgentToolNames.GetMyDay, AgentToolNames.GetOverdueTasks, AgentToolNames.CreateTask, AgentToolNames.UpdateTask, AgentToolNames.CompleteTask, AgentToolNames.AddStep, AgentToolNames.CompleteStep, AgentToolNames.AddToMyDay, AgentToolNames.SearchNotes, AgentToolNames.ReadNote, AgentToolNames.CreateNote, AgentToolNames.UpdateNote, AgentToolNames.LinkNoteToTask, AgentToolNames.GetCurrentTime, AgentToolNames.SetReminder, AgentToolNames.SetRecurrence, AgentToolNames.DeleteTask, AgentToolNames.DeleteTaskList, AgentToolNames.DeleteNote];
+        string[] expectedNames = [AgentToolNames.ListTaskLists, AgentToolNames.CreateTaskList, AgentToolNames.SearchTasks, AgentToolNames.GetMyDay, AgentToolNames.GetOverdueTasks, AgentToolNames.CreateTask, AgentToolNames.UpdateTask, AgentToolNames.CompleteTask, AgentToolNames.AddStep, AgentToolNames.CompleteStep, AgentToolNames.AddToMyDay, AgentToolNames.SearchNotes, AgentToolNames.ReadNote, AgentToolNames.CreateNote, AgentToolNames.UpdateNote, AgentToolNames.EditNoteContent, AgentToolNames.LinkNoteToTask, AgentToolNames.GetCurrentTime, AgentToolNames.SetReminder, AgentToolNames.SetRecurrence, AgentToolNames.DeleteTask, AgentToolNames.DeleteTaskList, AgentToolNames.DeleteNote];
         Assert.Equal(expectedNames.Order(), tools.Select(tool => tool.Name).Order());
         Assert.Equal([AgentToolNames.DeleteNote, AgentToolNames.DeleteTask, AgentToolNames.DeleteTaskList], tools.OfType<ApprovalRequiredAIFunction>().Select(tool => tool.Name).Order());
         var createTask = Assert.IsAssignableFrom<AIFunction>(Assert.Single(tools, tool => tool.Name == AgentToolNames.CreateTask));
@@ -181,6 +181,14 @@ public sealed class AgentToolsetTests(MongoDbContainerFixture mongoDb)
         Assert.Equal("# Day 1\n\nGwangalli", updated.Content);
         Assert.Equal(["travel", "korea"], updated.Tags);
         Assert.True(updated.IsPinned);
+
+        var edited = Assert.IsType<NoteResponse>(await toolset.EditNoteContentAsync(note.Id, "Gwangalli", "Gwangalli beach at night", cancellationToken: cancellationToken));
+        Assert.Equal("# Day 1\n\nGwangalli beach at night", edited.Content);
+        Assert.Equal("Busan trip", edited.Title);
+        Assert.IsType<AgentToolError>(await toolset.EditNoteContentAsync(note.Id, "Haeundae", "Songjeong", cancellationToken: cancellationToken));
+        Assert.IsType<AgentToolError>(await toolset.EditNoteContentAsync(note.Id, "a", "o", cancellationToken: cancellationToken));
+        var editedEverywhere = Assert.IsType<NoteResponse>(await toolset.EditNoteContentAsync(note.Id, "Day", "Night", replaceAll: true, cancellationToken: cancellationToken));
+        Assert.Equal("# Night 1\n\nGwangalli beach at night", editedEverywhere.Content);
 
         var linked = Assert.IsType<NoteResponse>(await toolset.LinkNoteToTaskAsync(note.Id, otherTask.Id, cancellationToken));
         Assert.Equal([task.Id, otherTask.Id], linked.LinkedTaskIds);

@@ -87,6 +87,24 @@ public sealed class NoteService(ErrandeskDatabase database, TaskListAccess taskL
         return await ToResponseAsync(userId, note, cancellationToken);
     }
 
+    /// <summary>
+    /// Replaces <paramref name="oldText"/> in the content of the note with <paramref name="newText"/>. The old text must appear exactly once, or at least once when <paramref name="replaceAll"/> is set.
+    /// </summary>
+    public async Task<NoteResponse> ReplaceContentAsync(Guid userId, Guid noteId, string oldText, string newText, bool replaceAll, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(oldText)) throw new RequestValidationException("The text to replace must not be empty.");
+
+        var note = await UpdateNoteAsync(userId, noteId, null, current =>
+        {
+            var occurrenceCount = CountOccurrences(current.Content, oldText);
+            if (occurrenceCount == 0) throw new RequestValidationException("The text to replace was not found in the note. Read the note again and copy the text exactly, including spaces and line breaks.");
+            if (occurrenceCount > 1 && !replaceAll) throw new RequestValidationException($"The text to replace appears {occurrenceCount} times in the note. Include more of the surrounding text so it appears only once, or replace every occurrence.");
+            var content = replaceAll ? current.Content.Replace(oldText, newText, StringComparison.Ordinal) : ReplaceFirst(current.Content, oldText, newText);
+            current.Content = InputValidation.OptionalText(content, "content", InputValidation.MaximumNoteContentLength);
+        }, cancellationToken);
+        return await ToResponseAsync(userId, note, cancellationToken);
+    }
+
     public Task DeleteAsync(Guid userId, Guid noteId, CancellationToken cancellationToken) => documentUpdater.SoftDeleteAsync(database.Notes, VisibleFilter(userId, noteId), ResourceName, cancellationToken);
 
     /// <summary>Links the note to a task of the user. Linking an already linked task returns the note unchanged.</summary>
@@ -149,6 +167,19 @@ public sealed class NoteService(ErrandeskDatabase database, TaskListAccess taskL
     {
         try { return await documentUpdater.UpdateAsync(database.Notes, VisibleFilter(userId, noteId), ResourceName, expectedChangeVersion, current => current, applyChanges, cancellationToken); }
         catch (ChangeVersionConflictException exception) when (exception.CurrentResource is NoteDocument currentNote) { throw new ChangeVersionConflictException(await ToResponseAsync(userId, currentNote, cancellationToken)); }
+    }
+
+    private static int CountOccurrences(string text, string value)
+    {
+        var count = 0;
+        for (var index = text.IndexOf(value, StringComparison.Ordinal); index >= 0; index = text.IndexOf(value, index + value.Length, StringComparison.Ordinal)) count++;
+        return count;
+    }
+
+    private static string ReplaceFirst(string text, string oldValue, string newValue)
+    {
+        var index = text.IndexOf(oldValue, StringComparison.Ordinal);
+        return string.Concat(text.AsSpan(0, index), newValue, text.AsSpan(index + oldValue.Length));
     }
 
     private async Task<NoteResponse> ToResponseAsync(Guid userId, NoteDocument note, CancellationToken cancellationToken) => note.ToResponse(await GetVisibleTaskIdsAsync(userId, note.LinkedTaskIds, cancellationToken));

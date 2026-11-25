@@ -226,6 +226,9 @@
   <data name="AssistantToolDeleteTaskText" xml:space="preserve">
     <value>작업 삭제</value>
   </data>
+  <data name="AssistantToolEditNoteContentText" xml:space="preserve">
+    <value>노트 내용 일부 수정</value>
+  </data>
   <data name="AssistantToolGetCurrentTimeText" xml:space="preserve">
     <value>현재 시간 확인</value>
   </data>

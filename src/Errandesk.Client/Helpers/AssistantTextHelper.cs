@@ -25,6 +25,7 @@ public static class AssistantTextHelper
         ["read_note"] = "AssistantToolReadNoteText",
         ["create_note"] = "AssistantToolCreateNoteText",
         ["update_note"] = "AssistantToolUpdateNoteText",
+        ["edit_note_content"] = "AssistantToolEditNoteContentText",
         ["link_note_to_task"] = "AssistantToolLinkNoteToTaskText",
         ["get_current_time"] = "AssistantToolGetCurrentTimeText",
         ["delete_task"] = "AssistantToolDeleteTaskText",

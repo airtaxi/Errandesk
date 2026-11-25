@@ -51,7 +51,8 @@ public sealed class AgentToolset(TaskListService taskListService, TaskService ta
             Create(SearchNotesAsync, AgentToolNames.SearchNotes, $"Finds notes by words in the title, content or tags, by tag, or by linked task. Returns summaries of at most {MaximumSearchResultCount} notes; use read_note for the full content."),
             Create(ReadNoteAsync, AgentToolNames.ReadNote, "Returns a note with its full Markdown content."),
             Create(CreateNoteAsync, AgentToolNames.CreateNote, "Creates a Markdown note."),
-            Create(UpdateNoteAsync, AgentToolNames.UpdateNote, "Changes a note. Only the given values change; tags replace all existing tags."),
+            Create(UpdateNoteAsync, AgentToolNames.UpdateNote, "Changes a note. Only the given values change; tags replace all existing tags. To change part of the content, use edit_note_content instead of rewriting the whole content."),
+            Create(EditNoteContentAsync, AgentToolNames.EditNoteContent, "Replaces a piece of a note's Markdown content with new text and leaves the rest unchanged. Copy the old text exactly from read_note, including spaces and line breaks. It must appear exactly once unless replaceAll is true; include more surrounding text when it appears more than once. An empty new text deletes the old text."),
             Create(LinkNoteToTaskAsync, AgentToolNames.LinkNoteToTask, "Links a note to a task."),
             Create(GetCurrentTimeAsync, AgentToolNames.GetCurrentTime, "Returns the current local date, time and weekday of the user."),
             Create(SetReminderAsync, AgentToolNames.SetReminder, "Sets the reminder of a task to a local date and time in the user's time zone, or removes it. The user gets a notification at that time."),
@@ -150,6 +151,8 @@ public sealed class AgentToolset(TaskListService taskListService, TaskService ta
         };
         return RunAsync(AgentToolNames.UpdateNote, () => ChangeAsync(AgentToolNames.UpdateNote, EntityTypes.Note, noteId, () => noteService.UpdateAsync(UserId, noteId, request, cancellationToken), note => note.Id, cancellationToken));
     }
+
+    public Task<object> EditNoteContentAsync([Description("ID of the note.")] Guid noteId, [Description("Exact text in the current content to replace.")] string oldText, [Description("Text to put in its place. Empty deletes the old text.")] string newText, [Description("Replace every occurrence instead of requiring exactly one.")] bool replaceAll = false, CancellationToken cancellationToken = default) => RunAsync(AgentToolNames.EditNoteContent, () => ChangeAsync(AgentToolNames.EditNoteContent, EntityTypes.Note, noteId, () => noteService.ReplaceContentAsync(UserId, noteId, oldText, newText, replaceAll, cancellationToken), note => note.Id, cancellationToken));
 
     public Task<object> LinkNoteToTaskAsync([Description("ID of the note.")] Guid noteId, [Description("ID of the task.")] Guid taskId, CancellationToken cancellationToken = default) => RunAsync(AgentToolNames.LinkNoteToTask, () => ChangeAsync(AgentToolNames.LinkNoteToTask, EntityTypes.Note, noteId, () => noteService.LinkTaskAsync(UserId, noteId, taskId, cancellationToken), note => note.Id, cancellationToken));
 
