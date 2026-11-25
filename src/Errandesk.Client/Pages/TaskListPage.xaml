@@ -120,6 +120,27 @@
                 </Button>
             </Grid>
         </DataTemplate>
+
+        <DataTemplate x:Key="CompletedSectionRowTemplate" x:DataType="models:CompletedSectionModel">
+            <Button
+                Padding="8,6"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                AutomationProperties.AutomationId="CompletedSectionButton"
+                Background="Transparent"
+                BorderThickness="0"
+                Click="OnCompletedSectionButtonClicked">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon FontSize="12" Glyph="{x:Bind helpers:XamlFunctions.GetCompletedSectionGlyph(IsExpanded), Mode=OneWay}" />
+                    <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind HeaderText, Mode=OneWay}" />
+                </StackPanel>
+            </Button>
+        </DataTemplate>
+
+        <helpers:TaskRowTemplateSelector
+            x:Key="TaskRowTemplateSelector"
+            CompletedSectionTemplate="{StaticResource CompletedSectionRowTemplate}"
+            TaskTemplate="{StaticResource TaskRowTemplate}" />
     </Page.Resources>
 
     <Grid x:Name="LayoutGrid">
@@ -267,100 +288,80 @@
                 </Button>
             </Grid>
 
-            <ScrollViewer Grid.Row="3">
-                <StackPanel Padding="0,0,0,24" Spacing="4">
-                    <Border
-                        Margin="0,0,0,8"
-                        Padding="16,12,8,16"
-                        AutomationProperties.AutomationId="MorningBriefingPanel"
-                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8"
-                        Visibility="{x:Bind ViewModel.IsBriefingVisible, Mode=OneWay}">
-                        <Grid ColumnSpacing="8" RowSpacing="8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+            <ListView
+                x:Name="TasksListView"
+                Grid.Row="3"
+                Padding="0,0,0,24"
+                AutomationProperties.AutomationId="TasksListView"
+                ItemTemplateSelector="{StaticResource TaskRowTemplateSelector}"
+                ItemsSource="{x:Bind ViewModel.Rows, Mode=OneWay}"
+                SelectionChanged="OnTasksListViewSelectionChanged"
+                SelectionMode="Single">
+                <ListView.Header>
+                    <StackPanel Spacing="4">
+                        <Border
+                            Margin="0,0,0,8"
+                            Padding="16,12,8,16"
+                            AutomationProperties.AutomationId="MorningBriefingPanel"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Visibility="{x:Bind ViewModel.IsBriefingVisible, Mode=OneWay}">
+                            <Grid ColumnSpacing="8" RowSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
 
-                            <TextBlock
-                                x:Uid="MorningBriefingPanelTitleTextBlock"
-                                VerticalAlignment="Center"
-                                AutomationProperties.HeadingLevel="Level2"
-                                Style="{StaticResource BodyStrongTextBlockStyle}" />
-                            <Button
-                                x:Uid="DismissBriefingButton"
-                                Grid.Column="1"
-                                AutomationProperties.AutomationId="DismissBriefingButton"
-                                Command="{x:Bind ViewModel.DismissBriefingCommand}"
-                                Style="{StaticResource IconButtonStyle}">
-                                <ToolTipService.ToolTip>
-                                    <ToolTip x:Uid="DismissBriefingToolTip" />
-                                </ToolTipService.ToolTip>
-                                <FontIcon FontSize="16" Glyph="&#xE711;" />
-                            </Button>
+                                <TextBlock
+                                    x:Uid="MorningBriefingPanelTitleTextBlock"
+                                    VerticalAlignment="Center"
+                                    AutomationProperties.HeadingLevel="Level2"
+                                    Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                <Button
+                                    x:Uid="DismissBriefingButton"
+                                    Grid.Column="1"
+                                    AutomationProperties.AutomationId="DismissBriefingButton"
+                                    Command="{x:Bind ViewModel.DismissBriefingCommand}"
+                                    Style="{StaticResource IconButtonStyle}">
+                                    <ToolTipService.ToolTip>
+                                        <ToolTip x:Uid="DismissBriefingToolTip" />
+                                    </ToolTipService.ToolTip>
+                                    <FontIcon FontSize="16" Glyph="&#xE711;" />
+                                </Button>
 
-                            <views:MarkdownView
-                                Grid.Row="1"
-                                Grid.ColumnSpan="2"
-                                Margin="0,0,8,0"
-                                AutomationProperties.AutomationId="MorningBriefingMarkdownView"
-                                Markdown="{x:Bind ViewModel.BriefingText, Mode=OneWay}" />
+                                <views:MarkdownView
+                                    Grid.Row="1"
+                                    Grid.ColumnSpan="2"
+                                    Margin="0,0,8,0"
+                                    AutomationProperties.AutomationId="MorningBriefingMarkdownView"
+                                    Markdown="{x:Bind ViewModel.BriefingText, Mode=OneWay}" />
 
-                            <Button
-                                x:Uid="OpenBriefingInAssistantButton"
-                                Grid.Row="2"
-                                AutomationProperties.AutomationId="OpenBriefingInAssistantButton"
-                                Command="{x:Bind ViewModel.OpenBriefingInAssistantCommand}" />
-                        </Grid>
-                    </Border>
+                                <Button
+                                    x:Uid="OpenBriefingInAssistantButton"
+                                    Grid.Row="2"
+                                    AutomationProperties.AutomationId="OpenBriefingInAssistantButton"
+                                    Command="{x:Bind ViewModel.OpenBriefingInAssistantCommand}" />
+                            </Grid>
+                        </Border>
 
-                    <TextBlock
-                        x:Uid="EmptyTaskListTextBlock"
-                        Margin="0,24,0,0"
-                        HorizontalAlignment="Center"
-                        AutomationProperties.AutomationId="EmptyTaskListTextBlock"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        TextWrapping="Wrap"
-                        Visibility="{x:Bind ViewModel.IsEmptyStateVisible, Mode=OneWay}" />
-
-                    <ListView
-                        x:Name="OpenTasksListView"
-                        AutomationProperties.AutomationId="OpenTasksListView"
-                        ItemTemplate="{StaticResource TaskRowTemplate}"
-                        ItemsSource="{x:Bind ViewModel.OpenTasks}"
-                        SelectionChanged="OnTasksListViewSelectionChanged"
-                        SelectionMode="Single" />
-
-                    <Button
-                        Padding="8,6"
-                        AutomationProperties.AutomationId="CompletedSectionButton"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Command="{x:Bind ViewModel.ToggleCompletedSectionCommand}"
-                        Visibility="{x:Bind ViewModel.IsCompletedSectionVisible, Mode=OneWay}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon FontSize="12" Glyph="{x:Bind helpers:XamlFunctions.GetCompletedSectionGlyph(ViewModel.IsCompletedExpanded), Mode=OneWay}" />
-                            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.CompletedHeaderText, Mode=OneWay}" />
-                        </StackPanel>
-                    </Button>
-
-                    <ListView
-                        x:Name="CompletedTasksListView"
-                        AutomationProperties.AutomationId="CompletedTasksListView"
-                        ItemTemplate="{StaticResource TaskRowTemplate}"
-                        ItemsSource="{x:Bind ViewModel.CompletedTasks}"
-                        SelectionChanged="OnTasksListViewSelectionChanged"
-                        SelectionMode="Single"
-                        Visibility="{x:Bind ViewModel.IsCompletedExpanded, Mode=OneWay}" />
-                </StackPanel>
-            </ScrollViewer>
+                        <TextBlock
+                            x:Uid="EmptyTaskListTextBlock"
+                            Margin="0,24,0,0"
+                            HorizontalAlignment="Center"
+                            AutomationProperties.AutomationId="EmptyTaskListTextBlock"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            TextWrapping="Wrap"
+                            Visibility="{x:Bind ViewModel.IsEmptyStateVisible, Mode=OneWay}" />
+                    </StackPanel>
+                </ListView.Header>
+            </ListView>
         </Grid>
 
         <Border

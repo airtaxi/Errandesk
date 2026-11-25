@@ -63,38 +63,49 @@ public sealed partial class TaskListPage : Page
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName != nameof(TaskListViewModel.SelectedTask)) return;
-        SyncListSelection();
-        UpdatePaneLayout();
+        if (e.PropertyName == nameof(TaskListViewModel.Rows)) RestoreListSelection();
+        else if (e.PropertyName == nameof(TaskListViewModel.SelectedTask))
+        {
+            SyncListSelection();
+            UpdatePaneLayout();
+        }
     }
 
     /// <summary>
-    /// Selects the row of the selected task, for example after a notification opened it, or clears the selection.
+    /// Selects and scrolls to the row of the selected task, for example after a notification opened it, or clears the selection.
     /// </summary>
     private void SyncListSelection()
     {
-        if (ViewModel.SelectedTask is not { } selectedTask)
+        if (ViewModel.SelectedTask is not { } selectedTask || !ViewModel.Rows.Contains(selectedTask))
         {
-            OpenTasksListView.SelectedItem = null;
-            CompletedTasksListView.SelectedItem = null;
+            TasksListView.SelectedItem = null;
             return;
         }
 
-        var listView = ViewModel.CompletedTasks.Contains(selectedTask) ? CompletedTasksListView : OpenTasksListView;
-        if (ReferenceEquals(listView.SelectedItem, selectedTask)) return;
-        listView.SelectedItem = selectedTask;
-        listView.ScrollIntoView(selectedTask);
+        if (ReferenceEquals(TasksListView.SelectedItem, selectedTask)) return;
+        TasksListView.SelectedItem = selectedTask;
+        TasksListView.ScrollIntoView(selectedTask);
     }
+
+    /// <summary>
+    /// Selects the row of the selected task without scrolling, after the rows were replaced or a row that cannot be selected was chosen.
+    /// </summary>
+    private void RestoreListSelection() => TasksListView.SelectedItem = ViewModel.SelectedTask is { } selectedTask && ViewModel.Rows.Contains(selectedTask) ? selectedTask : null;
 
     private void OnTasksListViewSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (sender is not ListView { SelectedItem: TaskItemModel task } listView) return;
-        var otherListView = ReferenceEquals(listView, OpenTasksListView) ? CompletedTasksListView : OpenTasksListView;
-        otherListView.SelectedItem = null;
-        if (ReferenceEquals(ViewModel.SelectedTask, task)) return;
+        if (TasksListView.SelectedItem is CompletedSectionModel)
+        {
+            RestoreListSelection();
+            return;
+        }
+
+        if (TasksListView.SelectedItem is not TaskItemModel task || ReferenceEquals(ViewModel.SelectedTask, task)) return;
         TaskDetailView.CommitPendingEdits();
         ViewModel.SelectedTask = task;
     }
+
+    private void OnCompletedSectionButtonClicked(object sender, RoutedEventArgs e) => ViewModel.ToggleCompletedSectionCommand.Execute(null);
 
     private void OnTaskCompletionCheckBoxClicked(object sender, RoutedEventArgs e)
     {

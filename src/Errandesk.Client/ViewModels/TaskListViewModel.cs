@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Globalization;
 using Errandesk.Client.Helpers;
 using Errandesk.Client.Managers;
@@ -19,6 +20,7 @@ public sealed partial class TaskListViewModel : ObservableObject
     private readonly MorningBriefingManager _briefingManager;
     private readonly AssistantNavigationManager _assistantNavigationManager;
     private readonly HashSet<Guid> _locallyChangedTaskIds = [];
+    private bool _isLoadingTasks;
 
     public TaskListViewModel(SyncManager syncManager, TaskListsManager taskListsManager, DialogService dialogService, MorningBriefingManager briefingManager, AssistantNavigationManager assistantNavigationManager, TaskDetailViewModel detail)
     {
@@ -31,7 +33,8 @@ public sealed partial class TaskListViewModel : ObservableObject
         Detail.TaskChanged += OnDetailTaskChanged;
         Detail.TaskDeleted += OnDetailTaskDeleted;
         Detail.CloseRequested += OnDetailCloseRequested;
-        CompletedTasks.CollectionChanged += (_, __) => UpdateCompletedSection();
+        OpenTasks.CollectionChanged += OnOpenTasksCollectionChanged;
+        CompletedTasks.CollectionChanged += OnCompletedTasksCollectionChanged;
     }
 
     public TaskDetailViewModel Detail { get; }
@@ -41,6 +44,14 @@ public sealed partial class TaskListViewModel : ObservableObject
     public ObservableCollection<TaskItemModel> OpenTasks { get; } = [];
 
     public ObservableCollection<TaskItemModel> CompletedTasks { get; } = [];
+
+    public CompletedSectionModel CompletedSection { get; } = new();
+
+    /// <summary>
+    /// The rows of the task list: the open tasks, then the completed section header and, when the section is expanded, the completed tasks.
+    /// </summary>
+    [ObservableProperty]
+    public partial ObservableCollection<object> Rows { get; private set; } = [];
 
     [ObservableProperty]
     public partial string Title { get; set; } = string.Empty;
@@ -93,12 +104,6 @@ public sealed partial class TaskListViewModel : ObservableObject
     public partial bool IsCompletedExpanded { get; set; } = true;
 
     [ObservableProperty]
-    public partial bool IsCompletedSectionVisible { get; set; }
-
-    [ObservableProperty]
-    public partial string CompletedHeaderText { get; set; } = string.Empty;
-
-    [ObservableProperty]
     public partial TaskItemModel? SelectedTask { get; set; }
 
     /// <summary>
@@ -117,6 +122,12 @@ public sealed partial class TaskListViewModel : ObservableObject
     public partial string ErrorMessage { get; set; } = string.Empty;
 
     partial void OnSelectedTaskChanged(TaskItemModel? value) => Detail.CurrentTask = value;
+
+    partial void OnIsCompletedExpandedChanged(bool value)
+    {
+        CompletedSection.IsExpanded = value;
+        RebuildRows();
+    }
 
     /// <summary>
     /// Shows the tasks of <paramref name="view"/> stored on this device and opens <paramref name="taskIdToSelect"/> in the detail pane when it is among them.
@@ -178,6 +189,7 @@ public sealed partial class TaskListViewModel : ObservableObject
     {
         View = view;
         SelectedTask = null;
+        _isLoadingTasks = true;
         OpenTasks.Clear();
         CompletedTasks.Clear();
         _locallyChangedTaskIds.Clear();
@@ -194,7 +206,58 @@ public sealed partial class TaskListViewModel : ObservableObject
             }
         }
         catch (InvalidOperationException) { }
-        finally { UpdateEmptyState(); }
+        finally
+        {
+            _isLoadingTasks = false;
+            UpdateCompletedSection();
+            RebuildRows();
+            UpdateEmptyState();
+        }
+    }
+
+    /// <summary>
+    /// Replaces the rows at once, so a list with many tasks is handed to the list view in one change instead of one change per task.
+    /// </summary>
+    private void RebuildRows()
+    {
+        var rows = new List<object>(OpenTasks.Count + CompletedTasks.Count + 1);
+        rows.AddRange(OpenTasks);
+        if (CompletedTasks.Count > 0)
+        {
+            rows.Add(CompletedSection);
+            if (IsCompletedExpanded) rows.AddRange(CompletedTasks);
+        }
+
+        Rows = new ObservableCollection<object>(rows);
+    }
+
+    private void OnOpenTasksCollectionChanged(object? _, NotifyCollectionChangedEventArgs e)
+    {
+        if (_isLoadingTasks) return;
+        if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems is [var addedTask]) Rows.Insert(e.NewStartingIndex, addedTask!);
+        else if (e.Action == NotifyCollectionChangedAction.Remove && e.OldItems is { Count: 1 }) Rows.RemoveAt(e.OldStartingIndex);
+        else RebuildRows();
+    }
+
+    /// <summary>
+    /// Mirrors a change of the completed tasks in the rows, which hold the section header after the open tasks while any task is completed.
+    /// </summary>
+    private void OnCompletedTasksCollectionChanged(object? _, NotifyCollectionChangedEventArgs e)
+    {
+        if (_isLoadingTasks) return;
+        UpdateCompletedSection();
+        var sectionIndex = OpenTasks.Count;
+        if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems is [var addedTask])
+        {
+            if (CompletedTasks.Count == 1) Rows.Insert(sectionIndex, CompletedSection);
+            if (IsCompletedExpanded) Rows.Insert(sectionIndex + 1 + e.NewStartingIndex, addedTask!);
+        }
+        else if (e.Action == NotifyCollectionChangedAction.Remove && e.OldItems is { Count: 1 })
+        {
+            if (IsCompletedExpanded) Rows.RemoveAt(sectionIndex + 1 + e.OldStartingIndex);
+            if (CompletedTasks.Count == 0) Rows.RemoveAt(sectionIndex);
+        }
+        else RebuildRows();
     }
 
     /// <summary>
@@ -422,11 +485,7 @@ public sealed partial class TaskListViewModel : ObservableObject
         _ => string.Format(CultureInfo.CurrentCulture, LocalizedStrings.Get("SharedWithManyFormat"), list.Members.Count),
     };
 
-    private void UpdateCompletedSection()
-    {
-        IsCompletedSectionVisible = CompletedTasks.Count > 0;
-        CompletedHeaderText = string.Format(CultureInfo.CurrentCulture, LocalizedStrings.Get("CompletedSectionFormat"), CompletedTasks.Count);
-    }
+    private void UpdateCompletedSection() => CompletedSection.HeaderText = string.Format(CultureInfo.CurrentCulture, LocalizedStrings.Get("CompletedSectionFormat"), CompletedTasks.Count);
 
     private void UpdateEmptyState() => IsEmptyStateVisible = !IsErrorVisible && OpenTasks.Count == 0 && CompletedTasks.Count == 0;
 
