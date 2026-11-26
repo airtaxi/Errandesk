@@ -97,6 +97,9 @@
   <data name="AllTagsFilterText" xml:space="preserve">
     <value>All tags</value>
   </data>
+  <data name="AppCurrentVersionFormat" xml:space="preserve">
+    <value>Current version: {0}</value>
+  </data>
   <data name="AppearanceHeaderTextBlock.Text" xml:space="preserve">
     <value>Appearance</value>
   </data>
@@ -126,6 +129,63 @@
   </data>
   <data name="AppTitleTextBlock.Text" xml:space="preserve">
     <value>Errandesk</value>
+  </data>
+  <data name="AppUpdateAvailableFormat" xml:space="preserve">
+    <value>Version {0} is available.</value>
+  </data>
+  <data name="AppUpdateAvailableTitle" xml:space="preserve">
+    <value>Update available</value>
+  </data>
+  <data name="AppUpdateCheckFailedTitle" xml:space="preserve">
+    <value>Couldn't check for updates</value>
+  </data>
+  <data name="AppUpdateConnectionLostError" xml:space="preserve">
+    <value>The connection to the update server was interrupted.</value>
+  </data>
+  <data name="AppUpdateDownloadProgressFormat" xml:space="preserve">
+    <value>Downloading the update... {0}%</value>
+  </data>
+  <data name="AppUpdateFailedTitle" xml:space="preserve">
+    <value>Couldn't update</value>
+  </data>
+  <data name="AppUpdateFileError" xml:space="preserve">
+    <value>Couldn't save the update on this device.</value>
+  </data>
+  <data name="AppUpdateHeaderTextBlock.Text" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="AppUpdateInstallingMessage" xml:space="preserve">
+    <value>Finish the installation in the system installer.</value>
+  </data>
+  <data name="AppUpdateInstallingTitle" xml:space="preserve">
+    <value>Installing the update</value>
+  </data>
+  <data name="AppUpdateInvalidDataError" xml:space="preserve">
+    <value>The version file or package on the update server can't be used.</value>
+  </data>
+  <data name="AppUpdateLaunchError" xml:space="preserve">
+    <value>Couldn't start the installer.</value>
+  </data>
+  <data name="AppUpdatePermissionRequiredMessage" xml:space="preserve">
+    <value>Allow Errandesk to install apps, then select Update again.</value>
+  </data>
+  <data name="AppUpdatePermissionRequiredTitle" xml:space="preserve">
+    <value>Permission needed</value>
+  </data>
+  <data name="AppUpdateRequestFailedFormat" xml:space="preserve">
+    <value>The update server responded with status {0}.</value>
+  </data>
+  <data name="AppUpdateServerUnreachableError" xml:space="preserve">
+    <value>Couldn't reach the update server.</value>
+  </data>
+  <data name="AppUpdateTimeoutError" xml:space="preserve">
+    <value>The update server didn't respond in time.</value>
+  </data>
+  <data name="AppUpToDateFormat" xml:space="preserve">
+    <value>Version {0} is the latest version.</value>
+  </data>
+  <data name="AppUpToDateTitle" xml:space="preserve">
+    <value>Errandesk is up to date</value>
   </data>
   <data name="AssistantAvailableText" xml:space="preserve">
     <value>Available</value>
@@ -306,6 +366,9 @@
   </data>
   <data name="ChangeServerLinkButton.Content" xml:space="preserve">
     <value>Change server</value>
+  </data>
+  <data name="CheckForUpdateButton.Content" xml:space="preserve">
+    <value>Check for updates</value>
   </data>
   <data name="ClearDueDateButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Remove due date</value>
@@ -609,6 +672,9 @@
   </data>
   <data name="InsecureConnectionInfoBar.Title" xml:space="preserve">
     <value>Unencrypted connection</value>
+  </data>
+  <data name="InstallUpdateButton.Content" xml:space="preserve">
+    <value>Update</value>
   </data>
   <data name="InviteCodeTextBox.Header" xml:space="preserve">
     <value>Invite code</value>

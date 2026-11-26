@@ -169,6 +169,71 @@
                 </StackPanel>
 
                 <StackPanel
+                    AutomationProperties.AutomationId="AppUpdateSection"
+                    Spacing="12"
+                    Visibility="{x:Bind ViewModel.IsAppUpdateSupported, Mode=OneWay}">
+                    <TextBlock
+                        x:Uid="AppUpdateHeaderTextBlock"
+                        AutomationProperties.HeadingLevel="Level2"
+                        Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <TextBlock
+                        AutomationProperties.AutomationId="AppCurrentVersionTextBlock"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.CurrentVersionText, Mode=OneWay}"
+                        TextWrapping="Wrap" />
+
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button
+                            x:Uid="CheckForUpdateButton"
+                            AutomationProperties.AutomationId="CheckForUpdateButton"
+                            Command="{x:Bind ViewModel.CheckForUpdateCommand}"
+                            IsEnabled="{x:Bind ViewModel.IsCheckForUpdateEnabled, Mode=OneWay}" />
+                        <ProgressRing
+                            Width="20"
+                            Height="20"
+                            AutomationProperties.AutomationId="CheckForUpdateProgressRing"
+                            IsActive="{x:Bind ViewModel.IsCheckingForUpdate, Mode=OneWay}"
+                            Visibility="{x:Bind ViewModel.IsCheckingForUpdate, Mode=OneWay}" />
+                    </StackPanel>
+
+                    <InfoBar
+                        Title="{x:Bind ViewModel.AppUpdateInfoBarTitle, Mode=OneWay}"
+                        AutomationProperties.AutomationId="AppUpdateInfoBar"
+                        IsClosable="True"
+                        IsOpen="{x:Bind ViewModel.IsAppUpdateInfoBarOpen, Mode=TwoWay}"
+                        Message="{x:Bind ViewModel.AppUpdateInfoBarMessage, Mode=OneWay}"
+                        Severity="{x:Bind ViewModel.AppUpdateInfoBarSeverity, Mode=OneWay}"
+                        Visibility="{x:Bind ViewModel.IsAppUpdateInfoBarOpen, Mode=OneWay}">
+                        <InfoBar.ActionButton>
+                            <Button
+                                x:Uid="InstallUpdateButton"
+                                AutomationProperties.AutomationId="InstallUpdateButton"
+                                Command="{x:Bind ViewModel.InstallUpdateCommand}"
+                                Visibility="{x:Bind ViewModel.IsInstallUpdateVisible, Mode=OneWay}" />
+                        </InfoBar.ActionButton>
+                        <InfoBar.Content>
+                            <StackPanel
+                                Padding="0,0,0,12"
+                                Orientation="Horizontal"
+                                Spacing="12"
+                                Visibility="{x:Bind ViewModel.IsDownloadingUpdate, Mode=OneWay}">
+                                <ProgressRing
+                                    Width="20"
+                                    Height="20"
+                                    AutomationProperties.AutomationId="UpdateDownloadProgressRing"
+                                    IsActive="{x:Bind ViewModel.IsDownloadingUpdate, Mode=OneWay}" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    AutomationProperties.AutomationId="UpdateDownloadProgressTextBlock"
+                                    AutomationProperties.LiveSetting="Polite"
+                                    Text="{x:Bind ViewModel.UpdateDownloadProgressText, Mode=OneWay}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </InfoBar.Content>
+                    </InfoBar>
+                </StackPanel>
+
+                <StackPanel
                     AutomationProperties.AutomationId="MorningBriefingSection"
                     Spacing="12"
                     Visibility="{x:Bind ViewModel.IsAiAvailable, Mode=OneWay}">

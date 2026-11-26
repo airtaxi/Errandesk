@@ -77,6 +77,7 @@ public partial class App : Application
 
         if (_mainWindow is null)
         {
+            ClientUpdateService.DeleteDownloadedPackages();
             var appearanceService = GetService<AppearanceService>();
             appearanceService.ApplySavedLanguage();
 
@@ -149,6 +150,7 @@ public partial class App : Application
         services.AddSingleton<MicrosoftTodoImportManager>();
         services.AddSingleton<MorningBriefingManager>();
         services.AddSingleton<AssistantNavigationManager>();
+        services.AddSingleton<ClientUpdateManager>();
 #if WINDOWS
         services.AddSingleton<IReminderScheduler, WindowsReminderScheduler>();
 #elif ANDROID
@@ -167,6 +169,7 @@ public partial class App : Application
         services.AddHttpClient<ErrandeskApiClient>(httpClient => httpClient.Timeout = s_httpRequestTimeout);
         services.AddHttpClient<AuthenticatedApiClient>(httpClient => httpClient.Timeout = s_httpRequestTimeout).AddHttpMessageHandler<AuthenticationHandler>();
         services.AddHttpClient<ServerEventStreamClient>(httpClient => httpClient.Timeout = Timeout.InfiniteTimeSpan).AddHttpMessageHandler<AuthenticationHandler>();
+        services.AddHttpClient<ClientUpdateService>(httpClient => httpClient.Timeout = Timeout.InfiniteTimeSpan);
         services.AddHttpClient(SyncManager.HttpClientName, httpClient => httpClient.Timeout = s_httpRequestTimeout).AddHttpMessageHandler<AuthenticationHandler>();
         services.AddTransient<ServerConnectionViewModel>();
         services.AddTransient<SignInViewModel>();

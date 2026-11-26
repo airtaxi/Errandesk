@@ -141,6 +141,7 @@ Compose 구성은 공식 `mongo:9` 이미지를 사용합니다. MongoDB 5.0 이
 | `ERRANDESK_APNS_ENVIRONMENT` | 아니오 | `production` | 아니오 | iOS 푸시(APNs): `production` 또는 `sandbox` (대소문자 구분 없음). 단독 설정 시 부분 그룹 오류를 발생시키지 않습니다. |
 | `ERRANDESK_MICROSOFT_GRAPH_CLIENT_ID` | 아니오 | — | 아니오 | Microsoft Entra 공용 클라이언트 ID입니다. 설정 시 Microsoft To Do 가져오기가 활성화됩니다. |
 | `ERRANDESK_MICROSOFT_GRAPH_TENANT` | 아니오 | `common` | 아니오 | Microsoft Entra 테넌트(`common`, `consumers`, `organizations` 또는 테넌트 ID). 클라이언트 ID가 없으면 무시됩니다. |
+| `ERRANDESK_CLIENT_UPDATE_BASE_URL` | 아니오 | — | 아니오 | 클라이언트 업데이트 파일을 게시하는 절대 `http` 또는 `https` 기본 URL입니다(쿼리와 프래그먼트는 사용할 수 없음). 설정한 경우에만 Windows와 Android 클라이언트의 **설정**에 업데이트 기능이 나타납니다. [클라이언트 업데이트](#클라이언트-업데이트)를 참고하십시오. |
 
 **그룹**으로 표시된 변수는 그룹 단위로 모두 설정하거나 모두 비워 두어야 합니다. Android 푸시는 FCM 변수 3개 모두, iOS 푸시는 APNs 필수 변수 4개(`TEAM_ID`, `KEY_ID`, `PRIVATE_KEY`, `BUNDLE_ID`) 모두를 설정해야 하며, 일부만 설정하면 시작 시 검증 오류가 발생합니다.
 
@@ -234,6 +235,30 @@ Windows에서 iOS 워크로드 없이 솔루션을 빌드할 때 `net11.0-ios` �
 | `ERRANDESK_CLIENT_WINDOWS_CERTIFICATE` | Windows | MSIX 서명용 암호 없는 `.pfx` 인증서 경로입니다. | 로컬 개발 서명 |
 
 > **`google-services.json` 위치**: `src/Errandesk.Client/Platforms/Android/google-services.json`에 두거나(`.gitignore`에 포함됨) `ERRANDESK_CLIENT_GOOGLE_SERVICES_JSON`으로 경로를 지정합니다.
+
+## 클라이언트 업데이트
+
+Windows와 Android 클라이언트는 정적 파일 호스트에서 스스로 업데이트할 수 있습니다. 서버에 `ERRANDESK_CLIENT_UPDATE_BASE_URL`을 설정하면 `/api/server-info`가 이 값을 `clientUpdateBaseUrl`로 알려 주고, **설정 > 업데이트**에 **업데이트 확인** 버튼이 나타납니다. 새 버전이 있으면 **업데이트**를 눌러 설치 파일을 받고 설치합니다. 다른 페이지로 이동해도 다운로드는 계속되며, 업데이트 메시지를 닫으면 다운로드가 취소됩니다.
+
+기본 URL 아래에는 다음 구조로 파일을 게시합니다.
+
+```text
+<기본 URL>/
+├── windows/
+│   ├── version                  일반 텍스트, 예: 1.2.0
+│   ├── Installer-x64.exe
+│   └── Installer-arm64.exe
+└── android/
+    ├── version
+    └── Errandesk-latest.apk
+```
+
+- **`version`**: 최신 버전을 일반 텍스트로 적습니다(`1.2`부터 `1.2.0.0`까지의 형식을 쓸 수 있으며, 생략한 구성 요소는 `0`으로 간주합니다). 설치된 버전보다 높을 때만 업데이트를 제공합니다. 플랫폼 폴더마다 `version`이 따로 있으므로 Windows와 Android를 따로 배포할 수 있습니다.
+  - Windows는 설치된 MSIX 패키지 버전과 비교합니다. 패키지 버전은 `<Version>` 뒤에 `<ApplicationVersion>`을 네 번째 구성 요소로 붙인 값입니다(예: `0.1.0.1`).
+  - Android는 `<Version>`과 비교합니다(예: `0.1.0`).
+- **Windows**: 서명한 MSIX로 `aticmsixgen exe-pack`이 만든 설치 EXE인 `Installer-x64.exe`와 `Installer-arm64.exe`를 이름을 바꾸지 않고 올립니다(`aticmsixgen`은 [AT Installer](https://github.com/airtaxi/AT-Installer)를 참고하십시오). 클라이언트는 ARM64에서는 `Installer-arm64.exe`를, 그 밖의 환경에서는 `Installer-x64.exe`를 받아 실행한 다음 종료하며, 설치 프로그램이 패키지를 교체합니다. 받은 설치 파일은 다음 실행 시 삭제됩니다.
+- **Android**: 설치된 앱과 같은 키로 서명한 APK 하나를 올립니다. Android 8 이상에서는 사용자가 처음 **업데이트**를 누를 때 앱 설치 권한을 요청한 다음 시스템 패키지 설치 화면을 엽니다. Android 7에서는 시스템의 **알 수 없는 출처** 설정에서 설치를 허용해야 합니다. 받은 APK는 앱이 교체되거나 다음에 실행될 때 삭제됩니다.
+- **배포 순서**: 설치 파일을 먼저 올리고 `version`을 마지막에 바꿔야 클라이언트가 설치 파일보다 새 버전 번호를 먼저 보는 일이 없습니다. 클라이언트는 모든 파일을 `Cache-Control: no-cache`로 요청합니다.
 
 ## Microsoft To Do 가져오기 설정
 

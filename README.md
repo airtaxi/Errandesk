@@ -141,6 +141,7 @@ Variables marked with **`_FILE` supported** can alternatively be provided as `<V
 | `ERRANDESK_APNS_ENVIRONMENT` | No | `production` | No | iOS push (APNs): `production` or `sandbox` (case-insensitive). Setting this alone does not trigger a partial group error. |
 | `ERRANDESK_MICROSOFT_GRAPH_CLIENT_ID` | No | — | No | Microsoft Entra public client ID. Enables Microsoft To Do import when set. |
 | `ERRANDESK_MICROSOFT_GRAPH_TENANT` | No | `common` | No | Microsoft Entra tenant (`common`, `consumers`, `organizations`, or tenant ID). Ignored if client ID is unset. |
+| `ERRANDESK_CLIENT_UPDATE_BASE_URL` | No | — | No | Absolute `http` or `https` base URL where client updates are published (no query or fragment). The Windows and Android clients offer updates in **Settings** only when this is set. See [Client Updates](#client-updates). |
 
 Variables marked **Group** are all-or-nothing per group: set all three FCM variables to enable Android push, and set all four required APNs variables (`TEAM_ID`, `KEY_ID`, `PRIVATE_KEY`, `BUNDLE_ID`) to enable iOS push. A partially configured group fails startup validation.
 
@@ -234,6 +235,30 @@ All `ERRANDESK_CLIENT_*` environment variables are optional. MSBuild reads them 
 | `ERRANDESK_CLIENT_WINDOWS_CERTIFICATE` | Windows | Path to a passwordless `.pfx` certificate for MSIX signing. | Local development signing |
 
 > **Where `google-services.json` goes**: Place it at `src/Errandesk.Client/Platforms/Android/google-services.json` (gitignored) or point `ERRANDESK_CLIENT_GOOGLE_SERVICES_JSON` to its path.
+
+## Client Updates
+
+The Windows and Android clients can update themselves from a static file host. Set `ERRANDESK_CLIENT_UPDATE_BASE_URL` on the server; `/api/server-info` then reports it as `clientUpdateBaseUrl`, and **Settings > Updates** shows a **Check for updates** button. When a newer version is found, **Update** downloads the package and installs it. The download continues while the user moves to other pages, and closing the update message cancels it.
+
+Publish the files below the base URL with this layout:
+
+```text
+<base URL>/
+├── windows/
+│   ├── version                  plain text, for example 1.2.0
+│   ├── Installer-x64.exe
+│   └── Installer-arm64.exe
+└── android/
+    ├── version
+    └── Errandesk-latest.apk
+```
+
+- **`version`**: The latest version as plain text (`1.2` through `1.2.0.0` forms; missing components count as `0`). An update is offered only when it is higher than the installed version. Each platform folder has its own `version`, so Windows and Android can be released separately.
+  - Windows compares it with the version of the installed MSIX package, which is `<Version>` followed by `<ApplicationVersion>` as the fourth component (for example `0.1.0.1`).
+  - Android compares it with `<Version>` (for example `0.1.0`).
+- **Windows**: Upload `Installer-x64.exe` and `Installer-arm64.exe`, the installer EXEs that `aticmsixgen exe-pack` creates from the signed MSIX, without renaming them (see [AT Installer](https://github.com/airtaxi/AT-Installer) for `aticmsixgen`). The client downloads `Installer-arm64.exe` on ARM64 and `Installer-x64.exe` otherwise, starts it, and exits; the installer replaces the package. The downloaded installer is deleted on the next launch.
+- **Android**: A single APK signed with the same key as the installed app. On Android 8 and later, the client asks for permission to install apps the first time the user selects **Update**, then opens the system package installer. On Android 7, the system's **Unknown sources** setting must allow the installation. The downloaded APK is deleted once the app is replaced, or on the next launch.
+- **Release order**: Upload the packages first and replace `version` last, so a client never sees a new version number before its package is available. Clients request every file with `Cache-Control: no-cache`.
 
 ## Microsoft To Do Import Setup
 

@@ -32,6 +32,17 @@ public sealed class ServerInfoEndpointTests(MongoDbContainerFixture mongoDb)
         Assert.False(root.GetProperty("isAiAvailable").GetBoolean());
         Assert.False(root.GetProperty("isAndroidPushAvailable").GetBoolean());
         Assert.False(root.GetProperty("isIosPushAvailable").GetBoolean());
+        Assert.Equal(JsonValueKind.Null, root.GetProperty("clientUpdateBaseUrl").ValueKind);
+    }
+
+    [Fact]
+    public async Task GetServerInfo_WithClientUpdateBaseUrl_ReportsItWithTrailingSlash()
+    {
+        await using var application = await StartAsync(new Dictionary<string, string> { [ServerEnvironmentVariables.ClientUpdateBaseUrl] = "https://updates.example.com/errandesk" });
+
+        var serverInfo = await GetServerInfoAsync(application);
+
+        Assert.Equal("https://updates.example.com/errandesk/", serverInfo.ClientUpdateBaseUrl);
     }
 
     [Fact]

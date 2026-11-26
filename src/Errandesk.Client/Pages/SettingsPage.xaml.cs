@@ -8,7 +8,7 @@ using Windows.System;
 namespace Errandesk.Client.Pages;
 
 /// <summary>
-/// Profile, session, synchronization, language, theme, import, personal access token and invite settings.
+/// Profile, session, synchronization, language, theme, app update, import, personal access token and invite settings.
 /// </summary>
 public sealed partial class SettingsPage : Page
 {

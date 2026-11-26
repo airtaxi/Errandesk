@@ -36,6 +36,9 @@ public sealed class ServerSettings
     /// <summary>Microsoft Graph application settings, or <see langword="null"/> when Microsoft To Do import is not configured.</summary>
     public MicrosoftGraphSettings? MicrosoftGraph { get; init; }
 
+    /// <summary>Base URL below which the client update version files and packages are published, or <see langword="null"/> when client updates are not configured.</summary>
+    public Uri? ClientUpdateBaseUrl { get; init; }
+
     public bool IsAiAvailable => Ai is not null;
 
     public bool IsAndroidPushAvailable => Fcm is not null;

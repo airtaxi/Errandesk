@@ -417,6 +417,41 @@ public sealed class ServerSettingsLoaderTests
         Assert.Equal("consumers", LoadValid().MicrosoftGraph?.Tenant);
     }
 
+    [Fact]
+    public void Load_WithoutClientUpdateBaseUrl_LeavesClientUpdatesOff() => Assert.Null(LoadValid().ClientUpdateBaseUrl);
+
+    [Fact]
+    public void Load_WithBlankClientUpdateBaseUrl_LeavesClientUpdatesOff()
+    {
+        _variables[ClientUpdateBaseUrl] = "   ";
+
+        Assert.Null(LoadValid().ClientUpdateBaseUrl);
+    }
+
+    [Theory]
+    [InlineData("https://updates.example.com/errandesk", "https://updates.example.com/errandesk/")]
+    [InlineData("http://192.168.0.10:8081/clients/", "http://192.168.0.10:8081/clients/")]
+    public void Load_WithClientUpdateBaseUrl_NormalizesTrailingSlash(string value, string expected)
+    {
+        _variables[ClientUpdateBaseUrl] = value;
+
+        Assert.Equal(expected, LoadValid().ClientUpdateBaseUrl?.AbsoluteUri);
+    }
+
+    [Theory]
+    [InlineData("updates.example.com")]
+    [InlineData("ftp://updates.example.com/")]
+    [InlineData("https://updates.example.com/?channel=beta")]
+    [InlineData("https://updates.example.com/?")]
+    [InlineData("https://updates.example.com/#")]
+    public void Load_WithInvalidClientUpdateBaseUrl_Fails(string value)
+    {
+        _variables[ClientUpdateBaseUrl] = value;
+
+        var error = Assert.Single(LoadErrors());
+        Assert.Contains(ClientUpdateBaseUrl, error, StringComparison.Ordinal);
+    }
+
     private ServerSettingsLoadResult Load() => new ServerSettingsLoader(name => _variables.GetValueOrDefault(name), ReadFile).Load();
 
     private ServerSettings LoadValid()

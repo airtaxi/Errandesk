@@ -24,6 +24,8 @@ public class MainActivity : Uno.UI.Runtime.Android.ApplicationActivity
 
     private ActivityResultLauncher? _speechRecognitionLauncher;
     private TaskCompletionSource<string?>? _speechRecognitionCompletion;
+    private ActivityResultLauncher? _packageInstallPermissionLauncher;
+    private TaskCompletionSource<bool>? _packageInstallPermissionCompletion;
 
     /// <summary>
     /// Whether the device has an app that handles <see cref="RecognizerIntent.ActionRecognizeSpeech"/>.
@@ -69,12 +71,38 @@ public class MainActivity : Uno.UI.Runtime.Android.ApplicationActivity
         return completion.Task;
     }
 
+    /// <summary>
+    /// Opens the system screen where the user allows this app to install apps, and returns whether it may install apps once the user comes back.
+    /// A request that is still waiting completes with <see langword="false"/> when a new one starts.
+    /// </summary>
+    public static Task<bool> RequestPackageInstallPermissionAsync()
+    {
+        if (!OperatingSystem.IsAndroidVersionAtLeast(26)) return Task.FromResult(true);
+        if (s_runningActivity is not { _packageInstallPermissionLauncher: { } launcher } activity) return Task.FromResult(false);
+        if (activity.PackageManager?.CanRequestPackageInstalls() == true) return Task.FromResult(true);
+
+        activity._packageInstallPermissionCompletion?.TrySetResult(false);
+        var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        activity._packageInstallPermissionCompletion = completion;
+
+        var intent = new Intent(Android.Provider.Settings.ActionManageUnknownAppSources, Android.Net.Uri.Parse("package:" + activity.PackageName));
+        try { launcher.Launch(intent); }
+        catch (ActivityNotFoundException)
+        {
+            activity._packageInstallPermissionCompletion = null;
+            return Task.FromResult(false);
+        }
+
+        return completion.Task;
+    }
+
     protected override void OnCreate(Bundle? savedInstanceState)
     {
         AndroidX.Core.SplashScreen.SplashScreen.InstallSplashScreen(this);
         base.OnCreate(savedInstanceState);
         s_runningActivity = this;
         _speechRecognitionLauncher = RegisterForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultHandler(OnSpeechRecognitionResult));
+        _packageInstallPermissionLauncher = RegisterForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultHandler(OnPackageInstallPermissionResult));
         HandleLaunchIntent(Intent);
     }
 
@@ -89,7 +117,19 @@ public class MainActivity : Uno.UI.Runtime.Android.ApplicationActivity
         if (ReferenceEquals(s_runningActivity, this)) s_runningActivity = null;
         _speechRecognitionCompletion?.TrySetResult(null);
         _speechRecognitionCompletion = null;
+        _packageInstallPermissionCompletion?.TrySetResult(false);
+        _packageInstallPermissionCompletion = null;
         base.OnDestroy();
+    }
+
+    /// <summary>
+    /// The settings screen returns no result, so whether the user allowed this app to install apps is read again.
+    /// </summary>
+    private void OnPackageInstallPermissionResult(ActivityResult _)
+    {
+        var completion = _packageInstallPermissionCompletion;
+        _packageInstallPermissionCompletion = null;
+        completion?.TrySetResult(OperatingSystem.IsAndroidVersionAtLeast(26) && PackageManager?.CanRequestPackageInstalls() == true);
     }
 
     private void OnSpeechRecognitionResult(ActivityResult result)

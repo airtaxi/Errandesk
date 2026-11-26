@@ -18,7 +18,7 @@ public sealed class ServerInfoService(ServerSettings settings, IMongoDatabase da
     public async Task<ServerInfoResponse> GetServerInfoAsync(CancellationToken cancellationToken)
     {
         var isRegistrationAvailable = settings.RegistrationMode != RegistrationMode.Disabled || !await HasAnyUserAsync(cancellationToken);
-        return new ServerInfoResponse(ServerVersion, settings.RegistrationMode, isRegistrationAvailable, settings.IsAiAvailable, settings.IsAndroidPushAvailable, settings.IsIosPushAvailable, settings.IsMicrosoftTodoImportAvailable);
+        return new ServerInfoResponse(ServerVersion, settings.RegistrationMode, isRegistrationAvailable, settings.IsAiAvailable, settings.IsAndroidPushAvailable, settings.IsIosPushAvailable, settings.IsMicrosoftTodoImportAvailable, settings.ClientUpdateBaseUrl?.AbsoluteUri);
     }
 
     private Task<bool> HasAnyUserAsync(CancellationToken cancellationToken) => database.GetCollection<BsonDocument>(MongoCollectionNames.Users).Find(FilterDefinition<BsonDocument>.Empty).Limit(1).AnyAsync(cancellationToken);

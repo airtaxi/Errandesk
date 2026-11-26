@@ -11,10 +11,11 @@ using Windows.ApplicationModel.DataTransfer;
 namespace Errandesk.Client.ViewModels;
 
 /// <summary>
-/// The settings page: profile, sign-out, server, synchronization, language, theme, the morning briefing, the Microsoft To Do import, personal access tokens and, for administrators, invite codes.
+/// The settings page: profile, sign-out, server, synchronization, language, theme, app updates, the morning briefing, the Microsoft To Do import, personal access tokens and, for administrators, invite codes.
 /// </summary>
-public sealed partial class SettingsViewModel(SessionManager sessionManager, AuthenticatedApiClient apiClient, ErrandeskApiClient anonymousApiClient, ApplicationSettingsService settingsService, AppearanceService appearanceService, AppNavigationManager appNavigationManager, DialogService dialogService, SyncManager syncManager, MicrosoftTodoImportManager importManager) : ObservableObject
+public sealed partial class SettingsViewModel(SessionManager sessionManager, AuthenticatedApiClient apiClient, ErrandeskApiClient anonymousApiClient, ApplicationSettingsService settingsService, AppearanceService appearanceService, AppNavigationManager appNavigationManager, DialogService dialogService, SyncManager syncManager, MicrosoftTodoImportManager importManager, ClientUpdateManager clientUpdateManager) : ObservableObject
 {
+    private readonly ClientUpdateManager _clientUpdateManager = clientUpdateManager;
     private readonly SessionManager _sessionManager = sessionManager;
     private readonly SyncManager _syncManager = syncManager;
     private readonly AuthenticatedApiClient _apiClient = apiClient;
@@ -29,11 +30,13 @@ public sealed partial class SettingsViewModel(SessionManager sessionManager, Aut
     private bool _isApplyingMorningBriefingSettings;
     private bool _areInvitesLoaded;
     private bool _isLoadingInvites;
-    private bool _isImportAvailabilityLoaded;
-    private bool _isLoadingImportAvailability;
+    private bool _isServerInfoLoaded;
+    private bool _isLoadingServerInfo;
     private bool _areAccessTokensLoaded;
     private bool _isLoadingAccessTokens;
     private Guid? _newAccessTokenId;
+    private Uri? _clientUpdateBaseUrl;
+    private bool _isApplyingClientUpdateState;
 
     public ObservableCollection<InviteModel> Invites { get; } = [];
 
@@ -168,6 +171,42 @@ public sealed partial class SettingsViewModel(SessionManager sessionManager, Aut
     [ObservableProperty]
     public partial string ImportSkippedCountText { get; set; } = string.Empty;
 
+    /// <summary>Whether this platform installs updates and the server publishes them.</summary>
+    [ObservableProperty]
+    public partial bool IsAppUpdateSupported { get; set; }
+
+    [ObservableProperty]
+    public partial string CurrentVersionText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsCheckingForUpdate { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsCheckForUpdateEnabled { get; set; } = true;
+
+    /// <summary>Whether the result of the last update check or installation is shown.</summary>
+    [ObservableProperty]
+    public partial bool IsAppUpdateInfoBarOpen { get; set; }
+
+    [ObservableProperty]
+    public partial InfoBarSeverity AppUpdateInfoBarSeverity { get; set; }
+
+    [ObservableProperty]
+    public partial string AppUpdateInfoBarTitle { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string AppUpdateInfoBarMessage { get; set; } = string.Empty;
+
+    /// <summary>Whether the button that downloads and installs the newer version is shown.</summary>
+    [ObservableProperty]
+    public partial bool IsInstallUpdateVisible { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsDownloadingUpdate { get; set; }
+
+    [ObservableProperty]
+    public partial string UpdateDownloadProgressText { get; set; } = string.Empty;
+
     public async Task InitializeAsync()
     {
         var user = _sessionManager.CurrentUser;
@@ -178,26 +217,32 @@ public sealed partial class SettingsViewModel(SessionManager sessionManager, Aut
         var hasServerAddress = _sessionManager.TryGetServerAddress(out var serverAddress);
         ServerAddressText = hasServerAddress ? ServerAddressHelper.ToDisplayText(serverAddress) : string.Empty;
         McpEndpointText = hasServerAddress ? new Uri(serverAddress, PersonalAccessTokenFormat.McpEndpointPath).AbsoluteUri : string.Empty;
+        CurrentVersionText = string.Format(CultureInfo.CurrentCulture, LocalizedStrings.Get("AppCurrentVersionFormat"), ClientUpdateService.FormatVersion(ClientUpdateService.CurrentVersion));
         _syncManager.StatusChanged -= OnSyncManagerStatusChanged;
         _syncManager.StatusChanged += OnSyncManagerStatusChanged;
         _importManager.JobChanged -= OnImportManagerJobChanged;
         _importManager.JobChanged += OnImportManagerJobChanged;
+        _clientUpdateManager.StateChanged -= OnClientUpdateManagerStateChanged;
+        _clientUpdateManager.StateChanged += OnClientUpdateManagerStateChanged;
         UpdateSyncStatus();
         UpdateImportState();
+        ApplyClientUpdateState();
         _isInitialized = true;
 
-        if (_syncManager.IsOnline) _ = LoadImportAvailabilityAsync();
+        if (_syncManager.IsOnline) _ = LoadServerInfoAsync();
         if (_syncManager.IsOnline) _ = LoadAccessTokensAsync();
         if (IsAdministrator && _syncManager.IsOnline) await LoadInvitesAsync();
     }
 
     /// <summary>
-    /// Stops following the synchronization status and the import after the page was left, and forgets the value of a newly created token.
+    /// Stops following the synchronization status, the import and the app update after the page was left, and forgets the value of a newly created token.
+    /// A running update download continues.
     /// </summary>
     public void Unload()
     {
         _syncManager.StatusChanged -= OnSyncManagerStatusChanged;
         _importManager.JobChanged -= OnImportManagerJobChanged;
+        _clientUpdateManager.StateChanged -= OnClientUpdateManagerStateChanged;
         DismissNewAccessToken();
     }
 
@@ -320,7 +365,7 @@ public sealed partial class SettingsViewModel(SessionManager sessionManager, Aut
         IsLastSyncedVisible = _syncManager.LastSyncedAt is not null;
         LastSyncedText = _syncManager.LastSyncedAt is { } lastSyncedAt ? string.Format(CultureInfo.CurrentCulture, LocalizedStrings.Get("LastSyncedFormat"), DateDisplayHelper.FormatReminder(lastSyncedAt)) : string.Empty;
         if (_isInitialized && IsAdministrator && !_areInvitesLoaded && _syncManager.IsOnline && !_syncManager.IsSyncing) _ = LoadInvitesAsync();
-        if (_isInitialized && !_isImportAvailabilityLoaded && _syncManager.IsOnline && !_syncManager.IsSyncing) _ = LoadImportAvailabilityAsync();
+        if (_isInitialized && !_isServerInfoLoaded && _syncManager.IsOnline && !_syncManager.IsSyncing) _ = LoadServerInfoAsync();
         if (_isInitialized && !_areAccessTokensLoaded && _syncManager.IsOnline && !_syncManager.IsSyncing) _ = LoadAccessTokensAsync();
         IsImportStartEnabled = _syncManager.IsOnline && !MicrosoftTodoImportManager.IsActive(_importManager.CurrentJob);
         UpdateCreateAccessTokenEnabled();
@@ -474,24 +519,128 @@ public sealed partial class SettingsViewModel(SessionManager sessionManager, Aut
     private static string FormatCount(int? count) => (count ?? 0).ToString("N0", CultureInfo.CurrentCulture);
 
     /// <summary>
-    /// Reads from the server info whether the server can import and whether it has an AI model for the morning briefing.
+    /// Reads from the server info whether the server can import, whether it has an AI model for the morning briefing and where it publishes client updates.
     /// When the server cannot be reached, it is read again after the next synchronization reaches the server.
     /// </summary>
-    private async Task LoadImportAvailabilityAsync()
+    private async Task LoadServerInfoAsync()
     {
-        if (_isLoadingImportAvailability || !_sessionManager.TryGetServerAddress(out var serverAddress)) return;
+        if (_isLoadingServerInfo || !_sessionManager.TryGetServerAddress(out var serverAddress)) return;
 
-        _isLoadingImportAvailability = true;
+        _isLoadingServerInfo = true;
         try
         {
             var serverInfo = await _anonymousApiClient.GetServerInfoAsync(serverAddress, CancellationToken.None);
             IsImportAvailable = serverInfo.IsMicrosoftTodoImportAvailable;
             IsAiAvailable = serverInfo.IsAiAvailable;
-            _isImportAvailabilityLoaded = true;
+            ApplyClientUpdateBaseUrl(serverInfo.ClientUpdateBaseUrl);
+            _isServerInfoLoaded = true;
         }
         catch (Exception exception) when (ApiErrorMessages.IsRequestFailure(exception)) { }
-        finally { _isLoadingImportAvailability = false; }
+        finally { _isLoadingServerInfo = false; }
     }
+
+    /// <summary>
+    /// Uses the client update base URL from the server info when this platform installs updates. When the server publishes updates elsewhere than the last check, the result of that check is forgotten.
+    /// </summary>
+    private void ApplyClientUpdateBaseUrl(string? value)
+    {
+        _clientUpdateBaseUrl = ClientUpdateService.IsSupported ? ClientUpdateLayout.NormalizeBaseUrl(value) : null;
+        IsAppUpdateSupported = _clientUpdateBaseUrl is not null;
+        if (_clientUpdateBaseUrl is null || !_clientUpdateManager.IsCheckedAgainst(_clientUpdateBaseUrl)) _clientUpdateManager.Reset();
+    }
+
+    [RelayCommand]
+    private async Task CheckForUpdateAsync()
+    {
+        if (_clientUpdateBaseUrl is { } baseUrl)
+        {
+            await _clientUpdateManager.CheckAsync(baseUrl);
+        }
+    }
+
+    /// <summary>
+    /// Downloads and installs the newer version found by the last check. On Windows the app exits while the installer runs; on Android the system package installer opens.
+    /// </summary>
+    [RelayCommand]
+    private Task InstallUpdateAsync() => _clientUpdateManager.InstallAsync();
+
+    /// <summary>
+    /// Closing the update information hides the result, and cancels a running download.
+    /// </summary>
+    partial void OnIsAppUpdateInfoBarOpenChanged(bool value)
+    {
+        if (!value && !_isApplyingClientUpdateState)
+        {
+            _clientUpdateManager.Dismiss();
+        }
+    }
+
+    private void OnClientUpdateManagerStateChanged(object? _, EventArgs __) => ApplyClientUpdateState();
+
+    /// <summary>
+    /// Shows the stage of the app update: the check, its result, the download progress and the outcome of the installation.
+    /// </summary>
+    private void ApplyClientUpdateState()
+    {
+        var state = _clientUpdateManager.State;
+        var newerVersionText = _clientUpdateManager.NewerVersion is { } newerVersion ? ClientUpdateService.FormatVersion(newerVersion) : string.Empty;
+        _isApplyingClientUpdateState = true;
+        IsCheckingForUpdate = state == ClientUpdateState.Checking;
+        IsCheckForUpdateEnabled = state is not (ClientUpdateState.Checking or ClientUpdateState.Downloading);
+        IsDownloadingUpdate = state == ClientUpdateState.Downloading;
+        UpdateDownloadProgressText = string.Format(CultureInfo.CurrentCulture, LocalizedStrings.Get("AppUpdateDownloadProgressFormat"), _clientUpdateManager.DownloadPercent);
+        IsInstallUpdateVisible = state is ClientUpdateState.UpdateAvailable or ClientUpdateState.Installing or ClientUpdateState.PermissionRequired or ClientUpdateState.InstallFailed;
+        switch (state)
+        {
+            case ClientUpdateState.UpToDate:
+                ShowAppUpdateInfo(InfoBarSeverity.Success, LocalizedStrings.Get("AppUpToDateTitle"), string.Format(CultureInfo.CurrentCulture, LocalizedStrings.Get("AppUpToDateFormat"), ClientUpdateService.FormatVersion(ClientUpdateService.CurrentVersion)));
+                break;
+            case ClientUpdateState.UpdateAvailable:
+            case ClientUpdateState.Downloading:
+                ShowAppUpdateInfo(InfoBarSeverity.Informational, LocalizedStrings.Get("AppUpdateAvailableTitle"), string.Format(CultureInfo.CurrentCulture, LocalizedStrings.Get("AppUpdateAvailableFormat"), newerVersionText));
+                break;
+            case ClientUpdateState.CheckFailed:
+                ShowAppUpdateInfo(InfoBarSeverity.Error, LocalizedStrings.Get("AppUpdateCheckFailedTitle"), GetAppUpdateErrorMessage(_clientUpdateManager.LastError, true));
+                break;
+            case ClientUpdateState.Installing:
+                ShowAppUpdateInfo(InfoBarSeverity.Informational, LocalizedStrings.Get("AppUpdateInstallingTitle"), LocalizedStrings.Get("AppUpdateInstallingMessage"));
+                break;
+            case ClientUpdateState.PermissionRequired:
+                ShowAppUpdateInfo(InfoBarSeverity.Warning, LocalizedStrings.Get("AppUpdatePermissionRequiredTitle"), LocalizedStrings.Get("AppUpdatePermissionRequiredMessage"));
+                break;
+            case ClientUpdateState.InstallFailed:
+                ShowAppUpdateInfo(InfoBarSeverity.Error, LocalizedStrings.Get("AppUpdateFailedTitle"), GetAppUpdateErrorMessage(_clientUpdateManager.LastError, false));
+                break;
+            default:
+                IsAppUpdateInfoBarOpen = false;
+                break;
+        }
+
+        _isApplyingClientUpdateState = false;
+    }
+
+    private void ShowAppUpdateInfo(InfoBarSeverity severity, string title, string message)
+    {
+        AppUpdateInfoBarSeverity = severity;
+        AppUpdateInfoBarTitle = title;
+        AppUpdateInfoBarMessage = message;
+        IsAppUpdateInfoBarOpen = true;
+    }
+
+    /// <summary>
+    /// The message for a failed update. Other input and output failures are a broken connection while checking, and a file that could not be saved while installing.
+    /// </summary>
+    private static string GetAppUpdateErrorMessage(Exception? exception, bool isCheck) => exception switch
+    {
+        HttpRequestException { StatusCode: { } statusCode } => string.Format(CultureInfo.CurrentCulture, LocalizedStrings.Get("AppUpdateRequestFailedFormat"), (int)statusCode),
+        HttpRequestException => LocalizedStrings.Get("AppUpdateServerUnreachableError"),
+        TimeoutException => LocalizedStrings.Get("AppUpdateTimeoutError"),
+        InvalidDataException => LocalizedStrings.Get("AppUpdateInvalidDataError"),
+        InvalidOperationException or System.ComponentModel.Win32Exception => LocalizedStrings.Get("AppUpdateLaunchError"),
+        HttpIOException => LocalizedStrings.Get("AppUpdateConnectionLostError"),
+        IOException when isCheck => LocalizedStrings.Get("AppUpdateConnectionLostError"),
+        _ => LocalizedStrings.Get("AppUpdateFileError"),
+    };
 
     [RelayCommand]
     private async Task CreateInviteAsync()

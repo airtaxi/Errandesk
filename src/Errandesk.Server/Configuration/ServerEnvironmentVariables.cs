@@ -29,4 +29,5 @@ public static class ServerEnvironmentVariables
     public const string ApnsEnvironment = "ERRANDESK_APNS_ENVIRONMENT";
     public const string MicrosoftGraphClientId = "ERRANDESK_MICROSOFT_GRAPH_CLIENT_ID";
     public const string MicrosoftGraphTenant = "ERRANDESK_MICROSOFT_GRAPH_TENANT";
+    public const string ClientUpdateBaseUrl = "ERRANDESK_CLIENT_UPDATE_BASE_URL";
 }

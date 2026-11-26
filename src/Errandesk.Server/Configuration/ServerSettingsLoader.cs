@@ -59,6 +59,7 @@ public sealed class ServerSettingsLoader(Func<string, string?> readVariable, Fun
         var fcmSettings = ReadFcmSettings(errors);
         var apnsSettings = ReadApnsSettings(errors);
         var microsoftGraphSettings = ReadMicrosoftGraphSettings();
+        var clientUpdateBaseUrl = ReadClientUpdateBaseUrl(errors);
 
         if (errors.Count > 0 || mongoDbConnectionString is null || jwtSigningKey is null) return ServerSettingsLoadResult.Failure(errors);
 
@@ -76,6 +77,7 @@ public sealed class ServerSettingsLoader(Func<string, string?> readVariable, Fun
             Fcm = fcmSettings,
             Apns = apnsSettings,
             MicrosoftGraph = microsoftGraphSettings,
+            ClientUpdateBaseUrl = clientUpdateBaseUrl,
         });
     }
 
@@ -262,6 +264,17 @@ public sealed class ServerSettingsLoader(Func<string, string?> readVariable, Fun
 
         var tenant = ReadValue(MicrosoftGraphTenant) ?? DefaultMicrosoftGraphTenant;
         return new MicrosoftGraphSettings { ClientId = clientId, Tenant = tenant };
+    }
+
+    /// <summary>Reads the client update base URL; the returned URL always ends with a slash so relative paths resolve below it.</summary>
+    private Uri? ReadClientUpdateBaseUrl(List<string> errors)
+    {
+        var value = ReadValue(ClientUpdateBaseUrl);
+        if (value is null) return null;
+
+        var baseUrl = ClientUpdateLayout.NormalizeBaseUrl(value);
+        if (baseUrl is null) errors.Add($"{ClientUpdateBaseUrl} must be an absolute http or https URL without a query or fragment.");
+        return baseUrl;
     }
 
     /// <summary>Accepts a group that is either completely set or completely unset, and reports a partially configured group.</summary>
