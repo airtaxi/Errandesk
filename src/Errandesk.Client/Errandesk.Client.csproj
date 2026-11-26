@@ -90,14 +90,28 @@
     <Warning Text="ERRANDESK_CLIENT_GOOGLE_SERVICES_JSON names a file that does not exist, so Android push is left out of this build." />
   </Target>
 
-  <!-- Android release signing; the password file serves as both key and keystore password. -->
-  <PropertyGroup Condition="'$(ErrandeskTargetPlatform)' == 'android' and '$(ERRANDESK_CLIENT_ANDROID_KEYSTORE)' != '' and '$(ERRANDESK_CLIENT_ANDROID_KEY_ALIAS)' != '' and '$(ERRANDESK_CLIENT_ANDROID_KEY_PASSWORD_FILE)' != ''">
+  <!--
+    Android release signing. The key password file is required. The keystore password
+    file can differ; when it is empty, the key password file is used for both.
+  -->
+  <PropertyGroup Condition="'$(ErrandeskTargetPlatform)' == 'android'">
+    <ErrandeskAndroidSigningConfigured Condition="'$(ERRANDESK_CLIENT_ANDROID_KEYSTORE)' != '' and '$(ERRANDESK_CLIENT_ANDROID_KEY_ALIAS)' != '' and '$(ERRANDESK_CLIENT_ANDROID_KEY_PASSWORD_FILE)' != ''">true</ErrandeskAndroidSigningConfigured>
+    <ErrandeskAndroidSigningStarted Condition="'$(ERRANDESK_CLIENT_ANDROID_KEYSTORE)' != '' or '$(ERRANDESK_CLIENT_ANDROID_KEY_ALIAS)' != '' or '$(ERRANDESK_CLIENT_ANDROID_KEY_PASSWORD_FILE)' != '' or '$(ERRANDESK_CLIENT_ANDROID_KEYSTORE_PASSWORD_FILE)' != ''">true</ErrandeskAndroidSigningStarted>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(ErrandeskTargetPlatform)' == 'android' and '$(ErrandeskAndroidSigningConfigured)' == 'true'">
     <AndroidKeyStore>true</AndroidKeyStore>
     <AndroidSigningKeyStore>$(ERRANDESK_CLIENT_ANDROID_KEYSTORE)</AndroidSigningKeyStore>
     <AndroidSigningKeyAlias>$(ERRANDESK_CLIENT_ANDROID_KEY_ALIAS)</AndroidSigningKeyAlias>
     <AndroidSigningKeyPass>file:$(ERRANDESK_CLIENT_ANDROID_KEY_PASSWORD_FILE)</AndroidSigningKeyPass>
-    <AndroidSigningStorePass>file:$(ERRANDESK_CLIENT_ANDROID_KEY_PASSWORD_FILE)</AndroidSigningStorePass>
+    <ErrandeskAndroidStorePasswordFile Condition="'$(ERRANDESK_CLIENT_ANDROID_KEYSTORE_PASSWORD_FILE)' != ''">$(ERRANDESK_CLIENT_ANDROID_KEYSTORE_PASSWORD_FILE)</ErrandeskAndroidStorePasswordFile>
+    <ErrandeskAndroidStorePasswordFile Condition="'$(ErrandeskAndroidStorePasswordFile)' == ''">$(ERRANDESK_CLIENT_ANDROID_KEY_PASSWORD_FILE)</ErrandeskAndroidStorePasswordFile>
+    <AndroidSigningStorePass>file:$(ErrandeskAndroidStorePasswordFile)</AndroidSigningStorePass>
   </PropertyGroup>
+
+  <Target Name="ErrandeskWarnIncompleteAndroidSigning" BeforeTargets="Build" Condition="'$(ErrandeskAndroidSigningStarted)' == 'true' and '$(ErrandeskAndroidSigningConfigured)' != 'true'">
+    <Warning Text="Android signing is partially configured. Set ERRANDESK_CLIENT_ANDROID_KEYSTORE, ERRANDESK_CLIENT_ANDROID_KEY_ALIAS, and ERRANDESK_CLIENT_ANDROID_KEY_PASSWORD_FILE together; otherwise the APK uses debug signing." />
+  </Target>
 
   <!-- iOS device signing. -->
   <PropertyGroup Condition="'$(ErrandeskTargetPlatform)' == 'ios'">

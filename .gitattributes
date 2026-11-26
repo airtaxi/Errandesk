@@ -3,6 +3,11 @@
 # Shell scripts must keep LF line endings to run inside containers
 *.sh text eol=lf
 
+# Windows build scripts
+*.ps1 text eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
 # Images and icons
 *.png binary
 *.jpg binary

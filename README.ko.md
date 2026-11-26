@@ -242,7 +242,8 @@ Windows에서 iOS 워크로드 없이 솔루션을 빌드할 때 `net11.0-ios` �
 | `ERRANDESK_CLIENT_GOOGLE_SERVICES_JSON` | Android | `google-services.json` 파일 경로입니다. `Xamarin.Firebase.Messaging`과 `ERRANDESK_FIREBASE_MESSAGING`을 활성화합니다. | `src/Errandesk.Client/Platforms/Android/google-services.json`이 있으면 이를 사용하고, 없으면 FCM을 제외하고 로컬 알람을 사용합니다. |
 | `ERRANDESK_CLIENT_ANDROID_KEYSTORE` | Android | 릴리스 `.keystore` 또는 `.jks` 파일 경로입니다. | 디버그 서명 |
 | `ERRANDESK_CLIENT_ANDROID_KEY_ALIAS` | Android | 키 저장소 내 서명 키 별칭입니다. | 디버그 서명 |
-| `ERRANDESK_CLIENT_ANDROID_KEY_PASSWORD_FILE` | Android | 비밀번호가 담긴 파일 경로입니다(키와 키 저장소 비밀번호 모두에 사용). | 디버그 서명 |
+| `ERRANDESK_CLIENT_ANDROID_KEYSTORE_PASSWORD_FILE` | Android | keystore 비밀번호가 담긴 파일 경로입니다. 설정하지 않으면 키 비밀번호 파일을 keystore에도 사용합니다. | 디버그 서명 |
+| `ERRANDESK_CLIENT_ANDROID_KEY_PASSWORD_FILE` | Android | 키 별칭 비밀번호가 담긴 파일 경로입니다. | 디버그 서명 |
 | `ERRANDESK_CLIENT_IOS_CODESIGN_KEY` | iOS | 실기기 빌드용 Apple 서명 ID입니다. | 기본/시뮬레이터 서명 |
 | `ERRANDESK_CLIENT_IOS_PROVISIONING_PROFILE` | iOS | 실기기 빌드용 프로비저닝 프로필입니다. | 기본/시뮬레이터 서명 |
 | `ERRANDESK_CLIENT_WINDOWS_CERTIFICATE` | Windows | MSIX 서명용 암호 없는 `.pfx` 인증서 경로입니다. | 로컬 개발 서명 |

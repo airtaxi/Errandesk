@@ -501,3 +501,6 @@ $RECYCLE.BIN/
 # Server secrets
 deploy/.env
 deploy/secrets/
+
+# Build automation local settings and outputs
+scripts/local/

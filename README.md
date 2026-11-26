@@ -242,7 +242,8 @@ All `ERRANDESK_CLIENT_*` environment variables are optional. MSBuild reads them 
 | `ERRANDESK_CLIENT_GOOGLE_SERVICES_JSON` | Android | Path to `google-services.json`. Enables `Xamarin.Firebase.Messaging` and `ERRANDESK_FIREBASE_MESSAGING`. | Uses `src/Errandesk.Client/Platforms/Android/google-services.json` if present; otherwise FCM is compiled out and local alarms are used. |
 | `ERRANDESK_CLIENT_ANDROID_KEYSTORE` | Android | Path to the release `.keystore` / `.jks` file. | Debug signing |
 | `ERRANDESK_CLIENT_ANDROID_KEY_ALIAS` | Android | Signing key alias inside the keystore. | Debug signing |
-| `ERRANDESK_CLIENT_ANDROID_KEY_PASSWORD_FILE` | Android | Path to a file containing the password (used for both key and keystore password). | Debug signing |
+| `ERRANDESK_CLIENT_ANDROID_KEYSTORE_PASSWORD_FILE` | Android | Path to a file containing the keystore password. When unset, the key password file is used for both. | Debug signing |
+| `ERRANDESK_CLIENT_ANDROID_KEY_PASSWORD_FILE` | Android | Path to a file containing the key alias password. | Debug signing |
 | `ERRANDESK_CLIENT_IOS_CODESIGN_KEY` | iOS | Apple signing identity for device builds. | Default/simulator signing |
 | `ERRANDESK_CLIENT_IOS_PROVISIONING_PROFILE` | iOS | Provisioning profile for device builds. | Default/simulator signing |
 | `ERRANDESK_CLIENT_WINDOWS_CERTIFICATE` | Windows | Path to a passwordless `.pfx` certificate for MSIX signing. | Local development signing |
