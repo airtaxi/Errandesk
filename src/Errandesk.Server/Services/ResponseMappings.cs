@@ -34,6 +34,8 @@ public static class ResponseMappings
 
     public static ImportJobResponse ToResponse(this ImportJobDocument job) => new(job.Id, job.Source, job.Status, job.UserCode, job.VerificationUri, ToUtcOffset(job.ExpiresAt), job.ListsImported, job.ListsSkipped, job.TasksImported, job.TasksSkipped, job.StepsImported, job.Error, ToUtcOffset(job.CreatedAt), ToUtcOffset(job.CompletedAt));
 
+    public static ConversationAttachmentResponse ToResponse(this ConversationAttachmentDocument attachment) => new(attachment.Id, attachment.MediaType, attachment.Data.LongLength, ToUtcOffset(attachment.CreatedAt));
+
     public static ConversationResponse ToResponse(this ConversationDocument conversation, bool hasPendingApprovals) => new(conversation.Id, conversation.Title, hasPendingApprovals, ToUtcOffset(conversation.CreatedAt), ToUtcOffset(conversation.UpdatedAt), conversation.IsBriefing);
 
     public static ApprovalRequestResponse ToResponse(this ApprovalRecordDocument approval) => new(approval.ApprovalId, approval.ToolName, approval.EntityType, approval.EntityId, approval.EntityTitle, approval.Status);

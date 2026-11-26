@@ -1,18 +1,29 @@
 using System.Collections.Specialized;
+using Errandesk.Client.Helpers;
 using Errandesk.Client.Models;
+using Errandesk.Client.Services;
 using Errandesk.Client.ViewModels;
 using Microsoft.UI.Xaml.Input;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage;
 using Windows.System;
+#if WINDOWS
+using Microsoft.Windows.Storage.Pickers;
+#else
+using Windows.Storage.Pickers;
+#endif
 
 namespace Errandesk.Client.Views;
 
 /// <summary>
 /// The assistant pane: conversations, streamed replies with tool activity and approval cards, and the message box.
-/// Enter sends the message and Shift+Enter starts a new line.
+/// Enter sends the message and Shift+Enter starts a new line. Images are added with the attach button, by pasting, or by dropping files on the conversation.
 /// </summary>
 public sealed partial class AssistantView : UserControl
 {
     private const double BottomStickDistance = 24;
+
+    private static readonly string[] s_imageFileExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"];
 
     private bool _isShiftKeyDown;
     private bool _isScrolledToBottom = true;
@@ -21,6 +32,8 @@ public sealed partial class AssistantView : UserControl
     {
         InitializeComponent();
         ViewModel.Messages.CollectionChanged += OnMessagesCollectionChanged;
+        ChatGrid.AddHandler(DragOverEvent, new DragEventHandler(OnChatGridDragOver), handledEventsToo: true);
+        ChatGrid.AddHandler(DropEvent, new DragEventHandler(OnChatGridDrop), handledEventsToo: true);
     }
 
     /// <summary>
@@ -69,6 +82,111 @@ public sealed partial class AssistantView : UserControl
             MessageTextBox.Select(MessageTextBox.Text.Length, 0);
         }
         finally { DictateButton.IsEnabled = true; }
+    }
+
+    private async void OnAttachImageButtonClicked(object sender, RoutedEventArgs e)
+    {
+        List<Func<Task<Stream>>> imageSources = [];
+#if WINDOWS
+        var fileOpenPicker = new FileOpenPicker(XamlRoot.ContentIslandEnvironment.AppWindowId);
+        foreach (var extension in s_imageFileExtensions) fileOpenPicker.FileTypeFilter.Add(extension);
+        fileOpenPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+        var results = await fileOpenPicker.PickMultipleFilesAsync();
+        foreach (var result in results) imageSources.Add(() => Task.FromResult<Stream>(File.OpenRead(result.Path)));
+#else
+        var fileOpenPicker = new FileOpenPicker();
+        foreach (var extension in s_imageFileExtensions) fileOpenPicker.FileTypeFilter.Add(extension);
+        fileOpenPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+        var files = await fileOpenPicker.PickMultipleFilesAsync();
+        foreach (var file in files) imageSources.Add(file.OpenStreamForReadAsync);
+#endif
+        await ViewModel.AddImagesAsync(imageSources);
+        MessageTextBox.Focus(FocusState.Programmatic);
+    }
+
+    private void OnRemovePendingImageButtonClicked(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: PendingImageModel image })
+        {
+            ViewModel.RemovePendingImage(image);
+        }
+    }
+
+    /// <summary>
+    /// Shows a sent image at full size.
+    /// </summary>
+    private async void OnMessageImageButtonClicked(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { DataContext: MessageImageModel image }) return;
+        if (await ViewModel.LoadFullImageAsync(image) is not { } imageSource) return;
+
+        var maximumHeight = XamlRoot is { } xamlRoot ? xamlRoot.Size.Height * 0.7 : 600;
+        var imageElement = new Image { Source = imageSource, Stretch = Stretch.Uniform, MaxHeight = maximumHeight };
+        await App.GetService<DialogService>().ShowPanelAsync(string.Empty, imageElement, LocalizedStrings.Get("DialogCloseButtonText"), null);
+    }
+
+    /// <summary>
+    /// Adds an image or image files from the clipboard to the message box instead of pasting them as text.
+    /// </summary>
+    private async void OnMessageTextBoxPaste(object sender, TextControlPasteEventArgs e)
+    {
+        DataPackageView clipboardContent;
+        try { clipboardContent = Clipboard.GetContent(); }
+        catch (Exception exception) when (exception is not OutOfMemoryException) { return; }
+
+        if (!clipboardContent.Contains(StandardDataFormats.Bitmap) && !clipboardContent.Contains(StandardDataFormats.StorageItems)) return;
+        e.Handled = true;
+        await AddImagesAsync(clipboardContent);
+    }
+
+    private void OnChatGridDragOver(object sender, DragEventArgs e)
+    {
+        if (!ViewModel.CanAddImages || (!e.DataView.Contains(StandardDataFormats.StorageItems) && !e.DataView.Contains(StandardDataFormats.Bitmap))) return;
+        e.AcceptedOperation = DataPackageOperation.Copy;
+        e.Handled = true;
+    }
+
+    private async void OnChatGridDrop(object sender, DragEventArgs e)
+    {
+        if (!ViewModel.CanAddImages || (!e.DataView.Contains(StandardDataFormats.StorageItems) && !e.DataView.Contains(StandardDataFormats.Bitmap))) return;
+        e.Handled = true;
+        var deferral = e.GetDeferral();
+        List<Func<Task<Stream>>> imageSources;
+        try { imageSources = await GetImageSourcesAsync(e.DataView); }
+        finally { deferral.Complete(); }
+
+        await ViewModel.AddImagesAsync(imageSources);
+    }
+
+    private async Task AddImagesAsync(DataPackageView content) => await ViewModel.AddImagesAsync(await GetImageSourcesAsync(content));
+
+    /// <summary>
+    /// Openers for the image files in <paramref name="content"/>, or for its bitmap when it holds no files. Files that are not images are left out.
+    /// </summary>
+    private async Task<List<Func<Task<Stream>>>> GetImageSourcesAsync(DataPackageView content)
+    {
+        List<Func<Task<Stream>>> imageSources = [];
+        try
+        {
+            if (content.Contains(StandardDataFormats.StorageItems))
+            {
+                foreach (var item in await content.GetStorageItemsAsync())
+                {
+                    if (item is StorageFile file && s_imageFileExtensions.Contains(Path.GetExtension(file.Name), StringComparer.OrdinalIgnoreCase))
+                    {
+                        imageSources.Add(file.OpenStreamForReadAsync);
+                    }
+                }
+            }
+            else if (content.Contains(StandardDataFormats.Bitmap))
+            {
+                var bitmap = await content.GetBitmapAsync();
+                imageSources.Add(async () => (await bitmap.OpenReadAsync()).AsStreamForRead());
+            }
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException) { ViewModel.ReportUnreadableImages(1); }
+
+        return imageSources;
     }
 
     private async void OnConversationListViewItemClicked(object sender, ItemClickEventArgs e)

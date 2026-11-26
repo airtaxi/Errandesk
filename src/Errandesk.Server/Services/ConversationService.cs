@@ -39,17 +39,18 @@ public sealed class ConversationService(ErrandeskDatabase database, ChangeVersio
         return new CreateResult<ConversationResponse>(result.Resource.ToResponse(false), result.IsCreated);
     }
 
-    /// <summary>Deletes the conversation, keeping a tombstone, and removes its messages.</summary>
+    /// <summary>Deletes the conversation, keeping a tombstone, and removes its messages and images.</summary>
     public async Task DeleteAsync(Guid userId, Guid conversationId, CancellationToken cancellationToken)
     {
         await documentUpdater.SoftDeleteAsync(database.Conversations, VisibleFilter(userId, conversationId), ResourceName, cancellationToken);
         await database.ConversationMessages.DeleteManyAsync(message => message.ConversationId == conversationId && message.OwnerUserId == userId, cancellationToken);
+        await database.ConversationAttachments.DeleteManyAsync(attachment => attachment.ConversationId == conversationId && attachment.OwnerUserId == userId, cancellationToken);
     }
 
     public async Task<ConversationDocument> GetVisibleAsync(Guid userId, Guid conversationId, CancellationToken cancellationToken) => await database.Conversations.Find(VisibleFilter(userId, conversationId)).FirstOrDefaultAsync(cancellationToken) ?? throw new ResourceNotFoundException(ResourceName);
 
     /// <summary>
-    /// The messages shown to the user, oldest first: each user message, and one assistant message per run with its text, tool activity and approval requests.
+    /// The messages shown to the user, oldest first: each user message with its images, and one assistant message per run with its text, tool activity and approval requests.
     /// </summary>
     public async Task<IReadOnlyList<ConversationMessageResponse>> GetMessagesAsync(Guid userId, Guid conversationId, CancellationToken cancellationToken)
     {
@@ -74,9 +75,9 @@ public sealed class ConversationService(ErrandeskDatabase database, ChangeVersio
         {
             if (document.Role == ConversationMessageDocument.UserRole)
             {
-                if (document.Text.Length == 0) continue;
+                if (document.Text.Length == 0 && document.AttachmentIds.Count == 0) continue;
                 FlushRun();
-                messages.Add(new ConversationMessageResponse(document.Id, ConversationRoles.User, document.Text, [], [], ResponseMappings.ToUtcOffset(document.CreatedAt)));
+                messages.Add(new ConversationMessageResponse(document.Id, ConversationRoles.User, document.Text, [], [], ResponseMappings.ToUtcOffset(document.CreatedAt), document.AttachmentIds));
                 continue;
             }
 

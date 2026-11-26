@@ -61,6 +61,7 @@ public static class ErrandeskServerApplication
         builder.Services.AddSingleton<EventStreamOptions>();
         builder.Services.AddSingleton<AgentActionService>();
         builder.Services.AddSingleton<ConversationService>();
+        builder.Services.AddSingleton<ConversationAttachmentService>();
         builder.Services.AddSingleton<AgentToolsetFactory>();
         builder.Services.AddSingleton<AssistantConversationRunner>();
         builder.Services.AddSingleton<MorningBriefingService>();

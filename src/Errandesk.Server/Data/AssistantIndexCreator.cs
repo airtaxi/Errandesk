@@ -3,12 +3,17 @@ using MongoDB.Driver;
 namespace Errandesk.Server.Data;
 
 /// <summary>
-/// Creates the indexes of the <c>conversations</c>, <c>conversation_messages</c> and <c>agent_actions</c> collections.
+/// Creates the indexes of the <c>conversations</c>, <c>conversation_messages</c>, <c>conversation_attachments</c> and <c>agent_actions</c> collections.
+/// Unsent attachments expire at their <see cref="ConversationAttachmentDocument.UnsentExpiresAt"/>.
 /// </summary>
 public sealed class AssistantIndexCreator : IMongoIndexCreator
 {
     public async Task CreateIndexesAsync(IMongoDatabase database, CancellationToken cancellationToken)
     {
+        var attachments = database.GetCollection<ConversationAttachmentDocument>(MongoCollectionNames.ConversationAttachments);
+        var attachmentKeys = Builders<ConversationAttachmentDocument>.IndexKeys;
+        await attachments.Indexes.CreateManyAsync([new CreateIndexModel<ConversationAttachmentDocument>(attachmentKeys.Ascending(attachment => attachment.ConversationId)), new CreateIndexModel<ConversationAttachmentDocument>(attachmentKeys.Ascending(attachment => attachment.UnsentExpiresAt), new CreateIndexOptions { Name = MongoIndexNames.UnsentAttachmentExpiry, ExpireAfter = TimeSpan.Zero })], cancellationToken);
+
         var conversations = database.GetCollection<ConversationDocument>(MongoCollectionNames.Conversations);
         var conversationKeys = Builders<ConversationDocument>.IndexKeys;
         await conversations.Indexes.CreateOneAsync(new CreateIndexModel<ConversationDocument>(conversationKeys.Ascending(conversation => conversation.OwnerUserId).Ascending(conversation => conversation.IsDeleted).Descending(conversation => conversation.UpdatedAt)), cancellationToken: cancellationToken);

@@ -16,6 +16,7 @@ When an OpenAI-compatible Chat Completions endpoint is configured on the server,
 
 - **Tool activity and Undo**: Every tool call appears inline in the conversation. Write operations (such as creating a task or setting a reminder) include an **Undo** button so recorded changes can be reverted directly from the chat.
 - **Approval for destructive actions**: Tools that delete data (`delete_task`, `delete_task_list`, `delete_note`) pause execution and present an approval card with **Approve** and **Deny** buttons before anything is removed.
+- **Image attachments**: Attach up to 10 images per message using the attach button, pasting, or dragging files onto the conversation (pasting and dragging are supported on Windows and desktop). The client rotates each image upright, scales it to at most 2048 pixels on the longer side, and converts it to JPEG before upload. The server accepts JPEG, PNG, GIF, and WebP files up to 5 MB. Images are kept with the conversation and deleted with it, and the 20 most recent images from earlier messages are sent to the model again in later turns. The configured model must support image input.
 
 ![AI assistant conversation paused at an approval card with Approve and Deny buttons before deleting a task](docs/screenshots/en/approval.png)
 

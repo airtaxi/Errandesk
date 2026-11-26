@@ -14,6 +14,7 @@ public static class MongoIndexNames
     public const string UniqueConversationMessageSequence = "conversationId_sequence_unique";
     public const string DueReminders = "reminderAt_due";
     public const string IdempotencyKeyExpiry = "createdAt_ttl";
+    public const string UnsentAttachmentExpiry = "unsentExpiresAt_ttl";
     public const string Tombstones = "deletedAt_updatedAt_tombstones";
     public const string UniqueExternalItem = "ownerUserId_externalSource_externalId_unique";
     public const string UniqueApiTokenHash = "apiTokenHash_unique";

@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization.Metadata;
 using Errandesk.Client.Managers;
@@ -29,6 +30,29 @@ public sealed class AuthenticatedApiClient(HttpClient httpClient, SessionManager
     public Task DeleteConversationAsync(Guid conversationId, CancellationToken cancellationToken) => DeleteAsync($"api/conversations/{conversationId}", cancellationToken);
 
     public Task<IReadOnlyList<ConversationMessageResponse>> GetConversationMessagesAsync(Guid conversationId, CancellationToken cancellationToken) => GetAsync($"api/conversations/{conversationId}/messages", JsonContext.IReadOnlyListConversationMessageResponse, cancellationToken);
+
+    /// <summary>
+    /// Uploads an image for the next message of a conversation.
+    /// </summary>
+    /// <exception cref="ApiException">400 when the image is too large or not a supported format.</exception>
+    public async Task<ConversationAttachmentResponse> UploadConversationAttachmentAsync(Guid conversationId, byte[] data, string mediaType, CancellationToken cancellationToken)
+    {
+        var content = new ByteArrayContent(data);
+        content.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Post, CreateUri($"api/conversations/{conversationId}/attachments")) { Content = content };
+        using var response = await httpClient.SendAsync(requestMessage, cancellationToken);
+        return await ApiResponseReader.ReadAsync(response, JsonContext.ConversationAttachmentResponse, cancellationToken);
+    }
+
+    /// <summary>
+    /// Downloads the image file of a conversation attachment.
+    /// </summary>
+    public async Task<byte[]> GetConversationAttachmentAsync(Guid conversationId, Guid attachmentId, CancellationToken cancellationToken)
+    {
+        using var response = await httpClient.GetAsync(CreateUri($"api/conversations/{conversationId}/attachments/{attachmentId}"), cancellationToken);
+        await ApiResponseReader.EnsureSuccessAsync(response, cancellationToken);
+        return await response.Content.ReadAsByteArrayAsync(cancellationToken);
+    }
 
     /// <summary>
     /// Restores the items an assistant action changed to their state before the action.

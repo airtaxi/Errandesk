@@ -187,6 +187,12 @@
   <data name="AppUpToDateTitle" xml:space="preserve">
     <value>Errandesk is up to date</value>
   </data>
+  <data name="AssistantAttachImageButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Attach images</value>
+  </data>
+  <data name="AssistantAttachImageToolTip.Content" xml:space="preserve">
+    <value>Attach images (up to 10)</value>
+  </data>
   <data name="AssistantAvailableText" xml:space="preserve">
     <value>Available</value>
   </data>
@@ -222,6 +228,15 @@
   </data>
   <data name="AssistantEmptyTextBlock.Text" xml:space="preserve">
     <value>Ask about your tasks and notes, or ask for help planning your day.</value>
+  </data>
+  <data name="AssistantImageLimitErrorFormat" xml:space="preserve">
+    <value>A message can carry up to {0} images.</value>
+  </data>
+  <data name="AssistantImageProgressRing.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Preparing images</value>
+  </data>
+  <data name="AssistantImageReadErrorFormat" xml:space="preserve">
+    <value>{0} image(s) could not be read. Use JPEG, PNG, GIF, WebP or BMP images.</value>
   </data>
   <data name="AssistantLabelTextBlock.Text" xml:space="preserve">
     <value>Assistant</value>
@@ -796,6 +811,9 @@
   <data name="MemberUserNameTextBox.PlaceholderText" xml:space="preserve">
     <value>The exact user name</value>
   </data>
+  <data name="MessageImageButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Open attached image</value>
+  </data>
   <data name="MonthlyRecurrenceMenuItem.Text" xml:space="preserve">
     <value>Monthly</value>
   </data>
@@ -955,6 +973,9 @@
   <data name="PasswordTooShortError" xml:space="preserve">
     <value>The password must have at least 8 characters.</value>
   </data>
+  <data name="PendingImage.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Image to send</value>
+  </data>
   <data name="PickDueDateDialogTitle" xml:space="preserve">
     <value>Pick a due date</value>
   </data>
@@ -1080,6 +1101,9 @@
   </data>
   <data name="RemoveListMemberButtonNameFormat" xml:space="preserve">
     <value>Remove {0}</value>
+  </data>
+  <data name="RemovePendingImageButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Remove image</value>
   </data>
   <data name="RenameButtonText" xml:space="preserve">
     <value>Rename</value>

@@ -52,6 +52,7 @@ namespace Errandesk.Contracts;
 [JsonSerializable(typeof(ConversationMessageResponse))]
 [JsonSerializable(typeof(IReadOnlyList<ConversationMessageResponse>))]
 [JsonSerializable(typeof(SendMessageRequest))]
+[JsonSerializable(typeof(ConversationAttachmentResponse))]
 [JsonSerializable(typeof(ApprovalDecisionsRequest))]
 [JsonSerializable(typeof(ApprovalRequestResponse))]
 [JsonSerializable(typeof(AgentActionResponse))]

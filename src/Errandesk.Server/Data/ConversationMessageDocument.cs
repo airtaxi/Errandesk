@@ -26,6 +26,11 @@ public sealed class ConversationMessageDocument : DocumentBase
     /// <summary>The message contents in the JSON form of the chat abstractions, including tool calls, tool results and approval requests.</summary>
     public string ContentsJson { get; set; } = "[]";
 
+    /// <summary>
+    /// Images of a user message, in order. Their data is stored in <c>conversation_attachments</c> and is not part of <see cref="ContentsJson"/>.
+    /// </summary>
+    public List<Guid> AttachmentIds { get; set; } = [];
+
     /// <summary>Tools whose results this message carries.</summary>
     public List<ToolCallRecordDocument> ToolCalls { get; set; } = [];
 

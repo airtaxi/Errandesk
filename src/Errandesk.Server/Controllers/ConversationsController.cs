@@ -13,7 +13,7 @@ namespace Errandesk.Server.Controllers;
 [ApiController]
 [Route("api/conversations")]
 [Authorize]
-public sealed class ConversationsController(ConversationService conversationService, AssistantConversationRunner runner) : ControllerBase
+public sealed class ConversationsController(ConversationService conversationService, ConversationAttachmentService attachmentService, AssistantConversationRunner runner) : ControllerBase
 {
     /// <summary>Conversations, most recently changed first.</summary>
     [HttpGet]
@@ -71,7 +71,36 @@ public sealed class ConversationsController(ConversationService conversationServ
         return conversationService.GetMessagesAsync(User.GetUserId(), conversationId, cancellationToken);
     }
 
-    /// <summary>Sends a message and streams the reply as server-sent events. Pending approval requests are denied.</summary>
+    /// <summary>
+    /// Stores an image for the next message of the conversation. The request body is the image file: JPEG, PNG, GIF or WebP,
+    /// at most <see cref="ConversationAttachmentLimits.MaximumLength"/> bytes. Images that are not sent within a day are removed.
+    /// </summary>
+    [HttpPost("{conversationId:guid}/attachments")]
+    [ProducesResponseType<ConversationAttachmentResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<ActionResult<ConversationAttachmentResponse>> CreateAttachmentAsync(Guid conversationId, CancellationToken cancellationToken)
+    {
+        runner.EnsureAvailable();
+        var attachment = await attachmentService.CreateAsync(User.GetUserId(), conversationId, Request.Body, cancellationToken);
+        return Created($"/api/conversations/{conversationId}/attachments/{attachment.Id}", attachment);
+    }
+
+    /// <summary>The image file of an attachment. Its content never changes, so clients may cache it.</summary>
+    [HttpGet("{conversationId:guid}/attachments/{attachmentId:guid}")]
+    [ProducesResponseType<FileContentResult>(StatusCodes.Status200OK, ImageMediaTypes.Jpeg, ImageMediaTypes.Png, ImageMediaTypes.Gif, ImageMediaTypes.Webp)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<FileContentResult> GetAttachmentAsync(Guid conversationId, Guid attachmentId, CancellationToken cancellationToken)
+    {
+        runner.EnsureAvailable();
+        var attachment = await attachmentService.GetAsync(User.GetUserId(), conversationId, attachmentId, cancellationToken);
+        Response.Headers.CacheControl = "private, max-age=31536000, immutable";
+        return File(attachment.Data, attachment.MediaType);
+    }
+
+    /// <summary>Sends a message with optional images and streams the reply as server-sent events. Pending approval requests are denied.</summary>
     [HttpPost("{conversationId:guid}/messages")]
     [IdempotencyExempt]
     [Produces(ServerSentEventWriter.ContentType)]

@@ -3,6 +3,7 @@ using Errandesk.Contracts;
 using Errandesk.Server.Agent;
 using Errandesk.Server.Tests.Infrastructure;
 using Microsoft.Extensions.AI;
+using MongoDB.Driver;
 
 namespace Errandesk.Server.Tests.Agent;
 
@@ -248,6 +249,96 @@ public sealed class AssistantConversationTests(MongoDbContainerFixture mongoDb)
         Assert.Equal("Reply 25", request[^2].Text);
         Assert.Equal("Last message", request[^1].Text);
         Assert.Equal((TurnCount + 1) * 2, (await alice.Client.GetAsync<IReadOnlyList<ConversationMessageResponse>>($"{ConversationsPath}/{conversation.Id}/messages")).Count);
+    }
+
+    [Fact]
+    public async Task AttachedImages_AreSentToTheModelKeptInTheHistoryAndRemovedWithTheConversation()
+    {
+        var chatClient = new ScriptedChatClient();
+        await using var server = await ApiTestServer.StartAsync(mongoDb, chatClient: chatClient);
+        var alice = await server.RegisterAsync("alice");
+        var bob = await server.RegisterInvitedAsync(alice, "bob");
+        var conversation = await alice.Client.PostAsync<ConversationResponse>(ConversationsPath, new CreateConversationRequest(), HttpStatusCode.Created);
+        var attachmentsPath = $"{ConversationsPath}/{conversation.Id}/attachments";
+        byte[] pngImage = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3];
+        byte[] jpegImage = [0xFF, 0xD8, 0xFF, 0xE0, 4, 5, 6];
+
+        var png = await UploadAsync(alice, attachmentsPath, pngImage, "image/png");
+        var jpeg = await UploadAsync(alice, attachmentsPath, jpegImage, "application/octet-stream");
+        Assert.Equal("image/png", png.MediaType);
+        Assert.Equal(pngImage.Length, png.Length);
+        Assert.Equal("image/jpeg", jpeg.MediaType);
+
+        chatClient.EnqueueText("Two receipts.");
+        var events = await alice.Client.PostForEventsAsync($"{ConversationsPath}/{conversation.Id}/messages", new SendMessageRequest("", [jpeg.Id, png.Id]));
+
+        Assert.Equal(ServerEventNames.MessageCompleted, events[^1].EventType);
+        var firstUserMessage = chatClient.ReceivedMessages[0][^1];
+        Assert.Equal(ChatRole.User, firstUserMessage.Role);
+        Assert.Equal(["image/jpeg", "image/png"], firstUserMessage.Contents.OfType<DataContent>().Select(content => content.MediaType));
+        Assert.Equal(pngImage, firstUserMessage.Contents.OfType<DataContent>().Last().Data.ToArray());
+        Assert.Empty(firstUserMessage.Contents.OfType<TextContent>());
+
+        chatClient.EnqueueText("The second one.");
+        await SendMessageAsync(alice, conversation.Id, "Which is newer?");
+        var secondRequest = chatClient.ReceivedMessages[1];
+        Assert.Equal(2, secondRequest.Single(message => message.Role == ChatRole.User && message.Contents.OfType<DataContent>().Any()).Contents.OfType<DataContent>().Count());
+        Assert.Equal("Which is newer?", secondRequest[^1].Text);
+
+        var history = await alice.Client.GetAsync<IReadOnlyList<ConversationMessageResponse>>($"{ConversationsPath}/{conversation.Id}/messages");
+        Assert.Equal([ConversationRoles.User, ConversationRoles.Assistant, ConversationRoles.User, ConversationRoles.Assistant], history.Select(message => message.Role));
+        Assert.Equal("", history[0].Text);
+        Assert.Equal([jpeg.Id, png.Id], history[0].AttachmentIds!);
+        Assert.Empty(history[2].AttachmentIds!);
+
+        using (var imageResponse = await alice.Client.SendAsync(HttpMethod.Get, $"{attachmentsPath}/{png.Id}"))
+        {
+            Assert.Equal(HttpStatusCode.OK, imageResponse.StatusCode);
+            Assert.Equal("image/png", imageResponse.Content.Headers.ContentType?.MediaType);
+            Assert.Equal(pngImage, await imageResponse.Content.ReadAsByteArrayAsync(TestContext.Current.CancellationToken));
+        }
+
+        await alice.Client.SendExpectingProblemAsync(HttpMethod.Post, $"{ConversationsPath}/{conversation.Id}/messages", new SendMessageRequest("Again", [png.Id]), HttpStatusCode.BadRequest);
+        await bob.Client.SendExpectingProblemAsync(HttpMethod.Get, $"{attachmentsPath}/{png.Id}", null, HttpStatusCode.NotFound);
+        using (var bobUpload = await bob.Client.SendBytesAsync(HttpMethod.Post, attachmentsPath, pngImage, "image/png")) Assert.Equal(HttpStatusCode.NotFound, bobUpload.StatusCode);
+
+        await alice.Client.DeleteAsync($"{ConversationsPath}/{conversation.Id}");
+        Assert.Equal(0, await server.Database.ConversationAttachments.CountDocumentsAsync(attachment => attachment.ConversationId == conversation.Id, cancellationToken: TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task InvalidAttachments_AreRejected()
+    {
+        var chatClient = new ScriptedChatClient();
+        await using var server = await ApiTestServer.StartAsync(mongoDb, chatClient: chatClient);
+        var alice = await server.RegisterAsync("alice");
+        var conversation = await alice.Client.PostAsync<ConversationResponse>(ConversationsPath, new CreateConversationRequest(), HttpStatusCode.Created);
+        var otherConversation = await alice.Client.PostAsync<ConversationResponse>(ConversationsPath, new CreateConversationRequest(), HttpStatusCode.Created);
+        var attachmentsPath = $"{ConversationsPath}/{conversation.Id}/attachments";
+        var messagesPath = $"{ConversationsPath}/{conversation.Id}/messages";
+
+        using (var textUpload = await alice.Client.SendBytesAsync(HttpMethod.Post, attachmentsPath, "not an image"u8.ToArray(), "image/png")) Assert.Equal(HttpStatusCode.BadRequest, textUpload.StatusCode);
+        using (var emptyUpload = await alice.Client.SendBytesAsync(HttpMethod.Post, attachmentsPath, [], "image/png")) Assert.Equal(HttpStatusCode.BadRequest, emptyUpload.StatusCode);
+        var oversizedImage = new byte[ConversationAttachmentLimits.MaximumLength + 1];
+        oversizedImage[0] = 0xFF;
+        oversizedImage[1] = 0xD8;
+        oversizedImage[2] = 0xFF;
+        using (var oversizedUpload = await alice.Client.SendBytesAsync(HttpMethod.Post, attachmentsPath, oversizedImage, "image/jpeg")) Assert.Equal(HttpStatusCode.BadRequest, oversizedUpload.StatusCode);
+
+        var image = await UploadAsync(alice, attachmentsPath, [0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 1], "image/gif");
+        var otherImage = await UploadAsync(alice, $"{ConversationsPath}/{otherConversation.Id}/attachments", [0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 1], "image/gif");
+        await alice.Client.SendExpectingProblemAsync(HttpMethod.Post, messagesPath, new SendMessageRequest("Look", [image.Id, image.Id]), HttpStatusCode.BadRequest);
+        await alice.Client.SendExpectingProblemAsync(HttpMethod.Post, messagesPath, new SendMessageRequest("Look", [otherImage.Id]), HttpStatusCode.BadRequest);
+        await alice.Client.SendExpectingProblemAsync(HttpMethod.Post, messagesPath, new SendMessageRequest("Look", [.. Enumerable.Range(0, ConversationAttachmentLimits.MaximumCount + 1).Select(_ => Guid.CreateVersion7())]), HttpStatusCode.BadRequest);
+        Assert.Empty(chatClient.ReceivedMessages);
+    }
+
+    private static async Task<ConversationAttachmentResponse> UploadAsync(TestUser user, string attachmentsPath, byte[] image, string contentType)
+    {
+        using var response = await user.Client.SendBytesAsync(HttpMethod.Post, attachmentsPath, image, contentType);
+        var content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        Assert.True(response.StatusCode == HttpStatusCode.Created, $"Upload: expected 201 but got {(int)response.StatusCode}. Body: {content}");
+        return ApiClient.DeserializeJson<ConversationAttachmentResponse>(content);
     }
 
     private static Task<IReadOnlyList<ReceivedServerEvent>> SendMessageAsync(TestUser user, Guid conversationId, string text) => user.Client.PostForEventsAsync($"{ConversationsPath}/{conversationId}/messages", new SendMessageRequest(text));

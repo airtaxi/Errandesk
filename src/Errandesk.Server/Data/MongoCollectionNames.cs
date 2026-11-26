@@ -14,6 +14,7 @@ public static class MongoCollectionNames
     public const string Notes = "notes";
     public const string Conversations = "conversations";
     public const string ConversationMessages = "conversation_messages";
+    public const string ConversationAttachments = "conversation_attachments";
     public const string AgentActions = "agent_actions";
     public const string Devices = "devices";
     public const string IdempotencyKeys = "idempotency_keys";

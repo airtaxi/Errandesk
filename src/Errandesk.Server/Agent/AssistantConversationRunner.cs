@@ -11,10 +11,15 @@ namespace Errandesk.Server.Agent;
 /// Runs the assistant for one conversation: sends a bounded recent history with the system instruction and the tools to the model, streams the reply as server-sent events,
 /// stores every message, and pauses for the user's approval of destructive tools.
 /// </summary>
-public sealed partial class AssistantConversationRunner(ServerSettings settings, IServiceProvider serviceProvider, ConversationService conversationService, UserService userService, AgentToolsetFactory toolsetFactory, TimeProvider timeProvider, ILoggerFactory loggerFactory, ILogger<AssistantConversationRunner> logger)
+public sealed partial class AssistantConversationRunner(ServerSettings settings, IServiceProvider serviceProvider, ConversationService conversationService, ConversationAttachmentService attachmentService, UserService userService, AgentToolsetFactory toolsetFactory, TimeProvider timeProvider, ILoggerFactory loggerFactory, ILogger<AssistantConversationRunner> logger)
 {
     /// <summary>The number of most recent stored messages sent to the model.</summary>
     public const int HistoryMessageLimit = 40;
+
+    /// <summary>The number of most recent images from earlier messages sent to the model. Older images are replaced by <see cref="OmittedImageText"/>.</summary>
+    public const int HistoryImageLimit = 20;
+
+    public const string OmittedImageText = "[An earlier image is not included.]";
 
     public const int MaximumMessageLength = 8000;
     public const int MaximumOutputTokens = 4096;
@@ -34,15 +39,20 @@ public sealed partial class AssistantConversationRunner(ServerSettings settings,
         }
     }
 
-    /// <summary>Validates a user message and takes the conversation's run lock. Pending approval requests are denied by the new message.</summary>
+    /// <summary>
+    /// Validates a user message and its images and takes the conversation's run lock. The text may be empty when the message carries images.
+    /// Pending approval requests are denied by the new message.
+    /// </summary>
     public async Task<AssistantRun> StartMessageRunAsync(Guid userId, Guid conversationId, SendMessageRequest request, CancellationToken cancellationToken)
     {
         EnsureAvailable();
-        var text = InputValidation.RequireText(request.Text, "message", MaximumMessageLength);
-        return await StartRunAsync(userId, conversationId, text, pendingMessages =>
+        var text = request.AttachmentIds is { Count: > 0 } ? InputValidation.OptionalText(request.Text?.Trim(), "message", MaximumMessageLength) : InputValidation.RequireText(request.Text, "message", MaximumMessageLength);
+        var attachments = await attachmentService.GetUnsentAsync(userId, conversationId, request.AttachmentIds, cancellationToken);
+        return await StartRunAsync(userId, conversationId, text, [.. attachments.Select(attachment => attachment.Id)], pendingMessages =>
         {
             var contents = CreateApprovalResponses(pendingMessages, _ => false, DeniedByNewMessageReason);
-            contents.Add(new TextContent(text));
+            if (text.Length > 0) contents.Add(new TextContent(text));
+            contents.AddRange(attachments.Select(attachment => new DataContent(attachment.Data, attachment.MediaType)));
             return contents;
         }, cancellationToken);
     }
@@ -55,7 +65,7 @@ public sealed partial class AssistantConversationRunner(ServerSettings settings,
         if (request.Decisions.Select(decision => decision.ApprovalId).Distinct(StringComparer.Ordinal).Count() != request.Decisions.Count) throw new RequestValidationException("Each approval request can be decided only once.");
         var decisions = request.Decisions.ToDictionary(decision => decision.ApprovalId, decision => decision.Approved, StringComparer.Ordinal);
 
-        return await StartRunAsync(userId, conversationId, "", pendingMessages =>
+        return await StartRunAsync(userId, conversationId, "", [], pendingMessages =>
         {
             var pendingApprovalIds = pendingMessages.SelectMany(message => message.Approvals).Where(approval => approval.Status == ApprovalStatuses.Pending).Select(approval => approval.ApprovalId).ToHashSet(StringComparer.Ordinal);
             if (pendingApprovalIds.Count == 0) throw new ResourceConflictException("There are no pending approval requests.");
@@ -84,9 +94,10 @@ public sealed partial class AssistantConversationRunner(ServerSettings settings,
         {
             var recentMessages = await conversationService.GetRecentMessagesAsync(run.ConversationId, HistoryMessageLimit, cancellationToken);
             foreach (var message in run.ResolvedApprovalMessages) await conversationService.SaveApprovalsAsync(message, cancellationToken);
-            var userDocument = new ConversationMessageDocument { Id = Guid.CreateVersion7(), RunId = run.RunId, Role = ConversationMessageDocument.UserRole, Text = run.UserText, ContentsJson = ChatMessageSerialization.SerializeContents(run.UserMessage.Contents) };
+            var userDocument = new ConversationMessageDocument { Id = Guid.CreateVersion7(), RunId = run.RunId, Role = ConversationMessageDocument.UserRole, Text = run.UserText, ContentsJson = ChatMessageSerialization.SerializeContents([.. run.UserMessage.Contents.Where(content => content is not DataContent)]), AttachmentIds = [.. run.AttachmentIds] };
             await conversationService.AppendMessagesAsync(run.User.Id, run.ConversationId, [userDocument], run.UserText, cancellationToken);
-            var history = BuildHistory(run, recentMessages);
+            if (run.AttachmentIds.Count > 0) await attachmentService.MarkSentAsync(run.AttachmentIds, userDocument.Id, cancellationToken);
+            var history = await BuildHistoryAsync(run, recentMessages, cancellationToken);
 
             await writer.WriteEventAsync(ServerEventNames.MessageStarted, new MessageStartedEventData(run.ConversationId, run.RunId), jsonContext.MessageStartedEventData, cancellationToken);
             var options = new ChatOptions { Tools = toolset.CreateTools(), MaxOutputTokens = MaximumOutputTokens };
@@ -125,7 +136,7 @@ public sealed partial class AssistantConversationRunner(ServerSettings settings,
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
     }
 
-    private async Task<AssistantRun> StartRunAsync(Guid userId, Guid conversationId, string userText, Func<List<ConversationMessageDocument>, List<AIContent>> createUserContents, CancellationToken cancellationToken)
+    private async Task<AssistantRun> StartRunAsync(Guid userId, Guid conversationId, string userText, IReadOnlyList<Guid> attachmentIds, Func<List<ConversationMessageDocument>, List<AIContent>> createUserContents, CancellationToken cancellationToken)
     {
         var user = await userService.GetAsync(userId, cancellationToken);
         await conversationService.GetVisibleAsync(userId, conversationId, cancellationToken);
@@ -135,7 +146,7 @@ public sealed partial class AssistantConversationRunner(ServerSettings settings,
         {
             var pendingMessages = await conversationService.GetPendingApprovalMessagesAsync(conversationId, cancellationToken);
             var contents = createUserContents(pendingMessages);
-            return new AssistantRun(user, conversationId, runId, new ChatMessage(ChatRole.User, contents), userText, pendingMessages);
+            return new AssistantRun(user, conversationId, runId, new ChatMessage(ChatRole.User, contents), userText, attachmentIds, pendingMessages);
         }
         catch
         {
@@ -147,17 +158,22 @@ public sealed partial class AssistantConversationRunner(ServerSettings settings,
     /// <summary>
     /// The system instruction followed by the stored messages from the oldest user message within the last <see cref="HistoryMessageLimit"/> messages, and the new user message.
     /// Approval requests stay only in the messages this run decides; tool calls without results are removed.
+    /// The <see cref="HistoryImageLimit"/> most recent images of earlier messages are included; older ones are replaced by <see cref="OmittedImageText"/>.
     /// </summary>
-    private List<ChatMessage> BuildHistory(AssistantRun run, List<ConversationMessageDocument> recentMessages)
+    private async Task<List<ChatMessage>> BuildHistoryAsync(AssistantRun run, List<ConversationMessageDocument> recentMessages, CancellationToken cancellationToken)
     {
         var resolvedMessageIds = run.ResolvedApprovalMessages.Select(message => message.Id).ToHashSet();
-        var startIndex = Math.Max(0, recentMessages.FindIndex(message => message.Role == ConversationMessageDocument.UserRole && (message.Text.Length > 0 || message.BriefingDate is not null)));
+        var startIndex = Math.Max(0, recentMessages.FindIndex(message => message.Role == ConversationMessageDocument.UserRole && (message.Text.Length > 0 || message.AttachmentIds.Count > 0 || message.BriefingDate is not null)));
+        var historyDocuments = recentMessages[startIndex..];
+        var historyImageIds = historyDocuments.AsEnumerable().Reverse().SelectMany(document => document.AttachmentIds.AsEnumerable().Reverse()).Take(HistoryImageLimit).ToList();
+        var historyImages = await attachmentService.GetManyAsync(run.ConversationId, historyImageIds, cancellationToken);
 
         List<ChatMessage> conversationMessages = [];
-        foreach (var document in recentMessages.Skip(startIndex))
+        foreach (var document in historyDocuments)
         {
             var contents = ChatMessageSerialization.DeserializeContents(document.ContentsJson);
             contents.RemoveAll(content => content is ToolApprovalResponseContent || (content is ToolApprovalRequestContent && !resolvedMessageIds.Contains(document.Id)));
+            foreach (var attachmentId in document.AttachmentIds) contents.Add(historyImages.TryGetValue(attachmentId, out var image) ? new DataContent(image.Data, image.MediaType) : new TextContent(OmittedImageText));
             if (contents.Count > 0) conversationMessages.Add(new ChatMessage(ToChatRole(document.Role), contents));
         }
         conversationMessages.Add(run.UserMessage);

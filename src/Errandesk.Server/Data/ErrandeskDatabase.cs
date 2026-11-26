@@ -25,6 +25,8 @@ public sealed class ErrandeskDatabase(IMongoDatabase database)
 
     public IMongoCollection<ConversationMessageDocument> ConversationMessages { get; } = database.GetCollection<ConversationMessageDocument>(MongoCollectionNames.ConversationMessages);
 
+    public IMongoCollection<ConversationAttachmentDocument> ConversationAttachments { get; } = database.GetCollection<ConversationAttachmentDocument>(MongoCollectionNames.ConversationAttachments);
+
     public IMongoCollection<AgentActionDocument> AgentActions { get; } = database.GetCollection<AgentActionDocument>(MongoCollectionNames.AgentActions);
 
     public IMongoCollection<DeviceDocument> Devices { get; } = database.GetCollection<DeviceDocument>(MongoCollectionNames.Devices);

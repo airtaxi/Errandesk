@@ -27,6 +27,15 @@ public sealed class ApiClient(HttpClient httpClient, string? accessToken = null)
         return await httpClient.SendAsync(request, TestContext.Current.CancellationToken);
     }
 
+    /// <summary>Sends <paramref name="body"/> as the raw request body with the given content type.</summary>
+    public async Task<HttpResponseMessage> SendBytesAsync(HttpMethod method, string path, byte[] body, string contentType)
+    {
+        using var request = new HttpRequestMessage(method, path) { Content = new ByteArrayContent(body) };
+        if (AccessToken is not null) request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
+        request.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+        return await httpClient.SendAsync(request, TestContext.Current.CancellationToken);
+    }
+
     /// <summary>Sends the request, asserts the status code and deserializes the body.</summary>
     public async Task<TResponse> SendAsync<TResponse>(HttpMethod method, string path, object? body = null, HttpStatusCode expectedStatusCode = HttpStatusCode.OK)
     {

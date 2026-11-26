@@ -27,6 +27,7 @@ public sealed partial class ChatMessageModel : ObservableObject
     {
         foreach (var toolActivity in response.ToolActivities) ToolActivities.Add(new ToolActivityModel(toolActivity));
         foreach (var approval in response.Approvals) Approvals.Add(new ApprovalModel(approval));
+        foreach (var attachmentId in response.AttachmentIds ?? []) Images.Add(new MessageImageModel(attachmentId));
     }
 
     public Guid Id { get; }
@@ -34,6 +35,11 @@ public sealed partial class ChatMessageModel : ObservableObject
     public bool IsUser { get; }
 
     public bool IsAssistant => !IsUser;
+
+    /// <summary>The images the user attached, in order. Set when the message is created.</summary>
+    public List<MessageImageModel> Images { get; } = [];
+
+    public bool HasImages => Images.Count > 0;
 
     public ObservableCollection<ToolActivityModel> ToolActivities { get; } = [];
 
