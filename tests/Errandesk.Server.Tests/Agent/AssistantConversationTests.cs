@@ -77,7 +77,7 @@ public sealed class AssistantConversationTests(MongoDbContainerFixture mongoDb)
         Assert.Contains("2031-03-10T12:00", firstRequest[0].Text, StringComparison.Ordinal);
         Assert.Contains("alice", firstRequest[0].Text, StringComparison.Ordinal);
         Assert.Equal("Add buy milk for tomorrow", firstRequest[^1].Text);
-        Assert.Equal(21, chatClient.ReceivedOptions[0]!.Tools!.Count);
+        Assert.Equal(23, chatClient.ReceivedOptions[0]!.Tools!.Count);
         Assert.Contains(chatClient.ReceivedMessages[1].SelectMany(message => message.Contents).OfType<FunctionResultContent>(), result => result.CallId == "call-1" && result.Result!.ToString()!.Contains("Buy milk", StringComparison.Ordinal));
         Assert.Equal("Add buy milk for tomorrow", (await alice.Client.GetAsync<ConversationResponse>($"{ConversationsPath}/{conversation.Id}")).Title);
 

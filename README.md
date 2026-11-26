@@ -12,7 +12,7 @@ Errandesk is a self-hosted task manager and note-taking application with a serve
 
 ## AI Assistant
 
-When an OpenAI-compatible Chat Completions endpoint is configured on the server, Errandesk provides a docked assistant that streams responses over Server-Sent Events (SSE) and interacts with your workspace through 21 tools for reading and updating tasks, lists, and notes.
+When an OpenAI-compatible Chat Completions endpoint is configured on the server, Errandesk provides a docked assistant that streams responses over Server-Sent Events (SSE) and interacts with your workspace through 23 tools for reading and updating tasks, lists, and notes.
 
 - **Tool activity and Undo**: Every tool call appears inline in the conversation. Write operations (such as creating a task or setting a reminder) include an **Undo** button so recorded changes can be reverted directly from the chat.
 - **Approval for destructive actions**: Tools that delete data (`delete_task`, `delete_task_list`, `delete_note`) pause execution and present an approval card with **Approve** and **Deny** buttons before anything is removed.
@@ -53,7 +53,7 @@ When AI is configured, users can enable a daily morning briefing at a chosen loc
 - **Offline sync**: Clients store lists, tasks, and notes locally in SQLite and queue writes in an outbox with `Idempotency-Key` headers. Edits merge with per-field last-writer-wins semantics (deletions win over edits), and live updates arrive over `/api/events` (SSE) and `/api/changes`.
 - **List sharing**: Share custom lists with other users on the same server by exact user name. Owners and members can read and edit shared tasks; **My Day** stays personal per user, reminders notify only the user who set them, and notes remain private.
 - **Microsoft To Do import**: Import lists, tasks, and checklist items from Microsoft To Do using an OAuth 2.0 device authorization flow and Microsoft Graph. Previously imported items are tracked by external ID and skipped on subsequent runs.
-- **MCP endpoint**: Connect external Model Context Protocol (MCP) clients to `/mcp` over stateless Streamable HTTP using personal access tokens (`edk_...`), exposing the same 21 tools with read-only and destructive annotations.
+- **MCP endpoint**: Connect external Model Context Protocol (MCP) clients to `/mcp` over stateless Streamable HTTP using personal access tokens (`edk_...`), exposing the same 23 tools with read-only and destructive annotations.
 
 ## Architecture
 

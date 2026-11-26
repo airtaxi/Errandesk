@@ -12,7 +12,7 @@ Errandesk는 ASP.NET Core 서버, MongoDB, 그리고 Windows, macOS, Linux, Andr
 
 ## AI 어시스턴트
 
-서버에 OpenAI 호환 Chat Completions 엔드포인트가 설정되어 있으면, 어시스턴트 패널에서 Server-Sent Events(SSE)로 응답을 스트리밍하며 21개의 도구로 할 일, 목록, 노트를 읽고 수정합니다.
+서버에 OpenAI 호환 Chat Completions 엔드포인트가 설정되어 있으면, 어시스턴트 패널에서 Server-Sent Events(SSE)로 응답을 스트리밍하며 23개의 도구로 할 일, 목록, 노트를 읽고 수정합니다.
 
 - **도구 실행 내역 및 실행 취소**: 호출된 모든 도구가 대화 흐름 안에 표시됩니다. 할 일 생성이나 알림 설정 같은 변경 작업에는 **실행 취소** 버튼이 함께 제공되어 기록된 변경 사항을 채팅에서 바로 되돌릴 수 있습니다.
 - **파괴적 작업 승인**: 데이터를 삭제하는 도구(`delete_task`, `delete_task_list`, `delete_note`)는 실행 전 일시 중지하고 **승인** 및 **거부** 버튼이 포함된 확인 카드를 표시합니다.
@@ -53,7 +53,7 @@ Errandesk는 ASP.NET Core 서버, MongoDB, 그리고 Windows, macOS, Linux, Andr
 - **오프라인 동기화**: 클라이언트는 목록, 할 일, 노트를 로컬 SQLite 데이터베이스에 저장하고, `Idempotency-Key` 헤더와 함께 아웃박스에 변경 사항을 대기열로 기록합니다. 편집 충돌은 필드 단위 최신 쓰기 우선(last-writer-wins)으로 병합되며 삭제가 편집보다 우선합니다. 실시간 변경 사항은 `/api/events`(SSE)와 `/api/changes`로 수신합니다.
 - **목록 공유**: 같은 서버의 다른 사용자와 정확한 사용자 이름으로 사용자 지정 목록을 공유할 수 있습니다. 소유자와 구성원 모두 공유 목록의 할 일을 읽고 편집할 수 있으며, **오늘 할 일**은 사용자별로 유지되고 알림은 설정한 사용자에게만 전송되며 노트는 비공개로 유지됩니다.
 - **Microsoft To Do 가져오기**: OAuth 2.0 디바이스 인증 흐름과 Microsoft Graph를 통해 Microsoft To Do의 목록, 할 일, 체크리스트 항목을 가져옵니다. 이미 가져온 항목은 외부 ID로 추적되어 다음 실행 시 건너뜁니다.
-- **MCP 엔드포인트**: 개인 액세스 토큰(`edk_...`)을 사용하여 상태 비저장 Streamable HTTP 기반 `/mcp` 엔드포인트에 외부 Model Context Protocol(MCP) 클라이언트를 연결할 수 있습니다. 어시스턴트와 동일한 21개 도구가 읽기 전용 및 파괴적 작업 주석(`readOnlyHint`, `destructiveHint`)과 함께 제공됩니다.
+- **MCP 엔드포인트**: 개인 액세스 토큰(`edk_...`)을 사용하여 상태 비저장 Streamable HTTP 기반 `/mcp` 엔드포인트에 외부 Model Context Protocol(MCP) 클라이언트를 연결할 수 있습니다. 어시스턴트와 동일한 23개 도구가 읽기 전용 및 파괴적 작업 주석(`readOnlyHint`, `destructiveHint`)과 함께 제공됩니다.
 
 ## 아키텍처
 
