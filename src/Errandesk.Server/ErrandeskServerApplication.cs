@@ -9,6 +9,7 @@ using Errandesk.Server.Import;
 using Errandesk.Server.Mcp;
 using Errandesk.Server.Notifications;
 using Errandesk.Server.Services;
+using Errandesk.Server.Web;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Errandesk.Server;
@@ -70,6 +71,7 @@ public static class ErrandeskServerApplication
         builder.Services.AddErrandeskNotifications(settings);
         builder.Services.AddErrandeskImport();
         builder.Services.AddErrandeskMcp();
+        builder.Services.AddErrandeskWebFetch(settings);
         if (settings.Ai is { } aiSettings) builder.Services.AddSingleton(_ => AssistantChatClientFactory.Create(aiSettings));
 
         builder.Services.AddControllers().AddApplicationPart(typeof(ErrandeskServerApplication).Assembly).AddJsonOptions(jsonOptions => ConfigureJsonSerializerOptions(jsonOptions.JsonSerializerOptions));

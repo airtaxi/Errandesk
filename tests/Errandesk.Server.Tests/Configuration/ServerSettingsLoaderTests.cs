@@ -265,6 +265,42 @@ public sealed class ServerSettingsLoaderTests
     }
 
     [Fact]
+    public void Load_WithModel_EnablesWebFetchForPublicAddressesByDefault()
+    {
+        _variables[AiModel] = "gpt-5-mini";
+        _variables[AiApiKey] = "sk-test";
+
+        var settings = LoadValid();
+
+        Assert.True(settings.Ai?.IsWebFetchEnabled);
+        Assert.False(settings.Ai?.AllowsPrivateNetworkWebFetch);
+    }
+
+    [Fact]
+    public void Load_WithWebFetchVariables_AppliesThem()
+    {
+        _variables[AiModel] = "gpt-5-mini";
+        _variables[AiApiKey] = "sk-test";
+        _variables[AiWebFetchEnabled] = "FALSE";
+        _variables[AiWebFetchAllowPrivateNetworks] = "true";
+
+        var settings = LoadValid();
+
+        Assert.False(settings.Ai?.IsWebFetchEnabled);
+        Assert.True(settings.Ai?.AllowsPrivateNetworkWebFetch);
+    }
+
+    [Fact]
+    public void Load_WithInvalidWebFetchValue_ReportsIt()
+    {
+        _variables[AiWebFetchAllowPrivateNetworks] = "yes";
+
+        var error = Assert.Single(LoadErrors());
+
+        Assert.Contains(AiWebFetchAllowPrivateNetworks, error, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Load_WithApiKeyFromFile_UsesIt()
     {
         _variables[AiModel] = "gpt-5-mini";

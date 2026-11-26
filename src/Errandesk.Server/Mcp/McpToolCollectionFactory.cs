@@ -6,7 +6,7 @@ using ModelContextProtocol.Server;
 namespace Errandesk.Server.Mcp;
 
 /// <summary>
-/// Builds the MCP tools of one user from the assistant toolset, with annotations that mark read-only and destructive tools.
+/// Builds the MCP tools of one user from the assistant toolset, with annotations that mark read-only and destructive tools. Assistant-only tools are left out.
 /// </summary>
 public sealed class McpToolCollectionFactory(AgentToolsetFactory toolsetFactory)
 {
@@ -14,7 +14,7 @@ public sealed class McpToolCollectionFactory(AgentToolsetFactory toolsetFactory)
     {
         var context = new AgentRunContext(userId, null) { ToolCompleted = RecordToolErrorAsync };
         var tools = new McpServerPrimitiveCollection<McpServerTool>();
-        foreach (var function in toolsetFactory.Create(context).CreateTools().OfType<AIFunction>()) tools.Add(McpServerTool.Create(new McpAgentToolFunction(function), CreateOptions(function.Name)));
+        foreach (var function in toolsetFactory.Create(context).CreateTools().OfType<AIFunction>().Where(function => !AgentToolset.IsAssistantOnly(function.Name))) tools.Add(McpServerTool.Create(new McpAgentToolFunction(function), CreateOptions(function.Name)));
         return tools;
     }
 

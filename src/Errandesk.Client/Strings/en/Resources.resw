@@ -331,6 +331,9 @@
   <data name="AssistantToolReadNoteText" xml:space="preserve">
     <value>Read note</value>
   </data>
+  <data name="AssistantToolReadUrlText" xml:space="preserve">
+    <value>Read web page</value>
+  </data>
   <data name="AssistantToolSearchNotesText" xml:space="preserve">
     <value>Search notes</value>
   </data>

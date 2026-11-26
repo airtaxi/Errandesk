@@ -97,7 +97,7 @@ public sealed partial class AssistantConversationRunner(ServerSettings settings,
             var userDocument = new ConversationMessageDocument { Id = Guid.CreateVersion7(), RunId = run.RunId, Role = ConversationMessageDocument.UserRole, Text = run.UserText, ContentsJson = ChatMessageSerialization.SerializeContents([.. run.UserMessage.Contents.Where(content => content is not DataContent)]), AttachmentIds = [.. run.AttachmentIds] };
             await conversationService.AppendMessagesAsync(run.User.Id, run.ConversationId, [userDocument], run.UserText, cancellationToken);
             if (run.AttachmentIds.Count > 0) await attachmentService.MarkSentAsync(run.AttachmentIds, userDocument.Id, cancellationToken);
-            var history = await BuildHistoryAsync(run, recentMessages, cancellationToken);
+            var history = await BuildHistoryAsync(run, recentMessages, toolset.CanReadWebPages, cancellationToken);
 
             await writer.WriteEventAsync(ServerEventNames.MessageStarted, new MessageStartedEventData(run.ConversationId, run.RunId), jsonContext.MessageStartedEventData, cancellationToken);
             var options = new ChatOptions { Tools = toolset.CreateTools(), MaxOutputTokens = MaximumOutputTokens };
@@ -160,7 +160,7 @@ public sealed partial class AssistantConversationRunner(ServerSettings settings,
     /// Approval requests stay only in the messages this run decides; tool calls without results are removed.
     /// The <see cref="HistoryImageLimit"/> most recent images of earlier messages are included; older ones are replaced by <see cref="OmittedImageText"/>.
     /// </summary>
-    private async Task<List<ChatMessage>> BuildHistoryAsync(AssistantRun run, List<ConversationMessageDocument> recentMessages, CancellationToken cancellationToken)
+    private async Task<List<ChatMessage>> BuildHistoryAsync(AssistantRun run, List<ConversationMessageDocument> recentMessages, bool canReadWebPages, CancellationToken cancellationToken)
     {
         var resolvedMessageIds = run.ResolvedApprovalMessages.Select(message => message.Id).ToHashSet();
         var startIndex = Math.Max(0, recentMessages.FindIndex(message => message.Role == ConversationMessageDocument.UserRole && (message.Text.Length > 0 || message.AttachmentIds.Count > 0 || message.BriefingDate is not null)));
@@ -178,7 +178,7 @@ public sealed partial class AssistantConversationRunner(ServerSettings settings,
         }
         conversationMessages.Add(run.UserMessage);
 
-        return [new ChatMessage(ChatRole.System, AgentSystemPrompt.Create(run.User, timeProvider.GetUtcNow())), .. ChatMessageSerialization.RemoveUnpairedToolContents(conversationMessages)];
+        return [new ChatMessage(ChatRole.System, AgentSystemPrompt.Create(run.User, timeProvider.GetUtcNow(), canReadWebPages)), .. ChatMessageSerialization.RemoveUnpairedToolContents(conversationMessages)];
     }
 
     private static async Task<ApprovalRecordDocument> CreateApprovalRecordAsync(AgentToolset toolset, ToolApprovalRequestContent approvalRequest, ServerSentEventWriter writer, CancellationToken cancellationToken)

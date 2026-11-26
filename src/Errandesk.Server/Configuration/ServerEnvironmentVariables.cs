@@ -19,6 +19,8 @@ public static class ServerEnvironmentVariables
     public const string AiEndpoint = "ERRANDESK_AI_ENDPOINT";
     public const string AiApiKey = "ERRANDESK_AI_API_KEY";
     public const string AiModel = "ERRANDESK_AI_MODEL";
+    public const string AiWebFetchEnabled = "ERRANDESK_AI_WEB_FETCH_ENABLED";
+    public const string AiWebFetchAllowPrivateNetworks = "ERRANDESK_AI_WEB_FETCH_ALLOW_PRIVATE_NETWORKS";
     public const string FcmProjectId = "ERRANDESK_FCM_PROJECT_ID";
     public const string FcmClientEmail = "ERRANDESK_FCM_CLIENT_EMAIL";
     public const string FcmPrivateKey = "ERRANDESK_FCM_PRIVATE_KEY";

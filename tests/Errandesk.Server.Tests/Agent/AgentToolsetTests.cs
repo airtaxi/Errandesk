@@ -1,6 +1,7 @@
 using System.Net;
 using Errandesk.Contracts;
 using Errandesk.Server.Agent;
+using Errandesk.Server.Configuration;
 using Errandesk.Server.Data;
 using Errandesk.Server.Tests.Infrastructure;
 using Microsoft.Extensions.AI;
@@ -29,6 +30,47 @@ public sealed class AgentToolsetTests(MongoDbContainerFixture mongoDb)
         var createTask = Assert.IsAssignableFrom<AIFunction>(Assert.Single(tools, tool => tool.Name == AgentToolNames.CreateTask));
         Assert.Contains("\"title\"", createTask.JsonSchema.GetRawText());
         Assert.Contains("\"dueDate\"", createTask.JsonSchema.GetRawText());
+    }
+
+    [Fact]
+    public async Task CreateTools_OffersReadUrlWithoutApprovalWhenTheAssistantIsConfigured()
+    {
+        await using var server = await ApiTestServer.StartAsync(mongoDb, chatClient: new ScriptedChatClient());
+        var alice = await server.RegisterAsync("alice");
+
+        var toolset = CreateToolset(server, alice.Id);
+        var tools = toolset.CreateTools();
+
+        Assert.True(toolset.CanReadWebPages);
+        var readUrl = Assert.IsAssignableFrom<AIFunction>(Assert.Single(tools, tool => tool.Name == AgentToolNames.ReadUrl));
+        Assert.IsNotType<ApprovalRequiredAIFunction>(readUrl);
+        Assert.Contains("\"url\"", readUrl.JsonSchema.GetRawText());
+        Assert.True(AgentToolset.IsReadOnly(AgentToolNames.ReadUrl));
+        Assert.True(AgentToolset.IsAssistantOnly(AgentToolNames.ReadUrl));
+        Assert.False(AgentToolset.RequiresApproval(AgentToolNames.ReadUrl));
+    }
+
+    [Fact]
+    public async Task CreateTools_LeavesOutReadUrlWhenWebFetchIsDisabled()
+    {
+        await using var server = await ApiTestServer.StartAsync(mongoDb, chatClient: new ScriptedChatClient(), additionalVariables: new Dictionary<string, string> { [ServerEnvironmentVariables.AiWebFetchEnabled] = "false" });
+        var alice = await server.RegisterAsync("alice");
+
+        var toolset = CreateToolset(server, alice.Id);
+
+        Assert.False(toolset.CanReadWebPages);
+        Assert.DoesNotContain(toolset.CreateTools(), tool => tool.Name == AgentToolNames.ReadUrl);
+    }
+
+    [Fact]
+    public async Task ReadUrl_ReportsInvalidUrlsAsToolErrors()
+    {
+        await using var server = await ApiTestServer.StartAsync(mongoDb, chatClient: new ScriptedChatClient());
+        var alice = await server.RegisterAsync("alice");
+
+        var result = await CreateToolset(server, alice.Id).ReadUrlAsync("ftp://example.com/file.txt", cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.IsType<AgentToolError>(result);
     }
 
     [Fact]

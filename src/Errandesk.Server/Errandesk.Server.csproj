@@ -21,6 +21,8 @@
     <PackageReference Include="ModelContextProtocol.AspNetCore" Version="2.4.0" />
     <PackageReference Include="MongoDB.Driver" Version="3.14.1" />
     <PackageReference Include="OpenAI" Version="2.15.0" />
+    <PackageReference Include="ReverseMarkdown" Version="6.3.0" />
+    <PackageReference Include="SmartReader" Version="0.11.1" />
   </ItemGroup>
 
 </Project>

@@ -143,6 +143,16 @@ public sealed class ServerSettingsLoader(Func<string, string?> readVariable, Fun
         return defaultValue;
     }
 
+    private bool ReadBoolean(string name, bool defaultValue, List<string> errors)
+    {
+        var value = ReadValue(name);
+        if (value is null) return defaultValue;
+        if (bool.TryParse(value, out var flag)) return flag;
+
+        errors.Add($"{name} must be true or false.");
+        return defaultValue;
+    }
+
     private LogLevel ReadLogLevel(List<string> errors)
     {
         var value = ReadValue(ServerEnvironmentVariables.LogLevel);
@@ -185,6 +195,8 @@ public sealed class ServerSettingsLoader(Func<string, string?> readVariable, Fun
         }
 
         var isApiKeyValid = TryReadSecret(AiApiKey, errors, out var apiKey);
+        var isWebFetchEnabled = ReadBoolean(AiWebFetchEnabled, true, errors);
+        var allowsPrivateNetworkWebFetch = ReadBoolean(AiWebFetchAllowPrivateNetworks, false, errors);
         var model = ReadValue(AiModel);
         if (model is null) return null;
 
@@ -194,7 +206,7 @@ public sealed class ServerSettingsLoader(Func<string, string?> readVariable, Fun
             return null;
         }
 
-        return new AiSettings { Endpoint = endpoint, ApiKey = apiKey, Model = model };
+        return new AiSettings { Endpoint = endpoint, ApiKey = apiKey, Model = model, IsWebFetchEnabled = isWebFetchEnabled, AllowsPrivateNetworkWebFetch = allowsPrivateNetworkWebFetch };
     }
 
     private FcmSettings? ReadFcmSettings(List<string> errors)

@@ -25,7 +25,7 @@ public sealed class McpEndpointTests(MongoDbContainerFixture mongoDb)
     [Fact]
     public async Task ListTools_ReturnsTheAssistantToolsetWithAnnotations()
     {
-        await using var server = await ApiTestServer.StartAsync(mongoDb);
+        await using var server = await ApiTestServer.StartAsync(mongoDb, chatClient: new ScriptedChatClient());
         var alice = await server.RegisterAsync("alice");
         await using var client = await ConnectAsync(server, await CreateTokenAsync(alice));
 

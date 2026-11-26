@@ -12,11 +12,15 @@ Errandesk is a self-hosted task manager and note-taking application with a serve
 
 ## AI Assistant
 
-When an OpenAI-compatible Chat Completions endpoint is configured on the server, Errandesk provides a docked assistant that streams responses over Server-Sent Events (SSE) and interacts with your workspace through 23 tools for reading and updating tasks, lists, and notes.
+When an OpenAI-compatible Chat Completions endpoint is configured on the server, Errandesk provides a docked assistant that streams responses over Server-Sent Events (SSE) and interacts with your workspace through 24 tools for reading and updating tasks, lists, and notes, as well as reading web pages.
 
 - **Tool activity and Undo**: Every tool call appears inline in the conversation. Write operations (such as creating a task or setting a reminder) include an **Undo** button so recorded changes can be reverted directly from the chat.
 - **Approval for destructive actions**: Tools that delete data (`delete_task`, `delete_task_list`, `delete_note`) pause execution and present an approval card with **Approve** and **Deny** buttons before anything is removed.
 - **Image attachments**: Attach up to 10 images per message using the attach button, pasting, or dragging files onto the conversation (pasting and dragging are supported on Windows and desktop). The client rotates each image upright, scales it to at most 2048 pixels on the longer side, and converts it to JPEG before upload. The server accepts JPEG, PNG, GIF, and WebP files up to 5 MB. Images are kept with the conversation and deleted with it, and the 20 most recent images from earlier messages are sent to the model again in later turns. The configured model must support image input.
+- **Reading web pages**: When a message includes a URL or asks about a web page, the assistant reads it with `read_url` without an approval card (`read_url` is not exposed over `/mcp`).
+  - **Server-side fetch and extraction**: The server downloads the page itself (HTML, plain text, Markdown, JSON, or XML up to 5 MB, with a 20-second timeout and at most 5 redirects). HTML main content is extracted and converted to Markdown, and text is given to the model in parts of up to 20,000 characters so the model can continue reading from the next position. Extracted pages are cached for 5 minutes per user so later parts are not downloaded again.
+  - **Network and prompt safeguards**: Target addresses are checked when each connection opens, including after every redirect. Loopback, link-local (including cloud metadata addresses), multicast, and reserved addresses are always blocked, and private networks are blocked unless `ERRANDESK_AI_WEB_FETCH_ALLOW_PRIVATE_NETWORKS=true`. Page text is marked as external content, and the assistant is instructed not to follow instructions in it.
+  - **Limitations and configuration**: Pages that need JavaScript to render and PDF files cannot be read. Set `ERRANDESK_AI_WEB_FETCH_ENABLED=false` to turn this feature off.
 
 ![AI assistant conversation paused at an approval card with Approve and Deny buttons before deleting a task](docs/screenshots/en/approval.png)
 
@@ -53,7 +57,7 @@ When AI is configured, users can enable a daily morning briefing at a chosen loc
 - **Offline sync**: Clients store lists, tasks, and notes locally in SQLite and queue writes in an outbox with `Idempotency-Key` headers. Edits merge with per-field last-writer-wins semantics (deletions win over edits), and live updates arrive over `/api/events` (SSE) and `/api/changes`.
 - **List sharing**: Share custom lists with other users on the same server by exact user name. Owners and members can read and edit shared tasks; **My Day** stays personal per user, reminders notify only the user who set them, and notes remain private.
 - **Microsoft To Do import**: Import lists, tasks, and checklist items from Microsoft To Do using an OAuth 2.0 device authorization flow and Microsoft Graph. Previously imported items are tracked by external ID and skipped on subsequent runs.
-- **MCP endpoint**: Connect external Model Context Protocol (MCP) clients to `/mcp` over stateless Streamable HTTP using personal access tokens (`edk_...`), exposing the same 23 tools with read-only and destructive annotations.
+- **MCP endpoint**: Connect external Model Context Protocol (MCP) clients to `/mcp` over stateless Streamable HTTP using personal access tokens (`edk_...`), exposing 23 assistant tools (all except `read_url`) with read-only and destructive annotations.
 
 ## Architecture
 
@@ -132,6 +136,8 @@ Variables marked with **`_FILE` supported** can alternatively be provided as `<V
 | `ERRANDESK_AI_ENDPOINT` | No | `https://api.openai.com/v1` | No | Absolute `http` or `https` base URL of an OpenAI-compatible Chat Completions API. |
 | `ERRANDESK_AI_API_KEY` | Conditional | — | Yes | Required when `ERRANDESK_AI_MODEL` is set and `ERRANDESK_AI_ENDPOINT` host is `api.openai.com`; optional for custom endpoints. |
 | `ERRANDESK_AI_MODEL` | No | — | No | Chat model name. The assistant and morning briefing are enabled only when this is set. |
+| `ERRANDESK_AI_WEB_FETCH_ENABLED` | No | `true` | No | `true` or `false` (case-insensitive). Enables or disables reading web pages with `read_url`. |
+| `ERRANDESK_AI_WEB_FETCH_ALLOW_PRIVATE_NETWORKS` | No | `false` | No | `true` or `false` (case-insensitive). Lets `read_url` read pages on private networks (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `100.64.0.0/10`, `fc00::/7`). Loopback, link-local, multicast, and reserved addresses remain blocked. |
 | `ERRANDESK_FCM_PROJECT_ID` | Group | — | No | Android push (FCM): Firebase project ID. |
 | `ERRANDESK_FCM_CLIENT_EMAIL` | Group | — | No | Android push (FCM): Service account email (`client_email`, must contain `@`). |
 | `ERRANDESK_FCM_PRIVATE_KEY` | Group | — | Yes | Android push (FCM): PEM-encoded RSA private key (`private_key`; literal `\n` sequences are converted to line breaks). |

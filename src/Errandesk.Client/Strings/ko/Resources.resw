@@ -331,6 +331,9 @@
   <data name="AssistantToolReadNoteText" xml:space="preserve">
     <value>노트 읽기</value>
   </data>
+  <data name="AssistantToolReadUrlText" xml:space="preserve">
+    <value>웹 페이지 읽기</value>
+  </data>
   <data name="AssistantToolSearchNotesText" xml:space="preserve">
     <value>노트 검색</value>
   </data>

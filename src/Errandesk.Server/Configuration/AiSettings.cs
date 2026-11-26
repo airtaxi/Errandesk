@@ -11,4 +11,10 @@ public sealed class AiSettings
     public string? ApiKey { get; init; }
 
     public required string Model { get; init; }
+
+    /// <summary>Whether the assistant may read web pages with <c>read_url</c>.</summary>
+    public bool IsWebFetchEnabled { get; init; } = true;
+
+    /// <summary>Whether web pages on private networks may be read. Loopback and link-local addresses stay blocked.</summary>
+    public bool AllowsPrivateNetworkWebFetch { get; init; }
 }
