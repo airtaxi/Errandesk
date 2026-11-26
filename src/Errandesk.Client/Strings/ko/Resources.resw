@@ -304,6 +304,9 @@
   <data name="AssistantToolDeleteNoteText" xml:space="preserve">
     <value>노트 삭제</value>
   </data>
+  <data name="AssistantToolDeleteStepText" xml:space="preserve">
+    <value>단계 삭제</value>
+  </data>
   <data name="AssistantToolDeleteTaskListText" xml:space="preserve">
     <value>목록 삭제</value>
   </data>
@@ -348,6 +351,9 @@
   </data>
   <data name="AssistantToolUpdateNoteText" xml:space="preserve">
     <value>노트 수정</value>
+  </data>
+  <data name="AssistantToolUpdateStepText" xml:space="preserve">
+    <value>단계 이름 변경</value>
   </data>
   <data name="AssistantToolUpdateTaskText" xml:space="preserve">
     <value>작업 수정</value>

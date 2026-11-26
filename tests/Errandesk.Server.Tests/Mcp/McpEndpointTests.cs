@@ -18,7 +18,7 @@ public sealed class McpEndpointTests(MongoDbContainerFixture mongoDb)
     private static readonly string[] s_toolNames =
     [
         AgentToolNames.ListTaskLists, AgentToolNames.CreateTaskList, AgentToolNames.SearchTasks, AgentToolNames.GetMyDay, AgentToolNames.GetOverdueTasks, AgentToolNames.CreateTask, AgentToolNames.UpdateTask,
-        AgentToolNames.CompleteTask, AgentToolNames.AddStep, AgentToolNames.CompleteStep, AgentToolNames.AddToMyDay, AgentToolNames.SearchNotes, AgentToolNames.ReadNote, AgentToolNames.CreateNote, AgentToolNames.UpdateNote,
+        AgentToolNames.CompleteTask, AgentToolNames.AddStep, AgentToolNames.CompleteStep, AgentToolNames.UpdateStep, AgentToolNames.DeleteStep, AgentToolNames.AddToMyDay, AgentToolNames.SearchNotes, AgentToolNames.ReadNote, AgentToolNames.CreateNote, AgentToolNames.UpdateNote,
         AgentToolNames.EditNoteContent, AgentToolNames.LinkNoteToTask, AgentToolNames.GetCurrentTime, AgentToolNames.SetReminder, AgentToolNames.SetRecurrence, AgentToolNames.DeleteTask, AgentToolNames.DeleteTaskList, AgentToolNames.DeleteNote,
     ];
 
@@ -39,7 +39,7 @@ public sealed class McpEndpointTests(MongoDbContainerFixture mongoDb)
             var annotations = tool.ProtocolTool.Annotations;
             Assert.NotNull(annotations);
             Assert.False(string.IsNullOrWhiteSpace(tool.Description));
-            Assert.Equal(AgentToolset.RequiresApproval(tool.Name), annotations.DestructiveHint);
+            Assert.Equal(AgentToolset.IsDestructive(tool.Name), annotations.DestructiveHint);
             Assert.Equal(AgentToolset.IsReadOnly(tool.Name), annotations.ReadOnlyHint);
             Assert.False(annotations.OpenWorldHint);
         }
@@ -47,6 +47,7 @@ public sealed class McpEndpointTests(MongoDbContainerFixture mongoDb)
         Assert.True(Find(tools, AgentToolNames.DeleteTask).ProtocolTool.Annotations!.DestructiveHint);
         Assert.True(Find(tools, AgentToolNames.DeleteTaskList).ProtocolTool.Annotations!.DestructiveHint);
         Assert.True(Find(tools, AgentToolNames.DeleteNote).ProtocolTool.Annotations!.DestructiveHint);
+        Assert.True(Find(tools, AgentToolNames.DeleteStep).ProtocolTool.Annotations!.DestructiveHint);
         Assert.True(Find(tools, AgentToolNames.SearchTasks).ProtocolTool.Annotations!.ReadOnlyHint);
         Assert.False(Find(tools, AgentToolNames.CreateTask).ProtocolTool.Annotations!.DestructiveHint);
         Assert.Contains("\"title\"", Find(tools, AgentToolNames.CreateTask).ProtocolTool.InputSchema.GetRawText());

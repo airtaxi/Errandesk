@@ -21,6 +21,7 @@ public sealed class AgentToolset(TaskListService taskListService, TaskService ta
 
     private static readonly HashSet<string> s_approvalRequiredToolNames = [AgentToolNames.DeleteTask, AgentToolNames.DeleteTaskList, AgentToolNames.DeleteNote];
     private static readonly HashSet<string> s_readOnlyToolNames = [AgentToolNames.ListTaskLists, AgentToolNames.SearchTasks, AgentToolNames.GetMyDay, AgentToolNames.GetOverdueTasks, AgentToolNames.SearchNotes, AgentToolNames.ReadNote, AgentToolNames.GetCurrentTime, AgentToolNames.ReadUrl];
+    private static readonly HashSet<string> s_destructiveToolNames = [AgentToolNames.DeleteTask, AgentToolNames.DeleteTaskList, AgentToolNames.DeleteNote, AgentToolNames.DeleteStep];
     private static readonly HashSet<string> s_assistantOnlyToolNames = [AgentToolNames.ReadUrl];
 
     private Guid UserId => context.UserId;
@@ -30,6 +31,9 @@ public sealed class AgentToolset(TaskListService taskListService, TaskService ta
 
     /// <summary>Whether the tool deletes data and runs only after the user approved the call.</summary>
     public static bool RequiresApproval(string toolName) => s_approvalRequiredToolNames.Contains(toolName);
+
+    /// <summary>Whether the tool deletes data, with or without the user's approval.</summary>
+    public static bool IsDestructive(string toolName) => s_destructiveToolNames.Contains(toolName);
 
     /// <summary>Whether the tool only reads data.</summary>
     public static bool IsReadOnly(string toolName) => s_readOnlyToolNames.Contains(toolName);
@@ -55,6 +59,8 @@ public sealed class AgentToolset(TaskListService taskListService, TaskService ta
             Create(CompleteTaskAsync, AgentToolNames.CompleteTask, "Marks a task as completed, or as not completed."),
             Create(AddStepAsync, AgentToolNames.AddStep, "Adds a step at the end of a task's steps."),
             Create(CompleteStepAsync, AgentToolNames.CompleteStep, "Marks a step of a task as completed, or as not completed. The step IDs are in the steps of the task data."),
+            Create(UpdateStepAsync, AgentToolNames.UpdateStep, "Renames a step of a task. The step IDs are in the steps of the task data."),
+            Create(DeleteStepAsync, AgentToolNames.DeleteStep, "Deletes a step of a task. The step IDs are in the steps of the task data. The deletion can be undone from the chat."),
             Create(AddToMyDayAsync, AgentToolNames.AddToMyDay, "Adds a task to today's My Day, or removes it."),
             Create(SearchNotesAsync, AgentToolNames.SearchNotes, $"Finds notes by words in the title, content or tags, by tag, or by linked task. Returns summaries of at most {MaximumSearchResultCount} notes; use read_note for the full content."),
             Create(ReadNoteAsync, AgentToolNames.ReadNote, "Returns a note with its full Markdown content."),
@@ -140,6 +146,10 @@ public sealed class AgentToolset(TaskListService taskListService, TaskService ta
     public Task<object> AddStepAsync([Description("ID of the task.")] Guid taskId, [Description("Title of the step.")] string title, CancellationToken cancellationToken = default) => RunAsync(AgentToolNames.AddStep, () => ChangeAsync(AgentToolNames.AddStep, EntityTypes.Task, taskId, () => taskService.AddStepAsync(UserId, taskId, new CreateTaskStepRequest(title), cancellationToken), task => task.Id, cancellationToken));
 
     public Task<object> CompleteStepAsync([Description("ID of the task.")] Guid taskId, [Description("ID of the step.")] Guid stepId, [Description("False marks the step as not completed.")] bool completed = true, CancellationToken cancellationToken = default) => RunAsync(AgentToolNames.CompleteStep, () => ChangeAsync(AgentToolNames.CompleteStep, EntityTypes.Task, taskId, () => taskService.UpdateStepAsync(UserId, taskId, stepId, new UpdateTaskStepRequest { IsCompleted = completed }, cancellationToken), task => task.Id, cancellationToken));
+
+    public Task<object> UpdateStepAsync([Description("ID of the task.")] Guid taskId, [Description("ID of the step.")] Guid stepId, [Description("New title of the step.")] string title, CancellationToken cancellationToken = default) => RunAsync(AgentToolNames.UpdateStep, () => ChangeAsync(AgentToolNames.UpdateStep, EntityTypes.Task, taskId, () => taskService.UpdateStepAsync(UserId, taskId, stepId, new UpdateTaskStepRequest { Title = new Optional<string>(title) }, cancellationToken), task => task.Id, cancellationToken));
+
+    public Task<object> DeleteStepAsync([Description("ID of the task.")] Guid taskId, [Description("ID of the step.")] Guid stepId, CancellationToken cancellationToken = default) => RunAsync(AgentToolNames.DeleteStep, () => ChangeAsync(AgentToolNames.DeleteStep, EntityTypes.Task, taskId, () => taskService.DeleteStepAsync(UserId, taskId, stepId, cancellationToken), task => task.Id, cancellationToken));
 
     public Task<object> AddToMyDayAsync([Description("ID of the task.")] Guid taskId, [Description("False removes the task from My Day.")] bool inMyDay = true, CancellationToken cancellationToken = default) => RunAsync(AgentToolNames.AddToMyDay, () => ChangeAsync(AgentToolNames.AddToMyDay, EntityTypes.Task, taskId, () => taskService.UpdateAsync(UserId, taskId, new UpdateTaskRequest { IsInMyDay = inMyDay }, cancellationToken), task => task.Id, cancellationToken));
 

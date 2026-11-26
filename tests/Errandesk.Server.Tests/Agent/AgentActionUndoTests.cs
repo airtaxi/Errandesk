@@ -96,6 +96,43 @@ public sealed class AgentActionUndoTests(MongoDbContainerFixture mongoDb)
     }
 
     [Fact]
+    public async Task UpdateStepAndDeleteStep_ChangeTheStepWithoutApprovalAndCanBeUndone()
+    {
+        await using var server = await ApiTestServer.StartAsync(mongoDb);
+        var alice = await server.RegisterAsync("alice");
+        var task = await alice.Client.PostAsync<TaskItemResponse>(TasksPath, new CreateTaskRequest("Plan trip", Steps: [new CreateTaskStepRequest("Book hotle"), new CreateTaskStepRequest("Buy guide")]), HttpStatusCode.Created);
+        var misspelledStep = task.Steps[0];
+        var unneededStep = task.Steps[1];
+        var context = new AgentRunContext(alice.Id, null);
+        var toolset = CreateToolset(server, context);
+
+        var renamed = Assert.IsType<TaskItemResponse>(await toolset.UpdateStepAsync(task.Id, misspelledStep.Id, " Book hotel ", TestContext.Current.CancellationToken));
+        var deleted = Assert.IsType<TaskItemResponse>(await toolset.DeleteStepAsync(task.Id, unneededStep.Id, TestContext.Current.CancellationToken));
+
+        Assert.Equal("Book hotel", renamed.Steps.Single(step => step.Id == misspelledStep.Id).Title);
+        Assert.Equal([misspelledStep.Id], deleted.Steps.Select(step => step.Id));
+        Assert.False(AgentToolset.RequiresApproval(AgentToolNames.DeleteStep));
+        Assert.True(AgentToolset.IsDestructive(AgentToolNames.DeleteStep));
+
+        await alice.Client.SendAsync<AgentActionResponse>(HttpMethod.Post, UndoPath(context.ToolCalls[1].AgentActionId!.Value));
+        var restored = await alice.Client.GetAsync<TaskItemResponse>($"{TasksPath}/{task.Id}");
+        Assert.Equal([misspelledStep.Id, unneededStep.Id], restored.Steps.Select(step => step.Id));
+        Assert.Equal("Book hotel", restored.Steps[0].Title);
+    }
+
+    [Fact]
+    public async Task DeleteStep_ReportsAnUnknownStepAsAToolError()
+    {
+        await using var server = await ApiTestServer.StartAsync(mongoDb);
+        var alice = await server.RegisterAsync("alice");
+        var task = await alice.Client.PostAsync<TaskItemResponse>(TasksPath, new CreateTaskRequest("Plan trip"), HttpStatusCode.Created);
+
+        var result = await CreateToolset(server, new AgentRunContext(alice.Id, null)).DeleteStepAsync(task.Id, Guid.CreateVersion7(), TestContext.Current.CancellationToken);
+
+        Assert.IsType<AgentToolError>(result);
+    }
+
+    [Fact]
     public async Task Undo_WhenTheItemChangedSince_ReturnsConflictAndChangesNothing()
     {
         await using var server = await ApiTestServer.StartAsync(mongoDb);

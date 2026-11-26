@@ -12,10 +12,10 @@ Errandesk is a self-hosted task manager and note-taking application with a serve
 
 ## AI Assistant
 
-When an OpenAI-compatible Chat Completions endpoint is configured on the server, Errandesk provides a docked assistant that streams responses over Server-Sent Events (SSE) and interacts with your workspace through 24 tools for reading and updating tasks, lists, and notes, as well as reading web pages.
+When an OpenAI-compatible Chat Completions endpoint is configured on the server, Errandesk provides a docked assistant that streams responses over Server-Sent Events (SSE) and interacts with your workspace through 26 tools for reading and updating tasks, lists, and notes, as well as reading web pages.
 
 - **Tool activity and Undo**: Every tool call appears inline in the conversation. Write operations (such as creating a task or setting a reminder) include an **Undo** button so recorded changes can be reverted directly from the chat.
-- **Approval for destructive actions**: Tools that delete data (`delete_task`, `delete_task_list`, `delete_note`) pause execution and present an approval card with **Approve** and **Deny** buttons before anything is removed.
+- **Approval for destructive actions**: Tools that delete a task, list, or note (`delete_task`, `delete_task_list`, `delete_note`) pause execution and present an approval card with **Approve** and **Deny** buttons before anything is removed. Renaming or deleting a single step (`update_step`, `delete_step`) runs without an approval card and can be reverted with **Undo**.
 - **Image attachments**: Attach up to 10 images per message using the attach button, pasting, or dragging files onto the conversation (pasting and dragging are supported on Windows and desktop). The client rotates each image upright, scales it to at most 2048 pixels on the longer side, and converts it to JPEG before upload. The server accepts JPEG, PNG, GIF, and WebP files up to 5 MB. Images are kept with the conversation and deleted with it, and the 20 most recent images from earlier messages are sent to the model again in later turns. The configured model must support image input.
 - **Reading web pages**: When a message includes a URL or asks about a web page, the assistant reads it with `read_url` without an approval card (`read_url` is not exposed over `/mcp`).
   - **Server-side fetch and extraction**: The server downloads the page itself (HTML, plain text, Markdown, JSON, or XML up to 5 MB, with a 20-second timeout and at most 5 redirects). HTML main content is extracted and converted to Markdown, and text is given to the model in parts of up to 20,000 characters so the model can continue reading from the next position. Extracted pages are cached for 5 minutes per user so later parts are not downloaded again.
@@ -57,7 +57,7 @@ When AI is configured, users can enable a daily morning briefing at a chosen loc
 - **Offline sync**: Clients store lists, tasks, and notes locally in SQLite and queue writes in an outbox with `Idempotency-Key` headers. Edits merge with per-field last-writer-wins semantics (deletions win over edits), and live updates arrive over `/api/events` (SSE) and `/api/changes`.
 - **List sharing**: Share custom lists with other users on the same server by exact user name. Owners and members can read and edit shared tasks; **My Day** stays personal per user, reminders notify only the user who set them, and notes remain private.
 - **Microsoft To Do import**: Import lists, tasks, and checklist items from Microsoft To Do using an OAuth 2.0 device authorization flow and Microsoft Graph. Previously imported items are tracked by external ID and skipped on subsequent runs.
-- **MCP endpoint**: Connect external Model Context Protocol (MCP) clients to `/mcp` over stateless Streamable HTTP using personal access tokens (`edk_...`), exposing 23 assistant tools (all except `read_url`) with read-only and destructive annotations.
+- **MCP endpoint**: Connect external Model Context Protocol (MCP) clients to `/mcp` over stateless Streamable HTTP using personal access tokens (`edk_...`), exposing 25 assistant tools (all except `read_url`) with read-only and destructive annotations.
 
 ## Architecture
 
@@ -318,7 +318,7 @@ Errandesk exposes a stateless Streamable HTTP MCP endpoint at `/mcp` authenticat
 
 - `/mcp` accepts personal access tokens only (JWT access tokens receive `401 Unauthorized`).
 - Personal access tokens also authenticate standard `/api/...` endpoints, except `/api/users/me/tokens` (token management requires a signed-in JWT session).
-- Destructive tools (`delete_task`, `delete_task_list`, `delete_note`) advertise `destructiveHint: true` and execute immediately when invoked over MCP without a server-side approval pause; MCP clients should confirm with the user before calling them.
+- Destructive tools (`delete_task`, `delete_task_list`, `delete_note`, `delete_step`) advertise `destructiveHint: true` and execute immediately when invoked over MCP without a server-side approval pause; MCP clients should confirm with the user before calling them.
 
 ## Local Development
 

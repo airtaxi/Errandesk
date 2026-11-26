@@ -304,6 +304,9 @@
   <data name="AssistantToolDeleteNoteText" xml:space="preserve">
     <value>Delete note</value>
   </data>
+  <data name="AssistantToolDeleteStepText" xml:space="preserve">
+    <value>Delete step</value>
+  </data>
   <data name="AssistantToolDeleteTaskListText" xml:space="preserve">
     <value>Delete list</value>
   </data>
@@ -348,6 +351,9 @@
   </data>
   <data name="AssistantToolUpdateNoteText" xml:space="preserve">
     <value>Update note</value>
+  </data>
+  <data name="AssistantToolUpdateStepText" xml:space="preserve">
+    <value>Rename step</value>
   </data>
   <data name="AssistantToolUpdateTaskText" xml:space="preserve">
     <value>Update task</value>

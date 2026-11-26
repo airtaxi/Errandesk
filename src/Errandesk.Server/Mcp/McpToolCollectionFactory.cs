@@ -22,7 +22,7 @@ public sealed class McpToolCollectionFactory(AgentToolsetFactory toolsetFactory)
     {
         Name = toolName,
         ReadOnly = AgentToolset.IsReadOnly(toolName),
-        Destructive = AgentToolset.RequiresApproval(toolName),
+        Destructive = AgentToolset.IsDestructive(toolName),
         OpenWorld = false,
     };
 
