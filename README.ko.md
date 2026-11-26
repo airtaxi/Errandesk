@@ -65,7 +65,7 @@ Errandesk는 ASP.NET Core 서버, MongoDB, 그리고 Windows, macOS, Linux, Andr
 
 ### MongoDB CPU 요구 사항
 
-Compose 구성은 공식 `mongo:9` 이미지를 사용합니다. MongoDB 5.0 이상은 x86-64 환경에서 **AVX**, ARM64 환경에서 **ARMv8.2-A** 명령어를 필요로 합니다. 컨테이너를 시작하기 전에 호스트 CPU가 해당 명령어를 지원하는지 확인하십시오.
+Compose 구성은 공식 `mongo:9` 이미지를 사용합니다. MongoDB 5.0 이상은 x86-64 환경에서 **AVX**, ARM64 환경에서 **ARMv8.2-A** 명령어를 필요로 합니다. 컨테이너를 시작하기 전에 호스트 CPU가 해당 명령어를 지원하는지 확인합니다.
 
 ### 설치 및 실행
 
@@ -141,7 +141,7 @@ Compose 구성은 공식 `mongo:9` 이미지를 사용합니다. MongoDB 5.0 이
 | `ERRANDESK_APNS_ENVIRONMENT` | 아니오 | `production` | 아니오 | iOS 푸시(APNs): `production` 또는 `sandbox` (대소문자 구분 없음). 단독 설정 시 부분 그룹 오류를 발생시키지 않습니다. |
 | `ERRANDESK_MICROSOFT_GRAPH_CLIENT_ID` | 아니오 | — | 아니오 | Microsoft Entra 공용 클라이언트 ID입니다. 설정 시 Microsoft To Do 가져오기가 활성화됩니다. |
 | `ERRANDESK_MICROSOFT_GRAPH_TENANT` | 아니오 | `common` | 아니오 | Microsoft Entra 테넌트(`common`, `consumers`, `organizations` 또는 테넌트 ID). 클라이언트 ID가 없으면 무시됩니다. |
-| `ERRANDESK_CLIENT_UPDATE_BASE_URL` | 아니오 | — | 아니오 | 클라이언트 업데이트 파일을 게시하는 절대 `http` 또는 `https` 기본 URL입니다(쿼리와 프래그먼트는 사용할 수 없음). 설정한 경우에만 Windows와 Android 클라이언트의 **설정**에 업데이트 기능이 나타납니다. [클라이언트 업데이트](#클라이언트-업데이트)를 참고하십시오. |
+| `ERRANDESK_CLIENT_UPDATE_BASE_URL` | 아니오 | — | 아니오 | 클라이언트 업데이트 파일을 게시하는 절대 `http` 또는 `https` 기본 URL입니다(쿼리와 프래그먼트는 사용할 수 없음). 설정한 경우에만 Windows와 Android 클라이언트의 **설정**에 업데이트 기능이 나타납니다. [클라이언트 업데이트](#클라이언트-업데이트)를 참고하면 됩니다. |
 
 **그룹**으로 표시된 변수는 그룹 단위로 모두 설정하거나 모두 비워 두어야 합니다. Android 푸시는 FCM 변수 3개 모두, iOS 푸시는 APNs 필수 변수 4개(`TEAM_ID`, `KEY_ID`, `PRIVATE_KEY`, `BUNDLE_ID`) 모두를 설정해야 하며, 일부만 설정하면 시작 시 검증 오류가 발생합니다.
 
@@ -217,7 +217,20 @@ dotnet build src/Errandesk.Client/Errandesk.Client.csproj -f net11.0-android -c 
 dotnet build src/Errandesk.Client/Errandesk.Client.csproj -f net11.0-ios -c Release
 ```
 
-Windows에서 iOS 워크로드 없이 솔루션을 빌드할 때 `net11.0-ios` 대상을 제외하려면 `-p:ErrandeskIncludeIosTarget=false`를 전달하십시오.
+Windows에서 iOS 워크로드 없이 솔루션을 빌드할 때 `net11.0-ios` 대상을 제외하려면 `-p:ErrandeskIncludeIosTarget=false`를 전달해야 합니다.
+
+### 빌드 자동화
+
+로컬 빌드에는 위 명령으로 충분합니다. 서명된 릴리스 빌드를 반복해서 생성할 때는 [`scripts`](scripts) 폴더의 PowerShell 스크립트를 사용합니다.
+
+- [`setup-environment.ps1`](scripts/setup-environment.ps1)은 .NET SDK, Android 워크로드와 SDK, Windows SDK, OpenJDK, `aticmsixgen`을 점검하거나 설치합니다.
+- [`setup-signing.ps1`](scripts/setup-signing.ps1)은 Android keystore와 로컬 서명 설정이 없으면 새로 생성합니다.
+- [`build-android.ps1`](scripts/build-android.ps1)은 Firebase Cloud Messaging을 활성화한 서명된 Android APK를 게시하고 `build-info.txt`를 기록합니다. `-Bundle`로 AAB를 함께 만들거나 `-Install`로 연결된 기기에 설치할 수 있으며, `-SkipFirebase`를 전달하면 `google-services.json` 없이 빌드합니다.
+- [`build-windows-msix.ps1`](scripts/build-windows-msix.ps1)은 ARM64 및 x64용 Windows 클라이언트를 빌드해 MSIX 번들로 패키징하고 서명한 뒤, `aticmsixgen`으로 `Installer-arm64.exe`와 `Installer-x64.exe`를 만듭니다.
+- [`build-all.ps1`](scripts/build-all.ps1)은 Android와 Windows 빌드를 순서대로 실행합니다.
+- [`stage-client-update.ps1`](scripts/stage-client-update.ps1)은 클라이언트 업데이트 호스트에서 사용하는 `windows/`와 `android/` 폴더를 구성합니다.
+
+서명 자료와 빌드 출력은 `scripts/local/`에 저장되며 커밋하지 않습니다. 사전 요구 사항, 설정, 매개 변수, 출력 파일은 [`scripts/README.ko.md`](scripts/README.ko.md)에 정리되어 있습니다. macOS, Linux, iOS 빌드 자동화는 아직 제공하지 않습니다.
 
 ### 클라이언트 빌드 환경 변수 (`ERRANDESK_CLIENT_*`)
 
@@ -256,7 +269,7 @@ Windows와 Android 클라이언트는 정적 파일 호스트에서 스스로 �
 - **`version`**: 최신 버전을 일반 텍스트로 적습니다(`1.2`부터 `1.2.0.0`까지의 형식을 쓸 수 있으며, 생략한 구성 요소는 `0`으로 간주합니다). 설치된 버전보다 높을 때만 업데이트를 제공합니다. 플랫폼 폴더마다 `version`이 따로 있으므로 Windows와 Android를 따로 배포할 수 있습니다.
   - Windows는 설치된 MSIX 패키지 버전과 비교합니다. 패키지 버전은 `<Version>` 뒤에 `<ApplicationVersion>`을 네 번째 구성 요소로 붙인 값입니다(예: `0.1.0.1`).
   - Android는 `<Version>`과 비교합니다(예: `0.1.0`).
-- **Windows**: 서명한 MSIX로 `aticmsixgen exe-pack`이 만든 설치 EXE인 `Installer-x64.exe`와 `Installer-arm64.exe`를 이름을 바꾸지 않고 올립니다(`aticmsixgen`은 [AT Installer](https://github.com/airtaxi/AT-Installer)를 참고하십시오). 클라이언트는 ARM64에서는 `Installer-arm64.exe`를, 그 밖의 환경에서는 `Installer-x64.exe`를 받아 실행한 다음 종료하며, 설치 프로그램이 패키지를 교체합니다. 받은 설치 파일은 다음 실행 시 삭제됩니다.
+- **Windows**: 서명한 MSIX로 `aticmsixgen exe-pack`이 만든 설치 EXE인 `Installer-x64.exe`와 `Installer-arm64.exe`를 이름을 바꾸지 않고 올립니다(`aticmsixgen`은 [AT Installer](https://github.com/airtaxi/AT-Installer)를 참고하면 됩니다). 클라이언트는 ARM64에서는 `Installer-arm64.exe`를, 그 밖의 환경에서는 `Installer-x64.exe`를 받아 실행한 다음 종료하며, 설치 프로그램이 패키지를 교체합니다. 받은 설치 파일은 다음 실행 시 삭제됩니다.
 - **Android**: 설치된 앱과 같은 키로 서명한 APK 하나를 올립니다. Android 8 이상에서는 사용자가 처음 **업데이트**를 누를 때 앱 설치 권한을 요청한 다음 시스템 패키지 설치 화면을 엽니다. Android 7에서는 시스템의 **알 수 없는 출처** 설정에서 설치를 허용해야 합니다. 받은 APK는 앱이 교체되거나 다음에 실행될 때 삭제됩니다.
 - **배포 순서**: 설치 파일을 먼저 올리고 `version`을 마지막에 바꿔야 클라이언트가 설치 파일보다 새 버전 번호를 먼저 보는 일이 없습니다. 클라이언트는 모든 파일을 `Cache-Control: no-cache`로 요청합니다.
 
@@ -326,4 +339,4 @@ dotnet test --project tests/Errandesk.Client.Sync.Tests
 
 ## 라이선스
 
-MIT License. 자세한 내용은 [LICENSE](LICENSE)를 참고하십시오 (`Copyright (c) 2026 Howon Lee`).
+MIT License. 자세한 내용은 [LICENSE](LICENSE)를 참고하면 됩니다 (`Copyright (c) 2026 Howon Lee`).

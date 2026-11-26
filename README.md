@@ -219,6 +219,19 @@ dotnet build src/Errandesk.Client/Errandesk.Client.csproj -f net11.0-ios -c Rele
 
 To skip the `net11.0-ios` target when building the solution on Windows without the iOS workload, pass `-p:ErrandeskIncludeIosTarget=false`.
 
+### Build automation
+
+The commands above cover local builds. For repeatable, signed release builds, use the PowerShell scripts in [`scripts`](scripts):
+
+- [`setup-environment.ps1`](scripts/setup-environment.ps1) checks or installs the .NET SDK, Android workload and SDK, Windows SDK, OpenJDK, and `aticmsixgen`.
+- [`setup-signing.ps1`](scripts/setup-signing.ps1) creates an Android keystore and local signing settings when they do not exist.
+- [`build-android.ps1`](scripts/build-android.ps1) publishes a signed Android APK with Firebase Cloud Messaging enabled, writes `build-info.txt`, and optionally produces an AAB (`-Bundle`) or installs on a connected device (`-Install`). Pass `-SkipFirebase` to build without `google-services.json`.
+- [`build-windows-msix.ps1`](scripts/build-windows-msix.ps1) builds the Windows client for ARM64 and x64, packs and signs an MSIX bundle, and creates `Installer-arm64.exe` and `Installer-x64.exe` with `aticmsixgen`.
+- [`build-all.ps1`](scripts/build-all.ps1) runs the Android and Windows builds in sequence.
+- [`stage-client-update.ps1`](scripts/stage-client-update.ps1) stages the `windows/` and `android/` folders used by the client update host.
+
+Signing material and build outputs stay in `scripts/local/`, which is not committed. See [`scripts/README.md`](scripts/README.md) for prerequisites, settings, parameters, and outputs. Build automation for macOS, Linux, and iOS is not available yet.
+
 ### Client build-time variables (`ERRANDESK_CLIENT_*`)
 
 All `ERRANDESK_CLIENT_*` environment variables are optional. MSBuild reads them as properties during the build; when unset, builds succeed with default IDs and debug or local development signing.
