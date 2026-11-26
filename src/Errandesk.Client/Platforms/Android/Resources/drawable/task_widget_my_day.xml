@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+  android:width="24dp"
+  android:height="24dp"
+  android:viewportWidth="24"
+  android:viewportHeight="24">
+  <path
+    android:pathData="M12,8A4,4 0,1 0,12 16A4,4 0,1 0,12 8ZM12,2.75V4.75M12,19.25V21.25M2.75,12H4.75M19.25,12H21.25M5.46,5.46L6.87,6.87M17.13,17.13L18.54,18.54M5.46,18.54L6.87,17.13M17.13,6.87L18.54,5.46"
+    android:strokeWidth="1.6"
+    android:strokeColor="@color/TaskWidgetIcon"
+    android:strokeLineCap="round"
+    android:strokeLineJoin="round" />
+</vector>

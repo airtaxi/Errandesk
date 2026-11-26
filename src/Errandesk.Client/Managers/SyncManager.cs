@@ -58,6 +58,11 @@ public sealed class SyncManager(SessionManager sessionManager, IHttpClientFactor
     public bool IsOpen => _data is not null;
 
     /// <summary>
+    /// The database file of the open local store, or <see langword="null"/> when none is open.
+    /// </summary>
+    public string? DatabasePath => _databasePath;
+
+    /// <summary>
     /// Whether the last request to the server succeeded. Changes are kept on this device while it is <see langword="false"/>.
     /// </summary>
     public bool IsOnline { get; private set; } = true;

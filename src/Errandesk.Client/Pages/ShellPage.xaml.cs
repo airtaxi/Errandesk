@@ -74,6 +74,7 @@ public sealed partial class ShellPage : Page, IBackNavigationHandler
         _taskNavigationManager.TaskOpenRequested += OnTaskNavigationManagerTaskOpenRequested;
         _reminderManager.InAppReminderRaised += OnReminderManagerInAppReminderRaised;
         _assistantNavigationManager.ConversationOpenRequested += OnAssistantNavigationManagerConversationOpenRequested;
+        _assistantNavigationManager.AssistantOpenRequested += OnAssistantNavigationManagerAssistantOpenRequested;
         _syncManager.Start();
         _ = _reminderManager.StartAsync();
         await LoadAsync();
@@ -85,6 +86,7 @@ public sealed partial class ShellPage : Page, IBackNavigationHandler
         _reminderManager.InAppReminderRaised -= OnReminderManagerInAppReminderRaised;
         _taskNavigationManager.TaskOpenRequested -= OnTaskNavigationManagerTaskOpenRequested;
         _assistantNavigationManager.ConversationOpenRequested -= OnAssistantNavigationManagerConversationOpenRequested;
+        _assistantNavigationManager.AssistantOpenRequested -= OnAssistantNavigationManagerAssistantOpenRequested;
         _syncManager.Stop();
         AssistantView.ViewModel.StopCommand.Execute(null);
         ViewModel.Lists.CollectionChanged -= OnListsCollectionChanged;
@@ -106,6 +108,7 @@ public sealed partial class ShellPage : Page, IBackNavigationHandler
         }
 
         if (ShellNavigationView.SelectedItem is null) ShellNavigationView.SelectedItem = MyDayNavigationItem;
+        if (_assistantNavigationManager.TryTakePendingAssistantRequest()) await SetAssistantOpenAsync(true);
     }
 
     private async void OnTaskNavigationManagerTaskOpenRequested(object? _, EventArgs __)
@@ -256,6 +259,17 @@ public sealed partial class ShellPage : Page, IBackNavigationHandler
         _isAssistantOpen = true;
         UpdateAssistantLayout();
         await AssistantView.ActivateAsync(conversationId);
+    }
+
+    /// <summary>
+    /// Opens the assistant pane once the lists are loaded, for example from the home screen widget.
+    /// </summary>
+    private async void OnAssistantNavigationManagerAssistantOpenRequested(object? _, EventArgs __)
+    {
+        if (_areListsLoaded && _assistantNavigationManager.TryTakePendingAssistantRequest())
+        {
+            await SetAssistantOpenAsync(true);
+        }
     }
 
     private void OnContentGridSizeChanged(object sender, SizeChangedEventArgs e) => UpdateAssistantLayout();

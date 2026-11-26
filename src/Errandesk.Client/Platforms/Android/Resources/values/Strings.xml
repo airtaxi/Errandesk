@@ -1,4 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="ApplicationName">Errandesk</string>
+	<string name="TaskWidgetLabel">Task list</string>
+	<string name="TaskWidgetDescription">Shows the open tasks of a list. Complete them, mark them important or add new ones from the home screen.</string>
+	<string name="TaskWidgetMyDay">My Day</string>
+	<string name="TaskWidgetImportant">Important</string>
+	<string name="TaskWidgetPlanned">Planned</string>
+	<string name="TaskWidgetDefaultList">Tasks</string>
+	<string name="TaskWidgetNoTasks">No open tasks</string>
+	<string name="TaskWidgetSignedOut">Sign in to Errandesk to see your tasks.</string>
+	<string name="TaskWidgetOpenApp">Open Errandesk</string>
+	<string name="TaskWidgetRefresh">Refresh</string>
+	<string name="TaskWidgetAdd">Add a task</string>
+	<string name="TaskWidgetAddHint">Add a task</string>
+	<string name="TaskWidgetComplete">Mark as completed</string>
+	<string name="TaskWidgetMarkImportant">Mark as important</string>
+	<string name="TaskWidgetRemoveImportance">Remove importance</string>
+	<string name="TaskWidgetMarkNotCompleted">Mark as not completed</string>
+	<string name="TaskWidgetSettings">Widget settings</string>
+	<string name="TaskWidgetAssistant">Open the assistant</string>
+	<string name="TaskWidgetOpacity">Opacity</string>
+	<string name="TaskWidgetFontSize">Font size</string>
+	<string name="TaskWidgetFontSizeSmall">Small</string>
+	<string name="TaskWidgetFontSizeNormal">Normal</string>
+	<string name="TaskWidgetFontSizeLarge">Large</string>
+	<string name="TaskWidgetShowCompleted">Show completed tasks</string>
 </resources>

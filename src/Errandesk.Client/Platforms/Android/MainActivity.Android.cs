@@ -12,6 +12,9 @@ namespace Errandesk.Client.Droid;
 [Activity(MainLauncher = true, ConfigurationChanges = global::Uno.UI.ActivityHelper.AllConfigChanges, WindowSoftInputMode = SoftInput.AdjustNothing | SoftInput.StateHidden, Exported = true)]
 public class MainActivity : Uno.UI.Runtime.Android.ApplicationActivity
 {
+    /// <summary>The intent action that opens the assistant pane, which the home screen widget sends.</summary>
+    public const string OpenAssistantAction = "errandesk.OPEN_ASSISTANT";
+
     private const int NotificationPermissionRequestCode = 1001;
 
     private static MainActivity? s_runningActivity;
@@ -32,19 +35,34 @@ public class MainActivity : Uno.UI.Runtime.Android.ApplicationActivity
         AndroidX.Core.SplashScreen.SplashScreen.InstallSplashScreen(this);
         base.OnCreate(savedInstanceState);
         s_runningActivity = this;
-        OpenNotificationTask(Intent);
+        HandleLaunchIntent(Intent);
     }
 
     protected override void OnNewIntent(Intent? intent)
     {
         base.OnNewIntent(intent);
-        OpenNotificationTask(intent);
+        HandleLaunchIntent(intent);
     }
 
     protected override void OnDestroy()
     {
         if (ReferenceEquals(s_runningActivity, this)) s_runningActivity = null;
         base.OnDestroy();
+    }
+
+    /// <summary>
+    /// Opens the assistant pane or the task an intent asks for, then removes the request from the intent so it is handled only once.
+    /// </summary>
+    private static void HandleLaunchIntent(Intent? intent)
+    {
+        if (intent?.Action == OpenAssistantAction)
+        {
+            intent.SetAction(null);
+            App.OpenAssistant();
+            return;
+        }
+
+        OpenNotificationTask(intent);
     }
 
     /// <summary>

@@ -9,7 +9,7 @@ namespace Errandesk.Client.Managers;
 /// <summary>
 /// Chooses the top-level page from the saved server address and session: the connection page, the sign-in page or the shell.
 /// </summary>
-public sealed class AppNavigationManager(SessionManager sessionManager, NavigationService navigationService, LoadingOverlayService loadingOverlayService, TaskListsManager taskListsManager, ReminderManager reminderManager, TaskNavigationManager taskNavigationManager, SyncManager syncManager)
+public sealed class AppNavigationManager(SessionManager sessionManager, NavigationService navigationService, LoadingOverlayService loadingOverlayService, TaskListsManager taskListsManager, ReminderManager reminderManager, TaskNavigationManager taskNavigationManager, AssistantNavigationManager assistantNavigationManager, SyncManager syncManager)
 {
     private DispatcherQueue? _dispatcherQueue;
 
@@ -88,6 +88,7 @@ public sealed class AppNavigationManager(SessionManager sessionManager, Navigati
 
         taskListsManager.Clear();
         taskNavigationManager.Clear();
+        assistantNavigationManager.Clear();
     }
 
     private void OnSessionManagerSessionEnded(object? _, EventArgs __)
@@ -97,6 +98,7 @@ public sealed class AppNavigationManager(SessionManager sessionManager, Navigati
             syncManager.Stop();
             taskListsManager.Clear();
             taskNavigationManager.Clear();
+            assistantNavigationManager.Clear();
             navigationService.Navigate<SignInPage>(new SignInPageParameter(LocalizedStrings.Get("SessionEndedMessage"), IsRestoreRetryAvailable: false));
             await reminderManager.ClearAsync();
         }

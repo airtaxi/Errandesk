@@ -14,6 +14,7 @@ public partial class App : Application
     private static IServiceProvider? s_services;
     private static DispatcherQueue? s_dispatcherQueue;
     private static TaskNavigationRequest? s_pendingTaskNavigationRequest;
+    private static bool s_isAssistantRequested;
 
     private MainWindow? _mainWindow;
 
@@ -47,6 +48,29 @@ public partial class App : Application
         else dispatcherQueue.TryEnqueue(OpenTask);
     }
 
+    /// <summary>
+    /// Brings the window to the front and opens the assistant pane, for example from the home screen widget. Can be called from any thread,
+    /// also before the app has launched; the pane opens once the signed-in shell is shown.
+    /// </summary>
+    public static void OpenAssistant()
+    {
+        var dispatcherQueue = s_dispatcherQueue;
+        if (s_services is null || dispatcherQueue is null)
+        {
+            s_isAssistantRequested = true;
+            return;
+        }
+
+        void Open()
+        {
+            (Current as App)?._mainWindow?.Activate();
+            GetService<AssistantNavigationManager>().OpenAssistant();
+        }
+
+        if (dispatcherQueue.HasThreadAccess) Open();
+        else dispatcherQueue.TryEnqueue(Open);
+    }
+
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         s_services ??= ConfigureServices();
@@ -75,8 +99,16 @@ public partial class App : Application
                 GetService<TaskNavigationManager>().OpenTask(pendingRequest);
             }
 
+            if (s_isAssistantRequested)
+            {
+                s_isAssistantRequested = false;
+                GetService<AssistantNavigationManager>().OpenAssistant();
+            }
+
 #if WINDOWS
             WindowsNotificationActivation.Register();
+#elif ANDROID
+            Droid.TaskWidgets.Attach(GetService<SyncManager>(), GetService<AssistantNavigationManager>());
 #endif
             _mainWindow.Activate();
             _ = GetService<AppNavigationManager>().StartAsync();

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <color name="TaskWidgetBackground">#202020</color>
+  <color name="TaskWidgetPrimaryText">#FFFFFF</color>
+  <color name="TaskWidgetSecondaryText">#ADADAD</color>
+  <color name="TaskWidgetIcon">#E0E0E0</color>
+  <color name="TaskWidgetDivider">#1AFFFFFF</color>
+  <color name="TaskWidgetPressed">#24FFFFFF</color>
+  <color name="TaskWidgetSelected">#14FFFFFF</color>
+  <color name="TaskWidgetScrim">#99000000</color>
+  <color name="TaskWidgetAccent">#7AA7E8</color>
+</resources>

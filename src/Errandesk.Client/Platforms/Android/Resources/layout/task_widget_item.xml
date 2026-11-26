@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/task_widget_item"
+  android:layout_width="match_parent"
+  android:layout_height="52dp"
+  android:background="@drawable/task_widget_row_background"
+  android:gravity="center_vertical"
+  android:orientation="horizontal"
+  android:paddingStart="8dp"
+  android:paddingEnd="8dp">
+
+  <ImageView
+    android:id="@+id/task_widget_item_complete"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:background="@drawable/task_widget_button_background"
+    android:contentDescription="@string/TaskWidgetComplete"
+    android:padding="8dp"
+    android:src="@drawable/task_widget_circle" />
+
+  <TextView
+    android:id="@+id/task_widget_item_title"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="6dp"
+    android:layout_marginEnd="6dp"
+    android:layout_weight="1"
+    android:ellipsize="end"
+    android:maxLines="1"
+    android:textColor="@color/TaskWidgetPrimaryText"
+    android:textSize="15sp" />
+
+  <ImageView
+    android:id="@+id/task_widget_item_importance"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:background="@drawable/task_widget_button_background"
+    android:padding="9dp"
+    android:src="@drawable/task_widget_star" />
+</LinearLayout>

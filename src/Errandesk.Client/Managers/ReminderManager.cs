@@ -13,7 +13,7 @@ namespace Errandesk.Client.Managers;
 /// In shared lists only the reminders the signed-in user set are shown.
 /// </summary>
 /// <remarks>Call every member on the UI thread.</remarks>
-public sealed class ReminderManager(IReminderScheduler reminderScheduler, AuthenticatedApiClient apiClient, ErrandeskApiClient anonymousApiClient, SessionManager sessionManager, ApplicationSettingsService settingsService, SyncManager syncManager)
+public sealed class ReminderManager(IReminderScheduler reminderScheduler, AuthenticatedApiClient apiClient, ErrandeskApiClient anonymousApiClient, SessionManager sessionManager, ApplicationSettingsService settingsService, SyncManager syncManager, AssistantNavigationManager assistantNavigationManager)
 {
     private readonly Dictionary<Guid, ReminderNotification> _reminders = [];
     private readonly SemaphoreSlim _scheduleGate = new(1, 1);
@@ -49,6 +49,7 @@ public sealed class ReminderManager(IReminderScheduler reminderScheduler, Authen
         try { serverInfo = await anonymousApiClient.GetServerInfoAsync(sessionManager.ServerAddress, CancellationToken.None); }
         catch (Exception exception) when (ApiErrorMessages.IsRequestFailure(exception)) { }
         if (generation != _generation) return;
+        if (serverInfo is not null) assistantNavigationManager.ReportAvailability(serverInfo.IsAiAvailable);
 
         var pushToken = await reminderScheduler.PrepareAsync(serverInfo, CancellationToken.None);
         if (generation != _generation) return;

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@android:id/background"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <ImageView
+    android:id="@+id/task_widget_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:importantForAccessibility="no"
+    android:scaleType="fitXY"
+    android:src="@drawable/task_widget_background" />
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="56dp"
+      android:gravity="center_vertical"
+      android:orientation="horizontal"
+      android:paddingStart="8dp"
+      android:paddingEnd="8dp">
+
+      <ImageView
+        android:id="@+id/task_widget_app_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/task_widget_button_background"
+        android:contentDescription="@string/TaskWidgetOpenApp"
+        android:padding="7dp"
+        android:src="@mipmap/icon" />
+
+      <FrameLayout
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_weight="1">
+
+        <TextView
+          android:id="@+id/task_widget_title"
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:background="@drawable/task_widget_button_background"
+          android:drawableEnd="@drawable/task_widget_chevron"
+          android:drawablePadding="4dp"
+          android:ellipsize="end"
+          android:fontFamily="sans-serif-medium"
+          android:gravity="center_vertical"
+          android:maxLines="1"
+          android:paddingStart="8dp"
+          android:paddingEnd="8dp"
+          android:textColor="@color/TaskWidgetPrimaryText"
+          android:textSize="16sp" />
+      </FrameLayout>
+
+      <ImageView
+        android:id="@+id/task_widget_refresh"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/task_widget_button_background"
+        android:contentDescription="@string/TaskWidgetRefresh"
+        android:padding="9dp"
+        android:src="@drawable/task_widget_refresh" />
+
+      <ImageView
+        android:id="@+id/task_widget_add"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/task_widget_button_background"
+        android:contentDescription="@string/TaskWidgetAdd"
+        android:padding="9dp"
+        android:src="@drawable/task_widget_add" />
+
+      <ImageView
+        android:id="@+id/task_widget_assistant"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/task_widget_button_background"
+        android:contentDescription="@string/TaskWidgetAssistant"
+        android:padding="9dp"
+        android:src="@drawable/task_widget_assistant"
+        android:visibility="gone" />
+
+      <ImageView
+        android:id="@+id/task_widget_settings"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/task_widget_button_background"
+        android:contentDescription="@string/TaskWidgetSettings"
+        android:padding="9dp"
+        android:src="@drawable/task_widget_settings" />
+    </LinearLayout>
+
+    <ImageView
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_marginStart="16dp"
+      android:layout_marginEnd="16dp"
+      android:background="@color/TaskWidgetDivider"
+      android:importantForAccessibility="no" />
+
+    <FrameLayout
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1">
+
+      <ListView
+        android:id="@+id/task_widget_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:divider="@drawable/task_widget_list_divider"
+        android:dividerHeight="1dp"
+        android:paddingBottom="8dp"
+        android:scrollbars="none" />
+
+      <TextView
+        android:id="@+id/task_widget_empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:padding="24dp"
+        android:textColor="@color/TaskWidgetSecondaryText"
+        android:textSize="14sp" />
+    </FrameLayout>
+  </LinearLayout>
+</FrameLayout>

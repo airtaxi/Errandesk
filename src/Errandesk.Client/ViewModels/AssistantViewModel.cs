@@ -14,7 +14,7 @@ namespace Errandesk.Client.ViewModels;
 /// The assistant pane: the conversation list, the messages of the open conversation with streamed replies,
 /// tool activity with undo, approval requests, and the message box.
 /// </summary>
-public sealed partial class AssistantViewModel(AuthenticatedApiClient apiClient, ServerEventStreamClient streamClient, ErrandeskApiClient serverInfoClient, SessionManager sessionManager, DialogService dialogService) : ObservableObject
+public sealed partial class AssistantViewModel(AuthenticatedApiClient apiClient, ServerEventStreamClient streamClient, ErrandeskApiClient serverInfoClient, SessionManager sessionManager, DialogService dialogService, AssistantNavigationManager assistantNavigationManager) : ObservableObject
 {
     private static ErrandeskJsonSerializerContext JsonContext => ErrandeskJsonSerializerContext.Default;
 
@@ -23,6 +23,7 @@ public sealed partial class AssistantViewModel(AuthenticatedApiClient apiClient,
     private readonly ErrandeskApiClient _serverInfoClient = serverInfoClient;
     private readonly SessionManager _sessionManager = sessionManager;
     private readonly DialogService _dialogService = dialogService;
+    private readonly AssistantNavigationManager _assistantNavigationManager = assistantNavigationManager;
     private CancellationTokenSource? _replyCancellation;
     private int _conversationLoadVersion;
     private bool _isLoaded;
@@ -152,6 +153,7 @@ public sealed partial class AssistantViewModel(AuthenticatedApiClient apiClient,
         {
             var serverInfo = await _serverInfoClient.GetServerInfoAsync(_sessionManager.ServerAddress, CancellationToken.None);
             IsAiUnavailable = !serverInfo.IsAiAvailable;
+            _assistantNavigationManager.ReportAvailability(serverInfo.IsAiAvailable);
             if (IsAiUnavailable)
             {
                 _isLoaded = true;
@@ -529,7 +531,9 @@ public sealed partial class AssistantViewModel(AuthenticatedApiClient apiClient,
     {
         try
         {
-            if (!(await _serverInfoClient.GetServerInfoAsync(_sessionManager.ServerAddress, CancellationToken.None)).IsAiAvailable)
+            var isAiAvailable = (await _serverInfoClient.GetServerInfoAsync(_sessionManager.ServerAddress, CancellationToken.None)).IsAiAvailable;
+            _assistantNavigationManager.ReportAvailability(isAiAvailable);
+            if (!isAiAvailable)
             {
                 IsErrorVisible = false;
                 IsAiUnavailable = true;

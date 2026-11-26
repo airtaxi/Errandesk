@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="TaskWidgetLabel">작업 목록</string>
+	<string name="TaskWidgetDescription">목록에 남은 작업을 보여 줍니다. 홈 화면에서 바로 완료하거나 중요로 표시하고 새 작업을 추가할 수 있습니다.</string>
+	<string name="TaskWidgetMyDay">오늘 할 일</string>
+	<string name="TaskWidgetImportant">중요</string>
+	<string name="TaskWidgetPlanned">계획된 일정</string>
+	<string name="TaskWidgetDefaultList">작업</string>
+	<string name="TaskWidgetNoTasks">남은 작업이 없습니다</string>
+	<string name="TaskWidgetSignedOut">작업을 보려면 Errandesk에 로그인하세요.</string>
+	<string name="TaskWidgetOpenApp">Errandesk 열기</string>
+	<string name="TaskWidgetRefresh">새로 고침</string>
+	<string name="TaskWidgetAdd">작업 추가</string>
+	<string name="TaskWidgetAddHint">작업 추가</string>
+	<string name="TaskWidgetComplete">완료로 표시</string>
+	<string name="TaskWidgetMarkImportant">중요로 표시</string>
+	<string name="TaskWidgetRemoveImportance">중요 표시 해제</string>
+	<string name="TaskWidgetMarkNotCompleted">미완료로 표시</string>
+	<string name="TaskWidgetSettings">위젯 설정</string>
+	<string name="TaskWidgetAssistant">어시스턴트 열기</string>
+	<string name="TaskWidgetOpacity">불투명도</string>
+	<string name="TaskWidgetFontSize">글꼴 크기</string>
+	<string name="TaskWidgetFontSizeSmall">작게</string>
+	<string name="TaskWidgetFontSizeNormal">보통</string>
+	<string name="TaskWidgetFontSizeLarge">크게</string>
+	<string name="TaskWidgetShowCompleted">완료된 작업 표시</string>
+</resources>
