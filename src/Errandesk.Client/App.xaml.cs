@@ -158,6 +158,11 @@ public partial class App : Application
 #else
         services.AddSingleton<IReminderScheduler, DesktopReminderScheduler>();
 #endif
+#if ANDROID
+        services.AddSingleton<ISpeechDictationService, AndroidSpeechDictationService>();
+#else
+        services.AddSingleton<ISpeechDictationService, UnavailableSpeechDictationService>();
+#endif
         services.AddTransient<AuthenticationHandler>();
         services.AddHttpClient<ErrandeskApiClient>(httpClient => httpClient.Timeout = s_httpRequestTimeout);
         services.AddHttpClient<AuthenticatedApiClient>(httpClient => httpClient.Timeout = s_httpRequestTimeout).AddHttpMessageHandler<AuthenticationHandler>();

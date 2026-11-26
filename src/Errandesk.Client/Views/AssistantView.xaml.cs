@@ -56,6 +56,21 @@ public sealed partial class AssistantView : UserControl
     /// </summary>
     private void OnAssistantSendOrStopButtonClicked(object sender, RoutedEventArgs e) => MessageTextBox.Focus(FocusState.Programmatic);
 
+    /// <summary>
+    /// Adds dictated text to the message box, then moves the focus to the message box with the caret after the text so the message can be edited or sent.
+    /// </summary>
+    private async void OnDictateButtonClicked(object sender, RoutedEventArgs e)
+    {
+        DictateButton.IsEnabled = false;
+        try
+        {
+            if (!await ViewModel.DictateAsync()) return;
+            MessageTextBox.Focus(FocusState.Programmatic);
+            MessageTextBox.Select(MessageTextBox.Text.Length, 0);
+        }
+        finally { DictateButton.IsEnabled = true; }
+    }
+
     private async void OnConversationListViewItemClicked(object sender, ItemClickEventArgs e)
     {
         if (e.ClickedItem is not ConversationItemModel conversation) return;

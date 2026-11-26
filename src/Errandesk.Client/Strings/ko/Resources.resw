@@ -151,6 +151,15 @@
   <data name="AssistantConversationsToolTip.Content" xml:space="preserve">
     <value>대화 목록</value>
   </data>
+  <data name="AssistantDictateButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>받아쓰기</value>
+  </data>
+  <data name="AssistantDictateToolTip.Content" xml:space="preserve">
+    <value>받아쓰기</value>
+  </data>
+  <data name="AssistantDictationPrompt" xml:space="preserve">
+    <value>메시지를 말씀하세요</value>
+  </data>
   <data name="AssistantEmptyTextBlock.Text" xml:space="preserve">
     <value>작업과 노트에 대해 묻거나 하루 계획을 부탁해 보세요.</value>
   </data>

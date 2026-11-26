@@ -151,6 +151,15 @@
   <data name="AssistantConversationsToolTip.Content" xml:space="preserve">
     <value>Conversations</value>
   </data>
+  <data name="AssistantDictateButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Dictate</value>
+  </data>
+  <data name="AssistantDictateToolTip.Content" xml:space="preserve">
+    <value>Dictate</value>
+  </data>
+  <data name="AssistantDictationPrompt" xml:space="preserve">
+    <value>Speak your message</value>
+  </data>
   <data name="AssistantEmptyTextBlock.Text" xml:space="preserve">
     <value>Ask about your tasks and notes, or ask for help planning your day.</value>
   </data>

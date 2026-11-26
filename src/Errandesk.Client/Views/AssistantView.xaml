@@ -384,6 +384,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <TextBox
@@ -400,8 +401,25 @@
                     TextWrapping="Wrap" />
 
                 <Button
-                    x:Uid="AssistantSendButton"
+                    x:Name="DictateButton"
+                    x:Uid="AssistantDictateButton"
                     Grid.Column="1"
+                    Width="36"
+                    Height="32"
+                    Padding="0"
+                    VerticalAlignment="Bottom"
+                    AutomationProperties.AutomationId="AssistantDictateButton"
+                    Click="OnDictateButtonClicked"
+                    Visibility="{x:Bind ViewModel.IsDictationAvailable}">
+                    <ToolTipService.ToolTip>
+                        <ToolTip x:Uid="AssistantDictateToolTip" />
+                    </ToolTipService.ToolTip>
+                    <FontIcon FontSize="14" Glyph="&#xE720;" />
+                </Button>
+
+                <Button
+                    x:Uid="AssistantSendButton"
+                    Grid.Column="2"
                     Width="36"
                     Height="32"
                     Padding="0"
@@ -419,7 +437,7 @@
 
                 <Button
                     x:Uid="AssistantStopButton"
-                    Grid.Column="1"
+                    Grid.Column="2"
                     Width="36"
                     Height="32"
                     Padding="0"

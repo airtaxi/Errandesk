@@ -14,7 +14,7 @@ namespace Errandesk.Client.ViewModels;
 /// The assistant pane: the conversation list, the messages of the open conversation with streamed replies,
 /// tool activity with undo, approval requests, and the message box.
 /// </summary>
-public sealed partial class AssistantViewModel(AuthenticatedApiClient apiClient, ServerEventStreamClient streamClient, ErrandeskApiClient serverInfoClient, SessionManager sessionManager, DialogService dialogService, AssistantNavigationManager assistantNavigationManager) : ObservableObject
+public sealed partial class AssistantViewModel(AuthenticatedApiClient apiClient, ServerEventStreamClient streamClient, ErrandeskApiClient serverInfoClient, SessionManager sessionManager, DialogService dialogService, AssistantNavigationManager assistantNavigationManager, ISpeechDictationService speechDictationService) : ObservableObject
 {
     private static ErrandeskJsonSerializerContext JsonContext => ErrandeskJsonSerializerContext.Default;
 
@@ -24,6 +24,7 @@ public sealed partial class AssistantViewModel(AuthenticatedApiClient apiClient,
     private readonly SessionManager _sessionManager = sessionManager;
     private readonly DialogService _dialogService = dialogService;
     private readonly AssistantNavigationManager _assistantNavigationManager = assistantNavigationManager;
+    private readonly ISpeechDictationService _speechDictationService = speechDictationService;
     private CancellationTokenSource? _replyCancellation;
     private int _conversationLoadVersion;
     private bool _isLoaded;
@@ -90,6 +91,21 @@ public sealed partial class AssistantViewModel(AuthenticatedApiClient apiClient,
     public bool CanSend => !IsReplying && !string.IsNullOrWhiteSpace(InputText);
 
     public bool IsSendButtonVisible => !IsReplying;
+
+    public bool IsDictationAvailable => _speechDictationService.IsAvailable;
+
+    /// <summary>
+    /// Listens for speech and adds the recognized text to the end of the message box, separated from existing text by a space.
+    /// </summary>
+    /// <returns>Whether text was added.</returns>
+    public async Task<bool> DictateAsync()
+    {
+        var text = (await _speechDictationService.DictateAsync(LocalizedStrings.Get("AssistantDictationPrompt")))?.Trim();
+        if (string.IsNullOrEmpty(text)) return false;
+
+        InputText = InputText.Length == 0 || char.IsWhiteSpace(InputText[^1]) ? InputText + text : $"{InputText} {text}";
+        return true;
+    }
 
     /// <summary>
     /// Checks whether the server has an AI model and opens the most recent conversation. Runs once; later calls do nothing.
