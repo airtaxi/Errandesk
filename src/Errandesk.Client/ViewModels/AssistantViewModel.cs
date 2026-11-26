@@ -151,7 +151,7 @@ public sealed partial class AssistantViewModel(AuthenticatedApiClient apiClient,
 
     public void RemovePendingImage(PendingImageModel image)
     {
-        if (IsProcessingImages || !PendingImages.Remove(image)) return;
+        if (!PendingImages.Remove(image)) return;
         OnPendingImagesChanged();
     }
 

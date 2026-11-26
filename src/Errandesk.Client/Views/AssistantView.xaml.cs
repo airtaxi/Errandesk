@@ -106,7 +106,7 @@ public sealed partial class AssistantView : UserControl
 
     private void OnRemovePendingImageButtonClicked(object sender, RoutedEventArgs e)
     {
-        if (sender is FrameworkElement { DataContext: PendingImageModel image })
+        if (GetDataItem<PendingImageModel>(sender) is { } image)
         {
             ViewModel.RemovePendingImage(image);
         }
@@ -117,7 +117,7 @@ public sealed partial class AssistantView : UserControl
     /// </summary>
     private async void OnMessageImageButtonClicked(object sender, RoutedEventArgs e)
     {
-        if (sender is not FrameworkElement { DataContext: MessageImageModel image }) return;
+        if (GetDataItem<MessageImageModel>(sender) is not { } image) return;
         if (await ViewModel.LoadFullImageAsync(image) is not { } imageSource) return;
 
         var maximumHeight = XamlRoot is { } xamlRoot ? xamlRoot.Size.Height * 0.7 : 600;
@@ -157,6 +157,16 @@ public sealed partial class AssistantView : UserControl
 
         await ViewModel.AddImagesAsync(imageSources);
     }
+
+    /// <summary>
+    /// The item of a templated element. The template puts the item in <see cref="FrameworkElement.Tag"/>, which works in templates that do not set a data context.
+    /// </summary>
+    private static TItem? GetDataItem<TItem>(object sender) where TItem : class => sender switch
+    {
+        FrameworkElement { Tag: TItem item } => item,
+        FrameworkElement { DataContext: TItem item } => item,
+        _ => null,
+    };
 
     private async Task AddImagesAsync(DataPackageView content) => await ViewModel.AddImagesAsync(await GetImageSourcesAsync(content));
 
